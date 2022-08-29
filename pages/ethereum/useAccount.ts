@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type { MetaMaskInpageProvider } from '@metamask/providers';
 
-type EthereumAccount = {
+export type EthereumAccount = {
   chainId: string;
   address: string;
 };
 
-const useAccount = (ethereum: MetaMaskInpageProvider) => {
+const useAccount = (ethereum: MetaMaskInpageProvider | null) => {
   const [chainId, setChainId] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const account = useMemo<EthereumAccount | null>(() => {
@@ -18,6 +18,10 @@ const useAccount = (ethereum: MetaMaskInpageProvider) => {
   }, [chainId, address]);
 
   useEffect(() => {
+    if (!ethereum) {
+      return () => {};
+    }
+
     const setFirstAddress = (addresses: string[]) => setAddress(addresses[0] || null);
 
     ethereum.request({ method: 'eth_chainId' }).then(setChainId);
