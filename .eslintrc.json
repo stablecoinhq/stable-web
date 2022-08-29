@@ -8,15 +8,9 @@
   "plugins": ["@typescript-eslint", "prefer-arrow"],
   "rules": {
     "@typescript-eslint/consistent-type-imports": "error",
-    "@typescript-eslint/no-unused-vars": ["error", {
-      "vars": "all",
-      "args": "after-used",
-      "argsIgnorePattern": "_",
-      "ignoreRestSiblings": false,
-      "varsIgnorePattern": "_"
-    }],
     "comma-dangle": ["error", "always-multiline"],
     "curly": ["error", "all"],
+    "import/extensions": ["error", "ignorePackages", { "js": "never", "jsx": "never", "ts": "never", "tsx": "never" }],
     "import/order": ["error", {
         "alphabetize": { "order": "asc" },
         "groups": ["builtin", "external", "internal", "unknown", "parent", "sibling", "index", "object", "type"],
@@ -27,7 +21,7 @@
     "lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": true }],
     "no-restricted-imports": ["error", {
       "patterns": [{
-        "group": ["./*", "../*", "!./*.module.scss"],
+        "group": ["../*"],
         "message": "Relative path imports are prohibited. Please use absolute path from project root instead."
       }]
     }],
@@ -44,11 +38,29 @@
     "react/jsx-filename-extension": ["error", { "extensions": [".tsx"] }],
     "react/jsx-wrap-multilines": ["error", { "declaration": "parens", "assignment": "parens", "return": "parens", "arrow": "parens" }],
 
+    "no-dupe-class-members": "off",
+    "@typescript-eslint/no-dupe-class-members": "error",
     "no-shadow": "off",
     "@typescript-eslint/no-shadow": "error",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error", {
+      "vars": "all",
+      "args": "after-used",
+      "argsIgnorePattern": "_",
+      "ignoreRestSiblings": false,
+      "varsIgnorePattern": "_"
+    }],
     "no-useless-constructor": "off",
     "@typescript-eslint/no-useless-constructor": "error",
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["*.d.ts"],
+      "rules": {
+        "max-classes-per-file": "off"
+      }
+    }
+  ]
 }

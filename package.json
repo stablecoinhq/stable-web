@@ -7,15 +7,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "yarn lint:es && yarn lint:style && yarn lint:prettier",
-    "lint:fix": "yarn -s lint:es:fix; yarn -s lint:style:fix; yarn -s lint:prettier:fix",
+    "lint:fix": "yarn -s lint:es:fix; yarn -s lint:style:fix; yarn -s lint:prettier:fix; yarn -s svgo",
     "lint:es": "eslint '**/*.{js,jsx,ts,tsx}'",
     "lint:es:fix": "eslint --fix '**/*.{js,jsx,ts,tsx}'",
     "lint:prettier": "prettier --check '**/*.{js,jsx,ts,tsx}'",
     "lint:prettier:fix": "prettier -w '**/*.{js,jsx,ts,tsx}'",
     "lint:style": "stylelint '**/*.{css,less,sass,scss}'",
-    "lint:style:fix": "stylelint --fix '**/*.{css,less,sass,scss}'"
+    "lint:style:fix": "stylelint --fix '**/*.{css,less,sass,scss}'",
+    "svgo": "svgo -r images"
   },
   "dependencies": {
+    "@metamask/detect-provider": "^1.2.0",
+    "@metamask/providers": "^9.1.0",
     "next": "12.2.5",
     "react": "18.2.0",
     "react-dom": "18.2.0"
@@ -38,6 +41,7 @@
     "stylelint-config-standard": "^28.0.0",
     "stylelint-order": "^5.0.0",
     "stylelint-scss": "^4.3.0",
+    "svgo": "^2.8.0",
     "typescript": "4.7.4"
   }
 }
