@@ -3,16 +3,10 @@ import { useCallback } from 'react';
 
 import MetaMaskIcon from 'images/metamask.svg';
 
-import type { EthereumAccount } from './useAccount';
-import type { MetaMaskInpageProvider } from '@metamask/providers';
 import type { FC } from 'react';
+import type { WithNullableEthereum } from 'types/next';
 
-export type MetaMaskButtonProps = {
-  ethereum: MetaMaskInpageProvider | null;
-  account: EthereumAccount | null;
-};
-
-const MetaMaskButton: FC<MetaMaskButtonProps> = ({ ethereum, account }) => {
+const MetaMaskButton: FC<WithNullableEthereum> = ({ ethereum, account }) => {
   const text = (() => {
     if (!ethereum) {
       return 'Install MetaMask';
@@ -37,7 +31,12 @@ const MetaMaskButton: FC<MetaMaskButtonProps> = ({ ethereum, account }) => {
   }, [ethereum, account]);
 
   return (
-    <Button variant="contained" startIcon={<SvgIcon component={MetaMaskIcon} inheritViewBox />} onClick={onClick}>
+    <Button
+      variant="outlined"
+      color="inherit"
+      startIcon={<SvgIcon component={MetaMaskIcon} inheritViewBox />}
+      onClick={onClick}
+    >
       {text}
     </Button>
   );

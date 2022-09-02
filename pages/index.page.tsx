@@ -1,14 +1,17 @@
-import MetaMaskButton from './ethereum/MetaMaskButton';
-import useAccount from './ethereum/useAccount';
-import useEthereum from './ethereum/useEthereum';
+import { Box } from '@mui/material';
 
-import type { NextPage } from 'next';
+import type { NextPageWithEthereum } from 'next';
 
-const Home: NextPage = () => {
-  const ethereum = useEthereum();
-  const account = useAccount(ethereum);
-
-  return <MetaMaskButton ethereum={ethereum} account={account} />;
-};
+const Home: NextPageWithEthereum = ({ account }) => (
+  <Box display="flex" minHeight="calc(100vh - 64px)" justifyContent="center" alignItems="center">
+    <p>
+      MetaMask is correctly connected.
+      <br />
+      Network: <code>{account.chainId}</code>
+      <br />
+      Address: <code>{account.address}</code>
+    </p>
+  </Box>
+);
 
 export default Home;
