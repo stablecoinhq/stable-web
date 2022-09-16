@@ -1,4 +1,5 @@
-import { createTheme, ThemeProvider } from '@mui/material';
+/* eslint-disable @typescript-eslint/naming-convention */
+import { Box, createTheme, ThemeProvider } from '@mui/material';
 
 import 'styles/globals.scss';
 
@@ -29,8 +30,10 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
     <ThemeProvider theme={theme}>
       <Header ethereum={ethereum} account={account} />
       {ethereum && account ? (
-        /* eslint-disable-next-line react/jsx-props-no-spreading */
-        <Component ethereum={ethereum} account={account} {...pageProps} />
+        <Box padding={4}>
+          {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+          <Component ethereum={ethereum} account={account} {...pageProps} />
+        </Box>
       ) : (
         <WithoutEthereum ethereum={ethereum} account={account} />
       )}

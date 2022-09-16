@@ -38,6 +38,13 @@
     "react/jsx-filename-extension": ["error", { "extensions": [".tsx"] }],
     "react/jsx-wrap-multilines": ["error", { "declaration": "parens", "assignment": "parens", "return": "parens", "arrow": "parens" }],
 
+    "camelcase": "off",
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {"selector": "default", "format": ["camelCase"], "leadingUnderscore": "allow", "trailingUnderscore": "allow"},
+      {"selector": "variable", "format": ["camelCase", "UPPER_CASE", "PascalCase"], "leadingUnderscore": "allow", "trailingUnderscore": "allow"},
+      {"selector": "typeLike", "format": ["PascalCase"]}
+    ],
     "no-dupe-class-members": "off",
     "@typescript-eslint/no-dupe-class-members": "error",
     "no-shadow": "off",
@@ -48,7 +55,7 @@
       "args": "after-used",
       "argsIgnorePattern": "_",
       "ignoreRestSiblings": false,
-      "varsIgnorePattern": "_"
+      "varsIgnorePattern": "(_|PromiseConstructor)"
     }],
     "no-useless-constructor": "off",
     "@typescript-eslint/no-useless-constructor": "error",
