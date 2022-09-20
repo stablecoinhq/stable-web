@@ -36,5 +36,5 @@ yarn-error.log*
 next-env.d.ts
 
 # auto generated files
-/generated/
+/generated/*
 !/generated/abi/
