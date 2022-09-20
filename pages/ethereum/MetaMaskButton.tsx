@@ -25,8 +25,8 @@ const MetaMaskButton: FC<WithNullableEthereum> = ({ ethereum, account }) => {
       return;
     }
 
-    if (!account) {
-      void ethereum.request({ method: 'eth_requestAccounts' });
+    if (!account && ethereum.provider.request) {
+      void ethereum.provider.request({ method: 'eth_requestAccounts' });
     }
   }, [ethereum, account]);
 

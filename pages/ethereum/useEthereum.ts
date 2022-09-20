@@ -1,14 +1,16 @@
 import detectEthereumProvider from '@metamask/detect-provider';
 import { useEffect, useState } from 'react';
+import { ethers } from 'ethers';
 
-import type { MetaMaskInpageProvider } from '@metamask/providers';
+import { ExternalProvider } from '@ethersproject/providers';
 
-const useEthereum = (): MetaMaskInpageProvider | null => {
-  const [provider, setProvider] = useState<MetaMaskInpageProvider | null>(null);
+const useEthereum = (): ethers.providers.Web3Provider | null => {
+  const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null);
   useEffect(() => {
-    detectEthereumProvider().then((it) => {
-      if (it === window.ethereum) {
-        setProvider(it as MetaMaskInpageProvider | null);
+    detectEthereumProvider().then(async (it) => {
+      if (it && it === window.ethereum) {
+        const provider = it as ExternalProvider;
+        setProvider(new ethers.providers.Web3Provider(provider));
       }
     });
   }, []);

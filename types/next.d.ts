@@ -1,9 +1,10 @@
 import type { MetaMaskInpageProvider } from '@metamask/providers';
+import { ethers } from 'ethers';
 import type { NextPage } from 'next';
 import type { EthereumAccount } from 'pages/ethereum/useAccount';
 
 export type WithEthereum = {
-  ethereum: MetaMaskInpageProvider;
+  ethereum: ethers.providers.Web3Provider;
   account: EthereumAccount;
 };
 export type WithNullableEthereum = {

@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import type { MetaMaskInpageProvider } from '@metamask/providers';
+import { ethers } from 'ethers';
 
 export type EthereumAccount = {
   chainId: string;
   address: string;
 };
 
-const useAccount = (ethereum: MetaMaskInpageProvider | null) => {
+const useAccount = (ethereum: ethers.providers.Web3Provider | null) => {
   const [chainId, setChainId] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const account = useMemo<EthereumAccount | null>(() => {
@@ -22,10 +22,17 @@ const useAccount = (ethereum: MetaMaskInpageProvider | null) => {
       return () => {};
     }
 
-    const setFirstAddress = (addresses: string[]) => setAddress(addresses[0] || null);
+    const setFirstAddress = async () => {
+      if (ethereum.provider.request) {
+        const addresses: string[] = await ethereum.provider.request({ method: 'eth_requestAccounts', params: [] });
+        setAddress(addresses[0] || null);
+      }
+    };
 
-    ethereum.request({ method: 'eth_chainId' }).then(setChainId);
-    ethereum.request({ method: 'eth_accounts' }).then(setFirstAddress);
+    if (ethereum.provider.request) {
+      ethereum.provider.request({ method: 'eth_chainId' }).then(setChainId);
+      setFirstAddress();
+    }
 
     ethereum.on('chainChanged', setChainId);
     ethereum.on('accountsChanged', setFirstAddress);
