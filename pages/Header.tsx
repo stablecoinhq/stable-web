@@ -1,7 +1,7 @@
 import { AppBar, Toolbar, Typography } from '@mui/material';
 import Link from 'next/link';
 
-import MetaMaskButton from './ethereum/MetaMaskButton';
+import WalletConnectButton from './ethereum/WalletConnectButton';
 
 import type { FC } from 'react';
 import type { WithNullableEthereum } from 'types/next';
@@ -14,7 +14,7 @@ const Header: FC<WithNullableEthereum> = ({ ethereum, account }) => (
           stable-web
         </Typography>
       </Link>
-      <MetaMaskButton ethereum={ethereum} account={account} />
+      <WalletConnectButton ethereum={ethereum} account={account} />
     </Toolbar>
   </AppBar>
 );
