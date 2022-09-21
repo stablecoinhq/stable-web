@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { ethers } from 'ethers';
+import type { ethers } from 'ethers';
 
 export type EthereumAccount = {
   chainId: string;

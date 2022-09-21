@@ -1,8 +1,7 @@
 import { DSProxy__factory, ProxyRegistry__factory } from 'generated/types';
 
-import type { Provider } from '@ethersproject/providers';
+import type { ethers } from 'ethers';
 import type { ProxyRegistry } from 'generated/types';
-import { ethers } from 'ethers';
 
 export default class ProxyRegistryHelper {
   private readonly provider: ethers.Signer;

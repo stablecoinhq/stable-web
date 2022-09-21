@@ -1,16 +1,15 @@
 import { formatBytes32String } from '@ethersproject/strings';
 
-import { ChainLog__factory, DSProxy, DssCdpManager__factory } from 'generated/types';
+import { ChainLog__factory, DssCdpManager__factory } from 'generated/types';
 
 import GetCDPsHelper from './GetCDPsHelper';
+import ProxyActionsHelper from './ProxyActionsHelper';
 import ProxyRegistryHelper from './ProxyRegistryHelper';
 
-import type { Provider } from '@ethersproject/providers';
-import type { ChainLog } from 'generated/types';
+import type { ethers } from 'ethers';
+import type addresses from 'generated/addresses.json';
+import type { ChainLog, DSProxy } from 'generated/types';
 import type PromiseConstructor from 'types/promise';
-import ProxyActionsHelper from './ProxyActionsHelper';
-import addresses from 'generated/addresses.json';
-import { ethers } from 'ethers';
 
 type ChainLogKeys = keyof typeof addresses;
 
@@ -51,6 +50,6 @@ export default class ChainLogHelper {
    */
   async bindActions(proxy: DSProxy) {
     const actions = await this.contract.getAddress(formatBytes32String('PROXY_ACTIONS'));
-    return new ProxyActionsHelper(this.provider, proxy, actions)
+    return new ProxyActionsHelper(this.provider, proxy, actions);
   }
 }

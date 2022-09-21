@@ -12,6 +12,7 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material';
+import { ethers } from 'ethers';
 import { useCallback, useState } from 'react';
 
 import { useChainLog, useDSProxy, useGetCDPs, useProxyRegistry } from 'pages/ethereum/ContractHooks';
@@ -20,7 +21,6 @@ import usePromiseFactory from 'pages/usePromiseFactory';
 import type { CDP } from 'contracts/GetCDPsHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
-import { ethers } from 'ethers';
 
 type ContentProps = {
   cdps: CDP[] | undefined;
@@ -69,29 +69,33 @@ const Page: NextPageWithEthereum = ({ ethereum, account }) => {
   );
 
   const proxyExists = dsProxy && dsProxy.address !== ethers.constants.AddressZero;
-  
+
   const [proxyPrepared, setProxyPrepared] = useState(false);
 
   const openNewVault = async () => {
     if (dsProxy) {
       const actions = await chainLog.bindActions(dsProxy);
       const cdpMan = await chainLog.getAddress('CDP_MANAGER');
-      await actions.open(cdpMan, 'ETA-A').catch(void 0);
+      await actions.open(cdpMan, 'ETA-A').catch(() => {});
     }
-  }
+  };
 
   const newProxy = async () => {
     if (!proxyPrepared) {
       await proxyRegistry?.buildNewProxy();
     }
     setProxyPrepared(true);
-  }
+  };
 
   return (
     <Card>
       <CardContent>
         <Typography variant="h5">Vaults</Typography>
-        {proxyExists ? <Button onClick={openNewVault}>Open a new Vault</Button> : <Button onClick={newProxy}>Prepare Proxy</Button>}
+        {proxyExists ? (
+          <Button onClick={openNewVault}>Open a new Vault</Button>
+        ) : (
+          <Button onClick={newProxy}>Prepare Proxy</Button>
+        )}
         <Content cdps={cdps} />
       </CardContent>
     </Card>

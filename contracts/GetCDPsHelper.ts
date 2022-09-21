@@ -2,7 +2,6 @@ import { toUtf8String } from '@ethersproject/strings';
 
 import { GetCdps__factory } from 'generated/types';
 
-import type { Provider } from '@ethersproject/providers';
 import type { BigNumber, ethers } from 'ethers';
 import type { DssCdpManager, GetCdps, DSProxy } from 'generated/types';
 
