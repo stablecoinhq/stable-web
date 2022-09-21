@@ -10,14 +10,15 @@ import type { ChainLog } from 'generated/types';
 import type PromiseConstructor from 'types/promise';
 import ProxyActionsHelper from './ProxyActionsHelper';
 import addresses from 'generated/addresses.json';
+import { ethers } from 'ethers';
 
 type ChainLogKeys = keyof typeof addresses;
 
 export default class ChainLogHelper {
-  private readonly provider: Provider;
+  private readonly provider: ethers.Signer;
   private readonly contract: ChainLog;
 
-  constructor(provider: Provider) {
+  constructor(provider: ethers.Signer) {
     this.provider = provider;
     this.contract = ChainLog__factory.connect(process.env.NEXT_PUBLIC_CHAINLOG_ADDRESS!!, provider);
   }
