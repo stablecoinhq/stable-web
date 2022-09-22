@@ -97,7 +97,11 @@ export default class ProxyActionsHelper {
     );
   }
 
-  // ilk: ETH-A, DAI-A, ...
+  /**
+   * if transferFrom is true, collateral will be sent to gemJoin adoptor by proxy.
+   * amtCollateral's decimal should be different per its token type.
+   * ilk: ETH-A, DAI-A, ...
+   */
   openLockGemAndDraw(
     cdpManager: string,
     jug: string,
@@ -120,6 +124,67 @@ export default class ProxyActionsHelper {
         wadDai,
         transferFrom,
       ]),
+    );
+  }
+
+  wipeAndFreeEth(
+    cdpMan: string,
+    ethJoin: string,
+    daiJoin: string,
+    cdpId: ethers.BigNumber,
+    wadCollateral: ethers.BigNumber,
+    wadDai: ethers.BigNumber,
+  ) {
+    return this.proxy['execute(address,bytes)'](
+      this.actions.address,
+      this.actions.interface.encodeFunctionData('wipeAndFreeETH', [cdpMan, ethJoin, daiJoin, cdpId, wadCollateral, wadDai]),
+    );
+  }
+
+  /**
+   * if dai amount is enough to withdraw all locked collateral, wadCollateral should be all locked collateral.
+   * if not, wadCollateral should be as withdrawable amount as possible.
+   * otherwise, unnecessary transactions needed later.
+   * locked collateral can't be used to re-mint dai as it is.
+   * to work, need to once unlock it and re-lock it
+   */
+  wipeAllAndFreeEth(
+    cdpMan: string,
+    ethJoin: string,
+    daiJoin: string,
+    cdpId: ethers.BigNumber,
+    wadCollateral: ethers.BigNumber,
+  ) {
+    return this.proxy['execute(address,bytes)'](
+      this.actions.address,
+      this.actions.interface.encodeFunctionData('wipeAllAndFreeETH', [cdpMan, ethJoin, daiJoin, cdpId, wadCollateral]),
+    );
+  }
+
+  wipeAndFreeGem(
+    cdpMan: string,
+    gemJoin: string,
+    daiJoin: string,
+    cdpId: ethers.BigNumber,
+    amtCollateral: ethers.BigNumber,
+    wadDai: ethers.BigNumber,
+  ) {
+    return this.proxy['execute(address,bytes)'](
+      this.actions.address,
+      this.actions.interface.encodeFunctionData('wipeAndFreeGem', [cdpMan, gemJoin, daiJoin, cdpId, amtCollateral, wadDai]),
+    );
+  }
+
+  wipeAllAndFreeGem(
+    cdpMan: string,
+    gemJoin: string,
+    daiJoin: string,
+    cdpId: ethers.BigNumber,
+    amtCollateral: ethers.BigNumber,
+  ) {
+    return this.proxy['execute(address,bytes)'](
+      this.actions.address,
+      this.actions.interface.encodeFunctionData('wipeAllAndFreeGem', [cdpMan, gemJoin, daiJoin, cdpId, amtCollateral]),
     );
   }
 }
