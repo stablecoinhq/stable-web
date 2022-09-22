@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import { ethers } from 'ethers';
+import { useRouter } from 'next/router';
 import { useCallback, useState } from 'react';
 
 import { useChainLog, useDSProxy, useGetCDPs, useProxyRegistry } from 'pages/ethereum/ContractHooks';
@@ -21,7 +22,6 @@ import usePromiseFactory from 'pages/usePromiseFactory';
 import type { CDP } from 'contracts/GetCDPsHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
-import { useRouter } from 'next/router';
 
 type ContentProps = {
   cdps: CDP[] | undefined;
@@ -55,10 +55,7 @@ const Content: FC<ContentProps> = ({ cdps }) => {
             <ListItemIcon>
               <AccountBalanceWalletIcon />
             </ListItemIcon>
-            <ListItemText
-                primary={`${ilk} (${id.toString()})`}
-                secondary={urn}
-              />
+            <ListItemText primary={`${ilk} (${id.toString()})`} secondary={urn} />
           </ListItemButton>
         </ListItem>
       ))}

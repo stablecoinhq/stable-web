@@ -28,20 +28,43 @@ export default class ProxyActionsHelper {
     );
   }
 
-  lockETHAndDraw(cdpManager: string, jug: string, ethJoin: string, daiJoin: string, cdp: ethers.BigNumberish, amtEth: ethers.BigNumber, wadDai: ethers.BigNumberish) {
+  lockETHAndDraw(
+    cdpManager: string,
+    jug: string,
+    ethJoin: string,
+    daiJoin: string,
+    cdp: ethers.BigNumberish,
+    amtEth: ethers.BigNumber,
+    wadDai: ethers.BigNumberish,
+  ) {
     return this.proxy['execute(address,bytes)'](
       this.actions.address,
       this.actions.interface.encodeFunctionData('lockETHAndDraw', [cdpManager, jug, ethJoin, daiJoin, cdp, wadDai]),
-      { value: amtEth }
+      { value: amtEth },
     );
   }
 
   // ilk: ETH-A, DAI-A, ...
-  openLockEthAndDraw(cdpManager: string, jug: string, ethJoin: string, daiJoin: string, ilk: string, amtEth: ethers.BigNumber, wadDai: ethers.BigNumberish) {
+  openLockEthAndDraw(
+    cdpManager: string,
+    jug: string,
+    ethJoin: string,
+    daiJoin: string,
+    ilk: string,
+    amtEth: ethers.BigNumber,
+    wadDai: ethers.BigNumberish,
+  ) {
     return this.proxy['execute(address,bytes)'](
       this.actions.address,
-      this.actions.interface.encodeFunctionData('openLockETHAndDraw', [cdpManager, jug, ethJoin, daiJoin, formatBytes32String(ilk), wadDai]),
-      { value: amtEth }
+      this.actions.interface.encodeFunctionData('openLockETHAndDraw', [
+        cdpManager,
+        jug,
+        ethJoin,
+        daiJoin,
+        formatBytes32String(ilk),
+        wadDai,
+      ]),
+      { value: amtEth },
     );
   }
 
@@ -49,18 +72,54 @@ export default class ProxyActionsHelper {
    * if transferFrom is true, collateral will be sent to gemJoin adoptor by proxy.
    * amtCollateral's decimal should be different per its token type.
    */
-  lockGemAndDraw(cdpManager: string, jug: string, gemJoin: string, daiJoin: string, cdp: ethers.BigNumberish, amtCollateral: ethers.BigNumber, wadDai: ethers.BigNumberish, transferFrom: boolean) {
+  lockGemAndDraw(
+    cdpManager: string,
+    jug: string,
+    gemJoin: string,
+    daiJoin: string,
+    cdp: ethers.BigNumberish,
+    amtCollateral: ethers.BigNumber,
+    wadDai: ethers.BigNumberish,
+    transferFrom: boolean,
+  ) {
     return this.proxy['execute(address,bytes)'](
       this.actions.address,
-      this.actions.interface.encodeFunctionData('lockGemAndDraw', [cdpManager, jug, gemJoin, daiJoin, cdp, amtCollateral, wadDai, transferFrom]),
+      this.actions.interface.encodeFunctionData('lockGemAndDraw', [
+        cdpManager,
+        jug,
+        gemJoin,
+        daiJoin,
+        cdp,
+        amtCollateral,
+        wadDai,
+        transferFrom,
+      ]),
     );
   }
 
   // ilk: ETH-A, DAI-A, ...
-  openLockGemAndDraw(cdpManager: string, jug: string, gemJoin: string, daiJoin: string, ilk: string, amtCollateral: ethers.BigNumber, wadDai: ethers.BigNumberish, transferFrom: boolean) {
+  openLockGemAndDraw(
+    cdpManager: string,
+    jug: string,
+    gemJoin: string,
+    daiJoin: string,
+    ilk: string,
+    amtCollateral: ethers.BigNumber,
+    wadDai: ethers.BigNumberish,
+    transferFrom: boolean,
+  ) {
     return this.proxy['execute(address,bytes)'](
       this.actions.address,
-      this.actions.interface.encodeFunctionData('openLockGemAndDraw', [cdpManager, jug, gemJoin, daiJoin, ilk, amtCollateral, wadDai, transferFrom]),
+      this.actions.interface.encodeFunctionData('openLockGemAndDraw', [
+        cdpManager,
+        jug,
+        gemJoin,
+        daiJoin,
+        ilk,
+        amtCollateral,
+        wadDai,
+        transferFrom,
+      ]),
     );
   }
 }

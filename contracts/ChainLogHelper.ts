@@ -3,6 +3,7 @@ import { formatBytes32String } from '@ethersproject/strings';
 import { ChainLog__factory, DssCdpManager__factory, Vat__factory } from 'generated/types';
 
 import GetCDPsHelper from './GetCDPsHelper';
+import IlkRegistryHelper from './IlkRgistryHelper';
 import ProxyActionsHelper from './ProxyActionsHelper';
 import ProxyRegistryHelper from './ProxyRegistryHelper';
 
@@ -10,7 +11,6 @@ import type { ethers } from 'ethers';
 import type addresses from 'generated/addresses.json';
 import type { ChainLog, DSProxy } from 'generated/types';
 import type PromiseConstructor from 'types/promise';
-import IlkRegistryHelper from './IlkRgistryHelper';
 
 type ChainLogKeys = keyof typeof addresses;
 
