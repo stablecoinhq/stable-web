@@ -14,6 +14,7 @@ import type PromiseConstructor from 'types/promise';
 import { ERC20__factory } from 'generated/types/factories/ERC20__factory';
 import { Jug__factory } from 'generated/types/factories/Jug__factory';
 import JugHelper from './JugHelper';
+import { Spotter__factory } from 'generated/types/factories/Spotter__factory';
 
 type ChainLogKeys = keyof typeof addresses;
 
@@ -44,6 +45,12 @@ export default class ChainLogHelper {
 
   jug() {
     return this.contract.getAddress(formatBytes32String('MCD_JUG')).then((address) => new JugHelper(this.provider, address));
+  }
+
+  spot() {
+    return this.contract
+      .getAddress(formatBytes32String('MCD_SPOT'))
+      .then((address) => Spotter__factory.connect(address, this.provider));
   }
 
   dssCDPManager() {

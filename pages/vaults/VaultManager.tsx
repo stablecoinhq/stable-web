@@ -1,5 +1,17 @@
 import { parseBytes32String, formatBytes32String } from '@ethersproject/strings';
-import { Button, CardContent, Card, Modal, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import {
+  Button,
+  CardContent,
+  Card,
+  Modal,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+} from '@mui/material';
 import { Box } from '@mui/system';
 import { ethers } from 'ethers';
 import { useCallback, useEffect, useState } from 'react';
@@ -26,6 +38,7 @@ type Ilk = {
   spot: ethers.BigNumber; // price with safety mergin i.e. collateralization ratio [ray 10 ** 27]
   line: ethers.BigNumber; // max supply for the vault type  [rad 10 ** 45]
   dust: ethers.BigNumber; // minimum mintable value [rad 10 ** 45]
+  liquidationRatio: ethers.BigNumber; // minimum collateralization ratio [ray 10 ** 27]
 };
 
 // vault status
@@ -37,19 +50,23 @@ type Urn = {
 
 const ETH_PREFIX = '0x455448';
 const ONE_YEAR = 60 * 60 * 24 * 365;
-const WAD = ethers.utils.parseUnits("1", 18);
-const RAY = ethers.utils.parseUnits("1", 27);
-const RAD = ethers.utils.parseUnits("1", 45);
+const WAD_DECIMAL = 18;
+const RAY_DECIMAL = 27;
+const RAD_DECIMAL = 45;
+const WAD = ethers.utils.parseUnits('1', WAD_DECIMAL);
+const RAY = ethers.utils.parseUnits('1', RAY_DECIMAL);
+const RAD = ethers.utils.parseUnits('1', RAD_DECIMAL);
 
 /**
  * to avoid rounding ethers.BigNumber
- * @param value 
+ * @param value
  * @param unit should be positive
  */
-const divString = (value: string, unit: number) => value.length < unit ? '0.' + value.padStart(unit - 1) : value.slice(0, -1 * unit) + '.' + value.slice(-1 * unit)
+const divString = (value: string, unit: number) =>
+  value.length < unit ? '0.' + value.padStart(unit - 1) : value.slice(0, -1 * unit) + '.' + value.slice(-1 * unit);
 
 /**
- * calculate ethers.BigNumber's pow in log time.
+ * calculate ethers.BigNumber's pow in log time. the default implementation is too expensive.
  * @param unit assuming one of WAD, RAY, RAD.
  */
 const logtimePow = (base_: ethers.BigNumber, exponent_: number, unit: ethers.BigNumber) => {
@@ -65,7 +82,7 @@ const logtimePow = (base_: ethers.BigNumber, exponent_: number, unit: ethers.Big
   }
 
   return result;
-}
+};
 
 type VaultManipulatorCommonProps = {
   ethereum: ethers.Signer;
@@ -228,11 +245,12 @@ const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumb
         label={`${parseBytes32String(ilk.bytes32).split('-')[0]} to lock`}
         fullWidth
         error={
-          !gemAmount.isZero() && (!existsEnoughGem ||
-          gemAmount.mul(ilk.spot) < dart ||
-          gemAmount.isNegative() ||
-          dart.mul(ilk.rate) < ilk.dust ||
-          ilk.line < ilk.Art.mul(ilk.rate).add(dart))
+          !gemAmount.isZero() &&
+          (!existsEnoughGem ||
+            gemAmount.mul(ilk.spot) < dart ||
+            gemAmount.isNegative() ||
+            dart.mul(ilk.rate) < ilk.dust ||
+            ilk.line < ilk.Art.mul(ilk.rate).add(dart))
         }
         value={gem}
         onChange={(e) => setGem(e.target.value)}
@@ -298,7 +316,7 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
   const [dai, setDai] = useState('0');
   const daiAmount = (() => {
     try {
-      return ethers.utils.parseUnits(dai, 18);
+      return ethers.utils.parseUnits(dai, WAD_DECIMAL);
     } catch (e) {
       return ethers.constants.Zero;
     }
@@ -313,7 +331,7 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
 
   // withdrawable collateral amount (limit)
   const withdrawable = (() => {
-    const insufficient = urn.art.sub(daiAmount.mul(ethers.utils.parseUnits('1', 27)).div(ilk.rate));
+    const insufficient = urn.art.sub(daiAmount.mul(ethers.utils.parseUnits('1', RAY_DECIMAL)).div(ilk.rate));
     if (insufficient.isZero() || insufficient.isNegative()) {
       return urn.ink;
     } else {
@@ -360,28 +378,28 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
 
         if (isValidAddr(cdpMan) && isValidAddr(gemJoin) && isValidAddr(daiJoin)) {
           await daiContract
-              .allowance(account.address, proxy.address)
-              .then((allowance) => {
-                const value = daiAmount.sub(allowance);
-                if (allowance.lt(daiAmount)) {
-                  setApproveWindow({
-                    open: true,
-                    spender: proxy.address,
-                    value,
-                  });
-                  return daiContract.approve(proxy.address, value);
-                }
+            .allowance(account.address, proxy.address)
+            .then((allowance) => {
+              const value = daiAmount.sub(allowance);
+              if (allowance.lt(daiAmount)) {
+                setApproveWindow({
+                  open: true,
+                  spender: proxy.address,
+                  value,
+                });
+                return daiContract.approve(proxy.address, value);
+              }
 
-                return Promise.resolve(undefined);
-              })
-              .catch((e) => Promise.reject(close()))
-              .then(() => {
-                if (isEth) {
-                  return actions.wipeAndFreeEth(cdpMan!, gemJoin!, daiJoin!, cdpId, gemAmount, daiAmount);
-                } else {
-                  return actions.wipeAndFreeGem(cdpMan!, gemJoin!, daiJoin!, cdpId, gemAmount, daiAmount);
-                }
-              });
+              return Promise.resolve(undefined);
+            })
+            .catch((e) => Promise.reject(close()))
+            .then(() => {
+              if (isEth) {
+                return actions.wipeAndFreeEth(cdpMan!, gemJoin!, daiJoin!, cdpId, gemAmount, daiAmount);
+              } else {
+                return actions.wipeAndFreeGem(cdpMan!, gemJoin!, daiJoin!, cdpId, gemAmount, daiAmount);
+              }
+            });
         }
       }
     }
@@ -421,51 +439,49 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
   );
 };
 
-const IlkStatusCard: FC<{ilk: Ilk, chainlog: ChainLogHelper}> = ({ ilk: { bytes32, Art, rate, spot, line, dust }, chainlog }) => {
+const IlkStatusCard: FC<{ ilk: Ilk; chainlog: ChainLogHelper }> = ({
+  ilk: { bytes32, Art, rate, spot, line, dust, liquidationRatio },
+  chainlog,
+}) => {
   const jug = usePromiseFactory(useCallback(() => chainlog.jug(), [chainlog]));
   const stabilityFee = usePromiseFactory(useCallback(async () => jug?.stabilityFee(bytes32), [jug, bytes32]));
-  console.log('stability fee', stabilityFee?.toString())
+  const [expanded, setExpanded] = useState(true);
 
   return (
-    <Card>
-      <CardContent>
-        <Typography gutterBottom>
-          {`Name: ${parseBytes32String(bytes32)}`}
-        </Typography>
-        <Typography gutterBottom>
-          {`Total Issue: ${divString(Art.mul(rate).toString(), 45)}`}
-        </Typography>
-        <Typography gutterBottom>
-          {`Annual fee: ${stabilityFee ? divString(logtimePow(stabilityFee, ONE_YEAR, RAY).toString(), 27) : ''}`}
-        </Typography>
-        <Typography gutterBottom>
-          {`Maximum liquidity: ${divString(line.toString(), 45)}`}
-        </Typography>
-        <Typography gutterBottom>
-          {`Debt Floor: ${divString(dust.toString(), 45)}`}
-        </Typography>
-      </CardContent>
-    </Card>
-  )
-}
+    <Accordion expanded={expanded} onClick={() => setExpanded(!expanded)}>
+      <AccordionSummary>Collateral Status</AccordionSummary>
+      <AccordionDetails>
+        <CardContent>
+          <Typography gutterBottom>{`Name: ${parseBytes32String(bytes32)}`}</Typography>
+          <Typography gutterBottom>{`Total Issue: ${divString(Art.mul(rate).toString(), RAD_DECIMAL)}`}</Typography>
+          <Typography gutterBottom>
+            {`Annual fee: ${stabilityFee ? divString(logtimePow(stabilityFee, ONE_YEAR, RAY).toString(), RAY_DECIMAL) : ''}`}
+          </Typography>
+          <Typography gutterBottom>{`Liquidation ratio: ${divString(liquidationRatio.toString(), RAY_DECIMAL)}`}</Typography>
+          <Typography gutterBottom>{`Current price: ${divString(liquidationRatio.mul(spot).div(RAY).toString(), RAY_DECIMAL)}`}</Typography>
+          <Typography gutterBottom>{`Maximum liquidity: ${divString(line.toString(), RAD_DECIMAL)}`}</Typography>
+          <Typography gutterBottom>{`Debt Floor: ${divString(dust.toString(), RAD_DECIMAL)}`}</Typography>
+        </CardContent>
+      </AccordionDetails>
+    </Accordion>
+  );
+};
 
-const UrnStatusCard: FC<{urn: Urn} & { rate: ethers.BigNumber }> = ({ urn: { gem, ink, art }, rate }) => {
+const UrnStatusCard: FC<{ urn: Urn } & { rate: ethers.BigNumber }> = ({ urn: { gem, ink, art }, rate }) => {
+  const [expanded, setExpanded] = useState(true);
   return (
-    <Card>
-      <CardContent>
-        <Typography gutterBottom>
-          {`Free collateral: ${divString(gem.toString(), 18)}`}
-        </Typography>
-        <Typography gutterBottom>
-          {`Locked collateral: ${divString(ink.toString(), 18)}`}
-        </Typography>
-        <Typography gutterBottom>
-          {`Debt: ${divString(art.mul(rate).toString(), 45)}`}
-        </Typography>
-      </CardContent>
-    </Card>
-  )
-}
+    <Accordion expanded={expanded} onClick={() => setExpanded(!expanded)}>
+      <AccordionSummary>Vault Status</AccordionSummary>
+      <AccordionDetails>
+        <CardContent>
+          <Typography gutterBottom>{`Free collateral: ${divString(gem.toString(), WAD_DECIMAL)}`}</Typography>
+          <Typography gutterBottom>{`Locked collateral: ${divString(ink.toString(), WAD_DECIMAL)}`}</Typography>
+          <Typography gutterBottom>{`Debt: ${divString(art.mul(rate).toString(), RAD_DECIMAL)}`}</Typography>
+        </CardContent>
+      </AccordionDetails>
+    </Accordion>
+  );
+};
 
 type VaultManagerCommonProps = { ethereum: ethers.Signer; account: EthereumAccount; chainlog: ChainLogHelper; vat: Vat };
 
@@ -487,9 +503,12 @@ const CdpVaultManager: FC<VaultManagerCommonProps & { cdpId: ethers.BigNumber }>
         .ilks(cdpId)
         .then((ilkBytes32) =>
           Promise.all([
-            vat
-              .ilks(ilkBytes32)
-              .then(({ Art, rate, spot, line, dust }) => setIlk({ bytes32: ilkBytes32, Art, rate, spot, line, dust })),
+            Promise.all([
+              vat
+              .ilks(ilkBytes32),
+              chainlog.spot().then((spot) => spot.ilks(ilkBytes32))
+            ])
+              .then(([{ Art, rate, spot, line, dust }, { mat }]) => setIlk({ bytes32: ilkBytes32, Art, rate, spot, line, dust, liquidationRatio: mat })),
             cdpMan
               .urns(cdpId)
               .then((address) =>
@@ -506,9 +525,9 @@ const CdpVaultManager: FC<VaultManagerCommonProps & { cdpId: ethers.BigNumber }>
     <Box>
       {ilk ? <IlkStatusCard ilk={ilk} chainlog={chainlog} /> : <div>loading</div>}
       {urn && ilk?.rate ? <UrnStatusCard urn={urn} rate={ilk.rate} /> : <div>loading</div>}
-      <ToggleButtonGroup value={selected} exclusive fullWidth onChange={(e, selected_) => setSelected(selected_)}>
-        <ToggleButton value="mint">mint</ToggleButton>
-        <ToggleButton value="burn">burn</ToggleButton>
+      <ToggleButtonGroup value={selected} exclusive fullWidth onChange={(e, selected_) => selected_ && setSelected(selected_)}>
+        <ToggleButton value="mint">Mint Stable coin</ToggleButton>
+        <ToggleButton value="burn">Redeem Stable coin</ToggleButton>
       </ToggleButtonGroup>
       {ilk && urn ? (
         selected === 'mint' ? (
@@ -549,9 +568,12 @@ const OpenVaultManager: FC<VaultManagerCommonProps> = ({ ethereum, account, chai
   useEffect(() => {
     if (ilkBytes32List) {
       if (ilkBytes32) {
-        vat
-          .ilks(ilkBytes32)
-          .then(({ Art, rate, spot, line, dust }) => setIlk({ bytes32: ilkBytes32, Art, rate, spot, line, dust }));
+        Promise.all([
+          vat
+          .ilks(ilkBytes32),
+          chainlog.spot().then((spot) => spot.ilks(ilkBytes32))
+        ])
+          .then(([{ Art, rate, spot, line, dust }, { mat }]) => setIlk({ bytes32: ilkBytes32, Art, rate, spot, line, dust, liquidationRatio: mat }));
       } else {
         setIlkBytes32(ilkBytes32List[0] || '');
       }
