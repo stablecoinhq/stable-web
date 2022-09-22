@@ -1,6 +1,7 @@
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import {
   Box,
+  Button,
   Card,
   CardContent,
   CircularProgress,
@@ -11,7 +12,8 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material';
-import { useCallback } from 'react';
+import { ethers } from 'ethers';
+import { useCallback, useState } from 'react';
 
 import { useChainLog, useDSProxy, useGetCDPs, useProxyRegistry } from 'pages/ethereum/ContractHooks';
 import usePromiseFactory from 'pages/usePromiseFactory';
@@ -58,7 +60,7 @@ const Content: FC<ContentProps> = ({ cdps }) => {
 };
 
 const Page: NextPageWithEthereum = ({ ethereum, account }) => {
-  const chainLog = useChainLog(ethereum);
+  const chainLog = useChainLog(ethereum.getSigner());
   const getCDPs = useGetCDPs(chainLog);
   const proxyRegistry = useProxyRegistry(chainLog);
   const dsProxy = useDSProxy(proxyRegistry, account);
@@ -66,10 +68,34 @@ const Page: NextPageWithEthereum = ({ ethereum, account }) => {
     useCallback(async () => (dsProxy ? getCDPs?.getCDPs(dsProxy) : undefined), [dsProxy, getCDPs]),
   );
 
+  const proxyExists = dsProxy && dsProxy.address !== ethers.constants.AddressZero;
+
+  const [proxyPrepared, setProxyPrepared] = useState(false);
+
+  const openNewVault = async () => {
+    if (dsProxy) {
+      const actions = await chainLog.bindActions(dsProxy);
+      const cdpMan = await chainLog.getAddress('CDP_MANAGER');
+      await actions.open(cdpMan, 'ETA-A').catch(() => {});
+    }
+  };
+
+  const newProxy = async () => {
+    if (!proxyPrepared) {
+      await proxyRegistry?.buildNewProxy();
+    }
+    setProxyPrepared(true);
+  };
+
   return (
     <Card>
       <CardContent>
         <Typography variant="h5">Vaults</Typography>
+        {proxyExists ? (
+          <Button onClick={openNewVault}>Open a new Vault</Button>
+        ) : (
+          <Button onClick={newProxy}>Prepare Proxy</Button>
+        )}
         <Content cdps={cdps} />
       </CardContent>
     </Card>

@@ -6,7 +6,7 @@ import MetaMaskIcon from 'images/metamask.svg';
 import type { FC } from 'react';
 import type { WithNullableEthereum } from 'types/next';
 
-const MetaMaskButton: FC<WithNullableEthereum> = ({ ethereum, account }) => {
+const WalletConnectButton: FC<WithNullableEthereum> = ({ ethereum, account }) => {
   const text = (() => {
     if (!ethereum) {
       return 'Install MetaMask';
@@ -25,8 +25,8 @@ const MetaMaskButton: FC<WithNullableEthereum> = ({ ethereum, account }) => {
       return;
     }
 
-    if (!account) {
-      void ethereum.request({ method: 'eth_requestAccounts' });
+    if (!account && ethereum.provider.request) {
+      void ethereum.provider.request({ method: 'eth_requestAccounts' });
     }
   }, [ethereum, account]);
 
@@ -42,4 +42,4 @@ const MetaMaskButton: FC<WithNullableEthereum> = ({ ethereum, account }) => {
   );
 };
 
-export default MetaMaskButton;
+export default WalletConnectButton;
