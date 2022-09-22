@@ -21,12 +21,16 @@ import usePromiseFactory from 'pages/usePromiseFactory';
 import type { CDP } from 'contracts/GetCDPsHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
+import { useRouter } from 'next/router';
 
 type ContentProps = {
   cdps: CDP[] | undefined;
 };
 
 const Content: FC<ContentProps> = ({ cdps }) => {
+  const router = useRouter();
+  const baseUrl = '/vaults/';
+
   if (!cdps) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
@@ -47,11 +51,14 @@ const Content: FC<ContentProps> = ({ cdps }) => {
     <List>
       {cdps.map(({ id, urn, ilk }) => (
         <ListItem key={id.toString()} disablePadding>
-          <ListItemButton>
+          <ListItemButton onClick={() => router.push(baseUrl + id.toHexString())}>
             <ListItemIcon>
               <AccountBalanceWalletIcon />
             </ListItemIcon>
-            <ListItemText primary={`${ilk} (${id.toString()})`} secondary={urn} />
+            <ListItemText
+                primary={`${ilk} (${id.toString()})`}
+                secondary={urn}
+              />
           </ListItemButton>
         </ListItem>
       ))}
@@ -76,7 +83,7 @@ const Page: NextPageWithEthereum = ({ ethereum, account }) => {
     if (dsProxy) {
       const actions = await chainLog.bindActions(dsProxy);
       const cdpMan = await chainLog.getAddress('CDP_MANAGER');
-      await actions.open(cdpMan, 'ETA-A').catch(() => {});
+      await actions.open(cdpMan, 'ETH-A').catch(() => {});
     }
   };
 

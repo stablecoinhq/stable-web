@@ -13,6 +13,6 @@ export default class IlkRegistryHelper {
   }
 
   list() {
-    return this.contracts['list()'];
+    return this.contracts['list()']();
   }
 }
