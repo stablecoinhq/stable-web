@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import { ethers } from 'ethers';
+import { useRouter } from 'next/router';
 import { useCallback, useState } from 'react';
 
 import { useChainLog, useDSProxy, useGetCDPs, useProxyRegistry } from 'pages/ethereum/ContractHooks';
@@ -27,6 +28,9 @@ type ContentProps = {
 };
 
 const Content: FC<ContentProps> = ({ cdps }) => {
+  const router = useRouter();
+  const baseUrl = '/vaults/';
+
   if (!cdps) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
@@ -47,7 +51,7 @@ const Content: FC<ContentProps> = ({ cdps }) => {
     <List>
       {cdps.map(({ id, urn, ilk }) => (
         <ListItem key={id.toString()} disablePadding>
-          <ListItemButton>
+          <ListItemButton onClick={() => router.push(baseUrl + id.toHexString())}>
             <ListItemIcon>
               <AccountBalanceWalletIcon />
             </ListItemIcon>
@@ -76,7 +80,7 @@ const Page: NextPageWithEthereum = ({ ethereum, account }) => {
     if (dsProxy) {
       const actions = await chainLog.bindActions(dsProxy);
       const cdpMan = await chainLog.getAddress('CDP_MANAGER');
-      await actions.open(cdpMan, 'ETA-A').catch(() => {});
+      await actions.open(cdpMan, 'ETH-A').catch(() => {});
     }
   };
 

@@ -27,6 +27,7 @@
     "@metamask/providers": "^9.1.0",
     "@mui/icons-material": "^5.10.3",
     "@mui/material": "^5.10.2",
+    "@mui/system": "^5.10.6",
     "@svgr/webpack": "^6.3.1",
     "ethers": "^5.7.0",
     "next": "12.2.5",

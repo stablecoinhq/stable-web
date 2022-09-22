@@ -1,8 +1,9 @@
 import { formatBytes32String } from '@ethersproject/strings';
 
-import { ChainLog__factory, DssCdpManager__factory } from 'generated/types';
+import { ChainLog__factory, DssCdpManager__factory, Vat__factory } from 'generated/types';
 
 import GetCDPsHelper from './GetCDPsHelper';
+import IlkRegistryHelper from './IlkRgistryHelper';
 import ProxyActionsHelper from './ProxyActionsHelper';
 import ProxyRegistryHelper from './ProxyRegistryHelper';
 
@@ -24,6 +25,18 @@ export default class ChainLogHelper {
 
   getAddress(key: ChainLogKeys) {
     return this.contract.getAddress(formatBytes32String(key));
+  }
+
+  ilkRegistry() {
+    return this.contract
+      .getAddress(formatBytes32String('ILK_REGISTRY'))
+      .then((address) => new IlkRegistryHelper(this.provider, address));
+  }
+
+  vat() {
+    return this.contract
+      .getAddress(formatBytes32String('MCD_VAT'))
+      .then((address) => Vat__factory.connect(address, this.provider));
   }
 
   dssCDPManager() {
