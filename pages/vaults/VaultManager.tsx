@@ -84,6 +84,8 @@ const logtimePow = (base_: ethers.BigNumber, exponent_: number, unit: ethers.Big
   return result;
 };
 
+const isValidAddr = (addr: string | undefined) => addr && addr !== ethers.constants.AddressZero;
+
 type VaultManipulatorCommonProps = {
   ethereum: ethers.Signer;
   account: EthereumAccount;
@@ -94,6 +96,9 @@ type VaultManipulatorCommonProps = {
 
 type ApproveTokenModalProps = { spender: string; value: ethers.BigNumber; open: boolean; onClose: () => void };
 
+/**
+ * display what we will do in the approval transaction when it is needed.
+ */
 const ApproveTokenModal: FC<ApproveTokenModalProps> = ({ spender, value, open, onClose }) => {
   return (
     <Modal open={open} onClose={onClose}>
@@ -106,6 +111,10 @@ const ApproveTokenModal: FC<ApproveTokenModalProps> = ({ spender, value, open, o
  * TODO
  * - consider dai and gem for both internal and external(minted),
  * - consider WETH for ETH pattern
+ * - show a status before the execution and after do it. (collateraliztion ratio, vault status, ...)
+ * - handle errors and emit some notification
+ * - handle loading components
+ * - display more intuitive parameters
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumber; urn?: Urn }> = ({
@@ -193,8 +202,6 @@ const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumb
           chainlog.getAddress(key as Parameters<typeof chainlog.getAddress>[0]),
         ),
       );
-
-      const isValidAddr = (addr: string | undefined) => addr && addr !== ethers.constants.AddressZero;
 
       if (isValidAddr(cdpMan) && isValidAddr(jug) && isValidAddr(gemJoin) && isValidAddr(daiJoin)) {
         if (gemAmount.mul(ilk.spot) < dart || dart.mul(ilk.rate) < ilk.dust || ilk.line < ilk.Art.mul(ilk.rate).add(dart)) {
@@ -291,6 +298,14 @@ const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumb
   );
 };
 
+/**
+ * TODO
+ * - use wipeAllAndFreeGem if possible.
+ * - show a status before the execution and after do it. (collateraliztion ratio, vault status, ...)
+ * - handle errors and emit some notification
+ * - handle loading components
+ * - display more intuitive parameters
+ */
 const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumber; urn: Urn }> = ({
   ethereum,
   account,
@@ -304,7 +319,7 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
 
   const registry = useProxyRegistry(chainlog);
   const proxy = useDSProxy(registry, account);
-  // consider this code will work well
+  // consider this code will work well. to get the Token addr, need to remove a type specifier. (ETH-A, MATIC-A,... => ETH, MATIC,...)
   const gemContract = usePromiseFactory(
     useCallback(() => chainlog.erc20(formatBytes32String(parseBytes32String(ilk.bytes32).split('-')[0]!)), [chainlog]),
   );
@@ -374,8 +389,6 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
           ),
         );
 
-        const isValidAddr = (addr: string | undefined) => addr && addr !== ethers.constants.AddressZero;
-
         if (isValidAddr(cdpMan) && isValidAddr(gemJoin) && isValidAddr(daiJoin)) {
           await daiContract
             .allowance(account.address, proxy.address)
@@ -439,6 +452,10 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
   );
 };
 
+/**
+ * TODO
+ * - handle loading status and errors
+ */
 const IlkStatusCard: FC<{ ilk: Ilk; chainlog: ChainLogHelper }> = ({
   ilk: { bytes32, Art, rate, spot, line, dust, liquidationRatio },
   chainlog,
@@ -467,6 +484,10 @@ const IlkStatusCard: FC<{ ilk: Ilk; chainlog: ChainLogHelper }> = ({
   );
 };
 
+/**
+ * TODO
+ * - handle loading status and errors
+ */
 const UrnStatusCard: FC<{ urn: Urn } & { rate: ethers.BigNumber }> = ({ urn: { gem, ink, art }, rate }) => {
   const [expanded, setExpanded] = useState(true);
   return (
@@ -485,6 +506,11 @@ const UrnStatusCard: FC<{ urn: Urn } & { rate: ethers.BigNumber }> = ({ urn: { g
 
 type VaultManagerCommonProps = { ethereum: ethers.Signer; account: EthereumAccount; chainlog: ChainLogHelper; vat: Vat };
 
+/**
+ * handle vaults already opend
+ * TODO
+ * - handle loading and errors
+ */
 const CdpVaultManager: FC<VaultManagerCommonProps & { cdpId: ethers.BigNumber }> = ({
   ethereum,
   account,
@@ -558,6 +584,11 @@ const CdpVaultManager: FC<VaultManagerCommonProps & { cdpId: ethers.BigNumber }>
   );
 };
 
+/**
+ * handle vaults opening
+ * TODO
+ * - handle loading and errors
+ */
 const OpenVaultManager: FC<VaultManagerCommonProps> = ({ ethereum, account, chainlog, vat }) => {
   const ilkBytes32List = usePromiseFactory(
     useCallback(() => chainlog.ilkRegistry().then((registry) => registry.list()), [chainlog]),
