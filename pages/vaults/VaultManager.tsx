@@ -38,7 +38,7 @@ type Ilk = {
   spot: ethers.BigNumber; // price with safety mergin i.e. collateralization ratio [ray 10 ** 27]
   line: ethers.BigNumber; // max supply for the vault type  [rad 10 ** 45]
   dust: ethers.BigNumber; // minimum mintable value [rad 10 ** 45]
-  liquidationRatio: ethers.BigNumber; // minimum collateralization ratio [ray 10 ** 27]
+  liquidationRatio: ethers.BigNumber; // minimum collateralization ratio(mat) [ray 10 ** 27]
 };
 
 // vault status
@@ -204,7 +204,7 @@ const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumb
       );
 
       if (isValidAddr(cdpMan) && isValidAddr(jug) && isValidAddr(gemJoin) && isValidAddr(daiJoin)) {
-        if (gemAmount.mul(ilk.spot) < dart || dart.mul(ilk.rate) < ilk.dust || ilk.line < ilk.Art.mul(ilk.rate).add(dart)) {
+        if (gemAmount.mul(ilk.spot).lt(dart) || dart.mul(ilk.rate).lt(ilk.dust) || ilk.line.lt(ilk.Art.add(dart).mul(ilk.rate))) {
           // TODO -- error handling
           console.error('invalid condition');
         } else {
@@ -254,10 +254,10 @@ const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumb
         error={
           !gemAmount.isZero() &&
           (!existsEnoughGem ||
-            gemAmount.mul(ilk.spot) < dart ||
+            gemAmount.mul(ilk.spot).lt(dart) ||
             gemAmount.isNegative() ||
-            dart.mul(ilk.rate) < ilk.dust ||
-            ilk.line < ilk.Art.mul(ilk.rate).add(dart))
+            dart.mul(ilk.rate).lt(ilk.dust) ||
+            ilk.line.lt(ilk.Art.mul(ilk.rate).add(dart)))
         }
         value={gem}
         onChange={(e) => setGem(e.target.value)}
@@ -266,11 +266,11 @@ const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumb
             ? 'Not Enough Balance'
             : gemAmount.isNegative()
             ? 'Negative Amount'
-            : gemAmount.mul(ilk.spot) < dart
+            : gemAmount.mul(ilk.spot).lt(dart)
             ? 'Not Enough Collateralized'
-            : dart.mul(ilk.rate) < ilk.dust
+            : dart.mul(ilk.rate).lt(ilk.dust)
             ? 'Less Than Mintable Floor'
-            : ilk.line < ilk.Art.mul(ilk.rate).add(dart)
+            : ilk.line.lt(ilk.Art.add(dart).mul(ilk.rate))
             ? 'Over The Collateral Line'
             : ''
         }
