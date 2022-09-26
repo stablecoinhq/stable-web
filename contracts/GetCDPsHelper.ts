@@ -1,4 +1,4 @@
-import { toUtf8String } from '@ethersproject/strings';
+import { parseBytes32String } from '@ethersproject/strings';
 
 import { GetCdps__factory } from 'generated/types';
 
@@ -25,7 +25,7 @@ export default class GetCDPsHelper {
       cdpIds.map((cdpId, i) => ({
         id: cdpId,
         urn: urns[i]!!,
-        ilk: toUtf8String(ilks[i]!!),
+        ilk: parseBytes32String(ilks[i]!!),
       })),
     );
   }
