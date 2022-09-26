@@ -11,6 +11,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  CircularProgress,
 } from '@mui/material';
 import { Box } from '@mui/system';
 import { ethers } from 'ethers';
@@ -60,13 +61,15 @@ const RAD = ethers.utils.parseUnits('1', RAD_DECIMAL);
 /**
  * to avoid rounding ethers.BigNumber
  * @param value
- * @param unit should be positive
+ * @param unit should be positive. assuming one of WAD_DECIMAL, RAY_DECIMAL, RAD_DECIMAL.
  */
 const divString = (value: string, unit: number) =>
   value.length < unit ? '0.' + value.padStart(unit - 1) : value.slice(0, -1 * unit) + '.' + value.slice(-1 * unit);
 
 /**
- * calculate ethers.BigNumber's pow in log time. the default implementation is too expensive.
+ * calculate ethers.BigNumber's pow (i.e. base_ ** exponent_) in log time. the default implementation is too expensive.
+ * @param base_
+ * @param exponent_
  * @param unit assuming one of WAD, RAY, RAD.
  */
 const logtimePow = (base_: ethers.BigNumber, exponent_: number, unit: ethers.BigNumber) => {
@@ -85,6 +88,9 @@ const logtimePow = (base_: ethers.BigNumber, exponent_: number, unit: ethers.Big
 };
 
 const isValidAddr = (addr: string | undefined) => addr && addr !== ethers.constants.AddressZero;
+
+/** ETH-A, MATIC-B, ... => ETH, MATIC, ... */
+const getBaseCollateralName = (ilkBytes32: string) => parseBytes32String(ilkBytes32).split('-')[0];
 
 type VaultManipulatorCommonProps = {
   ethereum: ethers.Signer;
@@ -249,7 +255,7 @@ const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumb
     <Box>
       <TextField
         id="collateral-amount-input"
-        label={`${parseBytes32String(ilk.bytes32).split('-')[0]} to lock`}
+        label={`${getBaseCollateralName(ilk.bytes32)} to lock`}
         fullWidth
         error={
           !gemAmount.isZero() &&
@@ -283,7 +289,7 @@ const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumb
         onChange={(e) => setCr(e.target.value)}
       />
       <Typography variant="inherit" component="div">
-        {dart.mul(ilk.rate).toString()}
+        {divString(dart.mul(ilk.rate).toString(), RAD_DECIMAL)}
       </Typography>
       <Button fullWidth onClick={mint}>
         mint
@@ -431,7 +437,7 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
       />
       <TextField
         id="gem-amount-input"
-        label="Gem to free"
+        label={`${getBaseCollateralName(ilk.bytes32)} to free`}
         fullWidth
         error={!gemAmount.isZero() && (gemAmount.isNegative() || withdrawable.lte(gemAmount))}
         value={gem}
@@ -456,29 +462,27 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
  * TODO
  * - handle loading status and errors
  */
-const IlkStatusCard: FC<{ ilk: Ilk; chainlog: ChainLogHelper }> = ({
-  ilk: { bytes32, Art, rate, spot, line, dust, liquidationRatio },
-  chainlog,
-}) => {
-  const jug = usePromiseFactory(useCallback(() => chainlog.jug(), [chainlog]));
-  const stabilityFee = usePromiseFactory(useCallback(async () => jug?.stabilityFee(bytes32), [jug, bytes32]));
+const IlkStatusCard: FC<{ ilk: Ilk | null; chainlog: ChainLogHelper }> = ({ ilk, chainlog }) => {
+  const stabilityFee = usePromiseFactory(useCallback(async () => ilk ? chainlog.jug().then((jug) => jug.stabilityFee(ilk.bytes32)) : undefined, [chainlog, ilk?.bytes32]));
   const [expanded, setExpanded] = useState(true);
 
   return (
     <Accordion expanded={expanded} onClick={() => setExpanded(!expanded)}>
       <AccordionSummary>Collateral Status</AccordionSummary>
       <AccordionDetails>
-        <CardContent>
-          <Typography gutterBottom>{`Name: ${parseBytes32String(bytes32)}`}</Typography>
-          <Typography gutterBottom>{`Total Issue: ${divString(Art.mul(rate).toString(), RAD_DECIMAL)}`}</Typography>
+        {ilk ? (
+          <CardContent>
+          <Typography gutterBottom>{`Name: ${parseBytes32String(ilk.bytes32)}`}</Typography>
+          <Typography gutterBottom>{`Total Issue: ${divString(ilk.Art.mul(ilk.rate).toString(), RAD_DECIMAL)}`}</Typography>
           <Typography gutterBottom>
             {`Annual fee: ${stabilityFee ? divString(logtimePow(stabilityFee, ONE_YEAR, RAY).toString(), RAY_DECIMAL) : ''}`}
           </Typography>
-          <Typography gutterBottom>{`Liquidation ratio: ${divString(liquidationRatio.toString(), RAY_DECIMAL)}`}</Typography>
-          <Typography gutterBottom>{`Current price: ${divString(liquidationRatio.mul(spot).div(RAY).toString(), RAY_DECIMAL)}`}</Typography>
-          <Typography gutterBottom>{`Maximum liquidity: ${divString(line.toString(), RAD_DECIMAL)}`}</Typography>
-          <Typography gutterBottom>{`Debt Floor: ${divString(dust.toString(), RAD_DECIMAL)}`}</Typography>
+          <Typography gutterBottom>{`Liquidation ratio: ${divString(ilk.liquidationRatio.toString(), RAY_DECIMAL)}`}</Typography>
+          <Typography gutterBottom>{`Current price: ${divString(ilk.liquidationRatio.mul(ilk.spot).div(RAY).toString(), RAY_DECIMAL)}`}</Typography>
+          <Typography gutterBottom>{`Maximum liquidity: ${divString(ilk.line.toString(), RAD_DECIMAL)}`}</Typography>
+          <Typography gutterBottom>{`Debt Floor: ${divString(ilk.dust.toString(), RAD_DECIMAL)}`}</Typography>
         </CardContent>
+        ): <CircularProgress/>}
       </AccordionDetails>
     </Accordion>
   );
@@ -488,17 +492,19 @@ const IlkStatusCard: FC<{ ilk: Ilk; chainlog: ChainLogHelper }> = ({
  * TODO
  * - handle loading status and errors
  */
-const UrnStatusCard: FC<{ urn: Urn } & { rate: ethers.BigNumber }> = ({ urn: { gem, ink, art }, rate }) => {
+const UrnStatusCard: FC<{ urn: Urn | null } & { rate: ethers.BigNumber | undefined }> = ({ urn, rate }) => {
   const [expanded, setExpanded] = useState(true);
   return (
     <Accordion expanded={expanded} onClick={() => setExpanded(!expanded)}>
       <AccordionSummary>Vault Status</AccordionSummary>
       <AccordionDetails>
-        <CardContent>
-          <Typography gutterBottom>{`Free collateral: ${divString(gem.toString(), WAD_DECIMAL)}`}</Typography>
-          <Typography gutterBottom>{`Locked collateral: ${divString(ink.toString(), WAD_DECIMAL)}`}</Typography>
-          <Typography gutterBottom>{`Debt: ${divString(art.mul(rate).toString(), RAD_DECIMAL)}`}</Typography>
+        {urn && rate ? (
+          <CardContent>
+          <Typography gutterBottom>{`Free collateral: ${divString(urn.gem.toString(), WAD_DECIMAL)}`}</Typography>
+          <Typography gutterBottom>{`Locked collateral: ${divString(urn.ink.toString(), WAD_DECIMAL)}`}</Typography>
+          <Typography gutterBottom>{`Debt: ${divString(urn.art.mul(rate).toString(), RAD_DECIMAL)}`}</Typography>
         </CardContent>
+        ): <CircularProgress/>}
       </AccordionDetails>
     </Accordion>
   );
@@ -549,8 +555,8 @@ const CdpVaultManager: FC<VaultManagerCommonProps & { cdpId: ethers.BigNumber }>
 
   return (
     <Box>
-      {ilk ? <IlkStatusCard ilk={ilk} chainlog={chainlog} /> : <div>loading</div>}
-      {urn && ilk?.rate ? <UrnStatusCard urn={urn} rate={ilk.rate} /> : <div>loading</div>}
+      <IlkStatusCard ilk={ilk} chainlog={chainlog} />
+      <UrnStatusCard urn={urn} rate={ilk?.rate} />
       <ToggleButtonGroup value={selected} exclusive fullWidth onChange={(e, selected_) => selected_ && setSelected(selected_)}>
         <ToggleButton value="mint">Mint Stable coin</ToggleButton>
         <ToggleButton value="burn">Redeem Stable coin</ToggleButton>
@@ -578,7 +584,7 @@ const CdpVaultManager: FC<VaultManagerCommonProps & { cdpId: ethers.BigNumber }>
           />
         )
       ) : (
-        <div>loading</div>
+        <CircularProgress/>
       )}
     </Box>
   );
@@ -590,10 +596,15 @@ const CdpVaultManager: FC<VaultManagerCommonProps & { cdpId: ethers.BigNumber }>
  * - handle loading and errors
  */
 const OpenVaultManager: FC<VaultManagerCommonProps> = ({ ethereum, account, chainlog, vat }) => {
-  const ilkBytes32List = usePromiseFactory(
-    useCallback(() => chainlog.ilkRegistry().then((registry) => registry.list()), [chainlog]),
-  );
   const [ilkBytes32, setIlkBytes32] = useState('');
+  const ilkBytes32List = usePromiseFactory(
+    useCallback(async () => {
+      const registry = await chainlog.ilkRegistry();
+      const list = await registry.list();
+      if (list[0]) setIlkBytes32(list[0]);
+      return list;
+    }, [chainlog]),
+  );
   const [ilk, setIlk] = useState<Ilk | null>(null);
 
   useEffect(() => {
@@ -605,8 +616,6 @@ const OpenVaultManager: FC<VaultManagerCommonProps> = ({ ethereum, account, chai
           chainlog.spot().then((spot) => spot.ilks(ilkBytes32))
         ])
           .then(([{ Art, rate, spot, line, dust }, { mat }]) => setIlk({ bytes32: ilkBytes32, Art, rate, spot, line, dust, liquidationRatio: mat }));
-      } else {
-        setIlkBytes32(ilkBytes32List[0] || '');
       }
     }
   }, [vat, ilkBytes32List, ilkBytes32]);
@@ -625,17 +634,15 @@ const OpenVaultManager: FC<VaultManagerCommonProps> = ({ ethereum, account, chai
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
+      <IlkStatusCard ilk={ilk} chainlog={chainlog} />
       {ilk ? (
-        <>
-          <IlkStatusCard ilk={ilk} chainlog={chainlog} />
-          <MintManipulator ethereum={ethereum} account={account} chainlog={chainlog} vat={vat} ilk={ilk} />
-        </>
+        <MintManipulator ethereum={ethereum} account={account} chainlog={chainlog} vat={vat} ilk={ilk} />
       ) : (
-        <div>loading</div>
+        <CircularProgress/>
       )}
     </Box>
   ) : (
-    <div>loading</div>
+    <CircularProgress/>
   );
 };
 
@@ -650,7 +657,7 @@ const VaultManager: FC<VaultManagerProps> = ({ ethereum, account, cdpId }) => {
       <OpenVaultManager ethereum={ethereum} account={account} chainlog={chainlog} vat={vat} />
     )
   ) : (
-    <div>loading</div>
+    <CircularProgress/>
   );
 };
 
