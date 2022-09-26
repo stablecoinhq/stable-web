@@ -64,6 +64,7 @@ const Content: FC<ContentProps> = ({ cdps }) => {
 };
 
 const Page: NextPageWithEthereum = ({ ethereum, account }) => {
+  const router = useRouter();
   const chainLog = useChainLog(ethereum.getSigner());
   const getCDPs = useGetCDPs(chainLog);
   const proxyRegistry = useProxyRegistry(chainLog);
@@ -75,14 +76,6 @@ const Page: NextPageWithEthereum = ({ ethereum, account }) => {
   const proxyExists = dsProxy && dsProxy.address !== ethers.constants.AddressZero;
 
   const [proxyPrepared, setProxyPrepared] = useState(false);
-
-  const openNewVault = async () => {
-    if (dsProxy) {
-      const actions = await chainLog.bindActions(dsProxy);
-      const cdpMan = await chainLog.getAddress('CDP_MANAGER');
-      await actions.open(cdpMan, 'ETH-A').catch(() => {});
-    }
-  };
 
   const newProxy = async () => {
     if (!proxyPrepared) {
@@ -96,9 +89,13 @@ const Page: NextPageWithEthereum = ({ ethereum, account }) => {
       <CardContent>
         <Typography variant="h5">Vaults</Typography>
         {proxyExists ? (
-          <Button onClick={openNewVault}>Open a new Vault</Button>
+          <Button fullWidth onClick={() => router.push('/vaults/open')}>
+            Open a new Vault
+          </Button>
         ) : (
-          <Button onClick={newProxy}>Prepare Proxy</Button>
+          <Button fullWidth onClick={newProxy}>
+            Prepare Proxy
+          </Button>
         )}
         <Content cdps={cdps} />
       </CardContent>

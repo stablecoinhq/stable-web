@@ -15,3 +15,5 @@ export const useProxyRegistry = (chainLog: ChainLogHelper) =>
 
 export const useDSProxy = (proxyRegistry: ProxyRegistryHelper | undefined, account: EthereumAccount) =>
   usePromiseFactory(useCallback(async () => proxyRegistry?.getDSProxy(account.address), [proxyRegistry, account]));
+
+export const useVat = (chainlog: ChainLogHelper) => usePromiseFactory(useCallback(() => chainlog.vat(), [chainlog]));
