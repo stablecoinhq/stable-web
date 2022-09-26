@@ -20,10 +20,16 @@
     ],
     "lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": true }],
     "no-restricted-imports": ["error", {
-      "patterns": [{
-        "group": ["../*"],
-        "message": "Relative path imports are prohibited. Please use absolute path from project root instead."
-      }]
+      "patterns": [
+        {
+          "group": ["../*"],
+          "message": "Relative path imports are prohibited. Please use absolute path from project root instead."
+        },
+        {
+          "group": ["generated/types/*"],
+          "message": "Direct imports from `generated/types/*` are prohibited. Please use `generated/types` instead."
+        }
+      ]
     }],
     "no-void": ["error", { "allowAsStatement": true }],
     "object-curly-newline": "off",

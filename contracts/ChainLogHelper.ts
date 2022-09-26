@@ -1,10 +1,14 @@
 import { formatBytes32String } from '@ethersproject/strings';
 import { ethers } from 'ethers';
 
-import { ChainLog__factory, Dai__factory, DssCdpManager__factory, Vat__factory } from 'generated/types';
-import { ERC20__factory } from 'generated/types/factories/ERC20__factory';
-import { Jug__factory } from 'generated/types/factories/Jug__factory';
-import { Spotter__factory } from 'generated/types/factories/Spotter__factory';
+import {
+  ChainLog__factory,
+  Dai__factory,
+  DssCdpManager__factory,
+  ERC20__factory,
+  Spotter__factory,
+  Vat__factory,
+} from 'generated/types';
 
 import GetCDPsHelper from './GetCDPsHelper';
 import IlkRegistryHelper from './IlkRgistryHelper';
