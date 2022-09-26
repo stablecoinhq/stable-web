@@ -200,9 +200,7 @@ const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumb
       // bytes32 form of ETH-A,MATIC-A,... into ETH_A,MATIC_A,...
       const ilkType = parseBytes32String(ilk.bytes32).replace('-', '_');
       const [cdpMan, jug, gemJoin, daiJoin] = await Promise.all(
-        ['CDP_MANAGER', 'MCD_JUG', `MCD_JOIN_${ilkType}`, 'MCD_JOIN_DAI'].map((key) =>
-          chainlog.getAddress(key as Parameters<typeof chainlog.getAddress>[0]),
-        ),
+        ['CDP_MANAGER', 'MCD_JUG', `MCD_JOIN_${ilkType}`, 'MCD_JOIN_DAI'].map((key) => chainlog.getAddressFromKey(key)),
       );
 
       if (isValidAddr(cdpMan) && isValidAddr(jug) && isValidAddr(gemJoin) && isValidAddr(daiJoin)) {
@@ -394,9 +392,7 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
         // bytes32 form of ETH-A,MATIC-A,... into ETH_A,MATIC_A,...
         const ilkType = parseBytes32String(ilk.bytes32).replace('-', '_');
         const [cdpMan, gemJoin, daiJoin] = await Promise.all(
-          ['CDP_MANAGER', `MCD_JOIN_${ilkType}`, 'MCD_JOIN_DAI'].map((key) =>
-            chainlog.getAddress(key as Parameters<typeof chainlog.getAddress>[0]),
-          ),
+          ['CDP_MANAGER', `MCD_JOIN_${ilkType}`, 'MCD_JOIN_DAI'].map((key) => chainlog.getAddressFromKey(key)),
         );
 
         if (isValidAddr(cdpMan) && isValidAddr(gemJoin) && isValidAddr(daiJoin)) {

@@ -21,6 +21,7 @@
   "dependencies": {
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
+    "@ethersproject/constants": "^5.7.0",
     "@ethersproject/providers": "^5.7.0",
     "@ethersproject/strings": "^5.7.0",
     "@metamask/detect-provider": "^1.2.0",
