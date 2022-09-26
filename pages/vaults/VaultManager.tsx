@@ -2,7 +2,6 @@ import { parseBytes32String, formatBytes32String } from '@ethersproject/strings'
 import {
   Button,
   CardContent,
-  Card,
   Modal,
   TextField,
   ToggleButton,
@@ -18,12 +17,12 @@ import { ethers } from 'ethers';
 import { useCallback, useEffect, useState } from 'react';
 
 import { useChainLog, useDSProxy, useProxyRegistry, useVat } from 'pages/ethereum/ContractHooks';
+import usePromiseFactory from 'pages/usePromiseFactory';
 
+import type ChainLogHelper from 'contracts/ChainLogHelper';
+import type { Vat } from 'generated/types';
 import type { EthereumAccount } from 'pages/ethereum/useAccount';
 import type { FC } from 'react';
-import usePromiseFactory from 'pages/usePromiseFactory';
-import ChainLogHelper from 'contracts/ChainLogHelper';
-import { Vat } from 'generated/types';
 
 export type VaultManagerProps = {
   ethereum: ethers.Signer;
@@ -54,9 +53,8 @@ const ONE_YEAR = 60 * 60 * 24 * 365;
 const WAD_DECIMAL = 18;
 const RAY_DECIMAL = 27;
 const RAD_DECIMAL = 45;
-const WAD = ethers.utils.parseUnits('1', WAD_DECIMAL);
+
 const RAY = ethers.utils.parseUnits('1', RAY_DECIMAL);
-const RAD = ethers.utils.parseUnits('1', RAD_DECIMAL);
 
 /**
  * to avoid rounding ethers.BigNumber
@@ -64,7 +62,7 @@ const RAD = ethers.utils.parseUnits('1', RAD_DECIMAL);
  * @param unit should be positive. assuming one of WAD_DECIMAL, RAY_DECIMAL, RAD_DECIMAL.
  */
 const divString = (value: string, unit: number) =>
-  value.length < unit ? '0.' + value.padStart(unit - 1) : value.slice(0, -1 * unit) + '.' + value.slice(-1 * unit);
+  value.length < unit ? `0.${value.padStart(unit - 1)}` : `${value.slice(0, -1 * unit)}.${value.slice(-1 * unit)}`;
 
 /**
  * calculate ethers.BigNumber's pow (i.e. base_ ** exponent_) in log time. the default implementation is too expensive.
@@ -78,10 +76,13 @@ const logtimePow = (base_: ethers.BigNumber, exponent_: number, unit: ethers.Big
   let exponent = exponent_;
 
   while (exponent > 0) {
-    if (exponent & 1) result = result.mul(base).div(unit);
+    // eslint-disable-next-line no-bitwise
+    if (exponent & 1) {
+      result = result.mul(base).div(unit);
+    }
 
     base = base.mul(base).div(unit);
-    exponent = exponent >> 1;
+    exponent >>= 1; // eslint-disable-line no-bitwise
   }
 
   return result;
@@ -93,10 +94,10 @@ const isValidAddr = (addr: string | undefined) => addr && addr !== ethers.consta
 const getBaseCollateralName = (ilkBytes32: string) => parseBytes32String(ilkBytes32).split('-')[0];
 
 type VaultManipulatorCommonProps = {
-  ethereum: ethers.Signer;
+  ethereum: ethers.Signer; // eslint-disable-line react/no-unused-prop-types
   account: EthereumAccount;
   chainlog: ChainLogHelper;
-  vat: Vat;
+  vat: Vat; // eslint-disable-line react/no-unused-prop-types
   ilk: Ilk;
 };
 
@@ -105,13 +106,11 @@ type ApproveTokenModalProps = { spender: string; value: ethers.BigNumber; open: 
 /**
  * display what we will do in the approval transaction when it is needed.
  */
-const ApproveTokenModal: FC<ApproveTokenModalProps> = ({ spender, value, open, onClose }) => {
-  return (
-    <Modal open={open} onClose={onClose}>
-      <Typography variant="body1">{`to complete the transaction, need to approve ${value} for ${spender}`}</Typography>
-    </Modal>
-  );
-};
+const ApproveTokenModal: FC<ApproveTokenModalProps> = ({ spender, value, open, onClose }) => (
+  <Modal open={open} onClose={onClose}>
+    <Typography variant="body1">{`to complete the transaction, need to approve ${value} for ${spender}`}</Typography>
+  </Modal>
+);
 
 /**
  * TODO
@@ -122,15 +121,13 @@ const ApproveTokenModal: FC<ApproveTokenModalProps> = ({ spender, value, open, o
  * - handle loading components
  * - display more intuitive parameters
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line react/require-default-props,react/no-unused-prop-types
 const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumber; urn?: Urn }> = ({
   ethereum,
   account,
   chainlog,
-  vat,
   ilk,
   cdpId,
-  urn,
 }) => {
   const isEth = ilk.bytes32.startsWith(ETH_PREFIX);
 
@@ -174,9 +171,8 @@ const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumb
     try {
       if (isEth && ethBalance) {
         return !!gemStatus?.balance?.add(ethBalance).gte(gemAmount);
-      } else {
-        return !!gemStatus?.balance?.gte(gemAmount);
       }
+      return !!gemStatus?.balance?.gte(gemAmount);
     } catch (e) {
       return true;
     }
@@ -210,9 +206,15 @@ const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumb
       );
 
       if (isValidAddr(cdpMan) && isValidAddr(jug) && isValidAddr(gemJoin) && isValidAddr(daiJoin)) {
-        if (gemAmount.mul(ilk.spot).lt(dart) || dart.mul(ilk.rate).lt(ilk.dust) || ilk.line.lt(ilk.Art.add(dart).mul(ilk.rate))) {
-          // TODO -- error handling
-          console.error('invalid condition');
+        if (
+          gemAmount.mul(ilk.spot).lt(dart) ||
+          dart.mul(ilk.rate).lt(ilk.dust) ||
+          ilk.line.lt(ilk.Art.add(dart).mul(ilk.rate))
+        ) {
+          /**
+           * invalid condition
+           * need to handle error
+           */
         } else {
           const checkAllowance = gemContract
             .allowance(account.address, proxy.address)
@@ -268,13 +270,13 @@ const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumb
         value={gem}
         onChange={(e) => setGem(e.target.value)}
         helperText={
-          !existsEnoughGem
+          !existsEnoughGem //eslint-disable-line
             ? 'Not Enough Balance'
-            : gemAmount.isNegative()
+            : gemAmount.isNegative() //eslint-disable-line
             ? 'Negative Amount'
-            : gemAmount.mul(ilk.spot).lt(dart)
+            : gemAmount.mul(ilk.spot).lt(dart) //eslint-disable-line
             ? 'Not Enough Collateralized'
-            : dart.mul(ilk.rate).lt(ilk.dust)
+            : dart.mul(ilk.rate).lt(ilk.dust) //eslint-disable-line
             ? 'Less Than Mintable Floor'
             : ilk.line.lt(ilk.Art.add(dart).mul(ilk.rate))
             ? 'Over The Collateral Line'
@@ -313,10 +315,8 @@ const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumb
  * - display more intuitive parameters
  */
 const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumber; urn: Urn }> = ({
-  ethereum,
   account,
   chainlog,
-  vat,
   ilk,
   cdpId,
   urn,
@@ -327,18 +327,23 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
   const proxy = useDSProxy(registry, account);
   // consider this code will work well. to get the Token addr, need to remove a type specifier. (ETH-A, MATIC-A,... => ETH, MATIC,...)
   const gemContract = usePromiseFactory(
-    useCallback(() => chainlog.erc20(formatBytes32String(parseBytes32String(ilk.bytes32).split('-')[0]!)), [chainlog]),
+    useCallback(
+      () => chainlog.erc20(formatBytes32String(parseBytes32String(ilk.bytes32).split('-')[0]!)),
+      [chainlog, ilk.bytes32],
+    ),
   );
   const gemDecimal = usePromiseFactory(useCallback(async () => gemContract?.decimals(), [gemContract]));
   const daiContract = usePromiseFactory(useCallback(() => chainlog.dai(), [chainlog]));
-  const daiBalance = usePromiseFactory(useCallback(async () => daiContract?.balanceOf(account.address), [daiContract]));
+  const daiBalance = usePromiseFactory(
+    useCallback(async () => daiContract?.balanceOf(account.address), [daiContract, account.address]),
+  );
 
   // stable coin to burn
   const [dai, setDai] = useState('0');
   const daiAmount = (() => {
     try {
       return ethers.utils.parseUnits(dai, WAD_DECIMAL);
-    } catch (e) {
+    } catch (_e) {
       return ethers.constants.Zero;
     }
   })();
@@ -355,10 +360,9 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
     const insufficient = urn.art.sub(daiAmount.mul(ethers.utils.parseUnits('1', RAY_DECIMAL)).div(ilk.rate));
     if (insufficient.isZero() || insufficient.isNegative()) {
       return urn.ink;
-    } else {
-      const locked = insufficient.mul(ilk.rate).div(ilk.spot);
-      return urn.ink.sub(locked);
     }
+    const locked = insufficient.mul(ilk.rate).div(ilk.spot);
+    return urn.ink.sub(locked);
   })();
   const [gem, setGem] = useState('0');
   const gemAmount = (() => {
@@ -411,13 +415,12 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
 
               return Promise.resolve(undefined);
             })
-            .catch((e) => Promise.reject(close()))
+            .catch((_e) => Promise.reject(close()))
             .then(() => {
               if (isEth) {
                 return actions.wipeAndFreeEth(cdpMan!, gemJoin!, daiJoin!, cdpId, gemAmount, daiAmount);
-              } else {
-                return actions.wipeAndFreeGem(cdpMan!, gemJoin!, daiJoin!, cdpId, gemAmount, daiAmount);
               }
+              return actions.wipeAndFreeGem(cdpMan!, gemJoin!, daiJoin!, cdpId, gemAmount, daiAmount);
             });
         }
       }
@@ -428,12 +431,12 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
     <Box>
       <TextField
         id="dai-amount-input"
-        label={`Dai to redeem`}
+        label="Dai to redeem"
         fullWidth
         error={!daiAmount.isZero() && (!existsEnoughDai || daiAmount.isNegative())}
         value={dai}
         onChange={(e) => setDai(e.target.value)}
-        helperText={!existsEnoughDai ? 'Not Enough Balance' : daiAmount.isNegative() ? 'Negative Amount' : ''}
+        helperText={!existsEnoughDai ? 'Not Enough Balance' : daiAmount.isNegative() ? 'Negative Amount' : ''} //eslint-disable-line
       />
       <TextField
         id="gem-amount-input"
@@ -442,7 +445,7 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
         error={!gemAmount.isZero() && (gemAmount.isNegative() || withdrawable.lte(gemAmount))}
         value={gem}
         onChange={(e) => setGem(e.target.value)}
-        helperText={gemAmount.isNegative() ? 'Negative Amount' : withdrawable.lte(gemAmount) ? 'Not Enough Collateralized' : ''}
+        helperText={gemAmount.isNegative() ? 'Negative Amount' : withdrawable.lte(gemAmount) ? 'Not Enough Collateralized' : ''} //eslint-disable-line
       />
       <Typography variant="inherit">{withdrawable.toString()}</Typography>
       <Button fullWidth onClick={burn}>
@@ -463,7 +466,12 @@ const BurnManipulator: FC<VaultManipulatorCommonProps & { cdpId: ethers.BigNumbe
  * - handle loading status and errors
  */
 const IlkStatusCard: FC<{ ilk: Ilk | null; chainlog: ChainLogHelper }> = ({ ilk, chainlog }) => {
-  const stabilityFee = usePromiseFactory(useCallback(async () => ilk ? chainlog.jug().then((jug) => jug.stabilityFee(ilk.bytes32)) : undefined, [chainlog, ilk?.bytes32]));
+  const stabilityFee = usePromiseFactory(
+    useCallback(
+      async () => (ilk ? chainlog.jug().then((jug) => jug.stabilityFee(ilk.bytes32)) : undefined),
+      [chainlog, ilk?.bytes32, ilk], //eslint-disable-line
+    ),
+  );
   const [expanded, setExpanded] = useState(true);
 
   return (
@@ -472,17 +480,25 @@ const IlkStatusCard: FC<{ ilk: Ilk | null; chainlog: ChainLogHelper }> = ({ ilk,
       <AccordionDetails>
         {ilk ? (
           <CardContent>
-          <Typography gutterBottom>{`Name: ${parseBytes32String(ilk.bytes32)}`}</Typography>
-          <Typography gutterBottom>{`Total Issue: ${divString(ilk.Art.mul(ilk.rate).toString(), RAD_DECIMAL)}`}</Typography>
-          <Typography gutterBottom>
-            {`Annual fee: ${stabilityFee ? divString(logtimePow(stabilityFee, ONE_YEAR, RAY).toString(), RAY_DECIMAL) : ''}`}
-          </Typography>
-          <Typography gutterBottom>{`Liquidation ratio: ${divString(ilk.liquidationRatio.toString(), RAY_DECIMAL)}`}</Typography>
-          <Typography gutterBottom>{`Current price: ${divString(ilk.liquidationRatio.mul(ilk.spot).div(RAY).toString(), RAY_DECIMAL)}`}</Typography>
-          <Typography gutterBottom>{`Maximum liquidity: ${divString(ilk.line.toString(), RAD_DECIMAL)}`}</Typography>
-          <Typography gutterBottom>{`Debt Floor: ${divString(ilk.dust.toString(), RAD_DECIMAL)}`}</Typography>
-        </CardContent>
-        ): <CircularProgress/>}
+            <Typography gutterBottom>{`Name: ${parseBytes32String(ilk.bytes32)}`}</Typography>
+            <Typography gutterBottom>{`Total Issue: ${divString(ilk.Art.mul(ilk.rate).toString(), RAD_DECIMAL)}`}</Typography>
+            <Typography gutterBottom>
+              {`Annual fee: ${stabilityFee ? divString(logtimePow(stabilityFee, ONE_YEAR, RAY).toString(), RAY_DECIMAL) : ''}`}
+            </Typography>
+            <Typography gutterBottom>{`Liquidation ratio: ${divString(
+              ilk.liquidationRatio.toString(),
+              RAY_DECIMAL,
+            )}`}</Typography>
+            <Typography gutterBottom>{`Current price: ${divString(
+              ilk.liquidationRatio.mul(ilk.spot).div(RAY).toString(),
+              RAY_DECIMAL,
+            )}`}</Typography>
+            <Typography gutterBottom>{`Maximum liquidity: ${divString(ilk.line.toString(), RAD_DECIMAL)}`}</Typography>
+            <Typography gutterBottom>{`Debt Floor: ${divString(ilk.dust.toString(), RAD_DECIMAL)}`}</Typography>
+          </CardContent>
+        ) : (
+          <CircularProgress />
+        )}
       </AccordionDetails>
     </Accordion>
   );
@@ -500,11 +516,13 @@ const UrnStatusCard: FC<{ urn: Urn | null } & { rate: ethers.BigNumber | undefin
       <AccordionDetails>
         {urn && rate ? (
           <CardContent>
-          <Typography gutterBottom>{`Free collateral: ${divString(urn.gem.toString(), WAD_DECIMAL)}`}</Typography>
-          <Typography gutterBottom>{`Locked collateral: ${divString(urn.ink.toString(), WAD_DECIMAL)}`}</Typography>
-          <Typography gutterBottom>{`Debt: ${divString(urn.art.mul(rate).toString(), RAD_DECIMAL)}`}</Typography>
-        </CardContent>
-        ): <CircularProgress/>}
+            <Typography gutterBottom>{`Free collateral: ${divString(urn.gem.toString(), WAD_DECIMAL)}`}</Typography>
+            <Typography gutterBottom>{`Locked collateral: ${divString(urn.ink.toString(), WAD_DECIMAL)}`}</Typography>
+            <Typography gutterBottom>{`Debt: ${divString(urn.art.mul(rate).toString(), RAD_DECIMAL)}`}</Typography>
+          </CardContent>
+        ) : (
+          <CircularProgress />
+        )}
       </AccordionDetails>
     </Accordion>
   );
@@ -531,27 +549,24 @@ const CdpVaultManager: FC<VaultManagerCommonProps & { cdpId: ethers.BigNumber }>
 
   useEffect(() => {
     if (vat && cdpMan) {
-      cdpMan
-        .ilks(cdpId)
-        .then((ilkBytes32) =>
-          Promise.all([
-            Promise.all([
-              vat
-              .ilks(ilkBytes32),
-              chainlog.spot().then((spot) => spot.ilks(ilkBytes32))
-            ])
-              .then(([{ Art, rate, spot, line, dust }, { mat }]) => setIlk({ bytes32: ilkBytes32, Art, rate, spot, line, dust, liquidationRatio: mat })),
-            cdpMan
-              .urns(cdpId)
-              .then((address) =>
-                Promise.all([vat.urns(ilkBytes32, address), vat.gem(ilkBytes32, address)]).then(([{ ink, art }, gem]) =>
-                  setUrn({ gem, ink, art }),
-                ),
+      cdpMan.ilks(cdpId).then((ilkBytes32) =>
+        Promise.all([
+          Promise.all([vat.ilks(ilkBytes32), chainlog.spot().then((spot) => spot.ilks(ilkBytes32))]).then(
+            (
+              [{ Art, rate, spot, line, dust }, { mat }], //eslint-disable-line
+            ) => setIlk({ bytes32: ilkBytes32, Art, rate, spot, line, dust, liquidationRatio: mat }), //eslint-disable-line
+          ),
+          cdpMan
+            .urns(cdpId)
+            .then((address) =>
+              Promise.all([vat.urns(ilkBytes32, address), vat.gem(ilkBytes32, address)]).then(([{ ink, art }, gem]) =>
+                setUrn({ gem, ink, art }),
               ),
-          ]),
-        );
+            ),
+        ]),
+      );
     }
-  }, [vat, cdpMan]);
+  }, [vat, cdpMan, cdpId, chainlog]);
 
   return (
     <Box>
@@ -561,7 +576,7 @@ const CdpVaultManager: FC<VaultManagerCommonProps & { cdpId: ethers.BigNumber }>
         <ToggleButton value="mint">Mint Stable coin</ToggleButton>
         <ToggleButton value="burn">Redeem Stable coin</ToggleButton>
       </ToggleButtonGroup>
-      {ilk && urn ? (
+      {ilk && urn ? ( //eslint-disable-line
         selected === 'mint' ? (
           <MintManipulator
             ethereum={ethereum}
@@ -584,7 +599,7 @@ const CdpVaultManager: FC<VaultManagerCommonProps & { cdpId: ethers.BigNumber }>
           />
         )
       ) : (
-        <CircularProgress/>
+        <CircularProgress />
       )}
     </Box>
   );
@@ -601,7 +616,9 @@ const OpenVaultManager: FC<VaultManagerCommonProps> = ({ ethereum, account, chai
     useCallback(async () => {
       const registry = await chainlog.ilkRegistry();
       const list = await registry.list();
-      if (list[0]) setIlkBytes32(list[0]);
+      if (list[0]) {
+        setIlkBytes32(list[0]);
+      }
       return list;
     }, [chainlog]),
   );
@@ -610,15 +627,14 @@ const OpenVaultManager: FC<VaultManagerCommonProps> = ({ ethereum, account, chai
   useEffect(() => {
     if (ilkBytes32List) {
       if (ilkBytes32) {
-        Promise.all([
-          vat
-          .ilks(ilkBytes32),
-          chainlog.spot().then((spot) => spot.ilks(ilkBytes32))
-        ])
-          .then(([{ Art, rate, spot, line, dust }, { mat }]) => setIlk({ bytes32: ilkBytes32, Art, rate, spot, line, dust, liquidationRatio: mat }));
+        Promise.all([vat.ilks(ilkBytes32), chainlog.spot().then((spot) => spot.ilks(ilkBytes32))]).then(
+          (
+            [{ Art, rate, spot, line, dust }, { mat }], //eslint-disable-line
+          ) => setIlk({ bytes32: ilkBytes32, Art, rate, spot, line, dust, liquidationRatio: mat }), //eslint-disable-line
+        );
       }
     }
-  }, [vat, ilkBytes32List, ilkBytes32]);
+  }, [vat, ilkBytes32List, ilkBytes32, chainlog]);
 
   return ilkBytes32List ? (
     <Box>
@@ -638,11 +654,11 @@ const OpenVaultManager: FC<VaultManagerCommonProps> = ({ ethereum, account, chai
       {ilk ? (
         <MintManipulator ethereum={ethereum} account={account} chainlog={chainlog} vat={vat} ilk={ilk} />
       ) : (
-        <CircularProgress/>
+        <CircularProgress />
       )}
     </Box>
   ) : (
-    <CircularProgress/>
+    <CircularProgress />
   );
 };
 
@@ -650,14 +666,14 @@ const VaultManager: FC<VaultManagerProps> = ({ ethereum, account, cdpId }) => {
   const chainlog = useChainLog(ethereum);
   const vat = useVat(chainlog);
 
-  return chainlog && vat ? (
+  return chainlog && vat ? ( //eslint-disable-line
     cdpId ? (
       <CdpVaultManager ethereum={ethereum} account={account} chainlog={chainlog} vat={vat} cdpId={cdpId} />
     ) : (
       <OpenVaultManager ethereum={ethereum} account={account} chainlog={chainlog} vat={vat} />
     )
   ) : (
-    <CircularProgress/>
+    <CircularProgress />
   );
 };
 

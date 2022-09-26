@@ -1,20 +1,20 @@
 import { formatBytes32String } from '@ethersproject/strings';
+import { ethers } from 'ethers';
 
 import { ChainLog__factory, Dai__factory, DssCdpManager__factory, Vat__factory } from 'generated/types';
+import { ERC20__factory } from 'generated/types/factories/ERC20__factory';
+import { Jug__factory } from 'generated/types/factories/Jug__factory';
+import { Spotter__factory } from 'generated/types/factories/Spotter__factory';
 
 import GetCDPsHelper from './GetCDPsHelper';
 import IlkRegistryHelper from './IlkRgistryHelper';
+import JugHelper from './JugHelper';
 import ProxyActionsHelper from './ProxyActionsHelper';
 import ProxyRegistryHelper from './ProxyRegistryHelper';
 
-import { ethers } from 'ethers';
 import type addresses from 'generated/addresses.json';
 import type { ChainLog, DSProxy } from 'generated/types';
 import type PromiseConstructor from 'types/promise';
-import { ERC20__factory } from 'generated/types/factories/ERC20__factory';
-import { Jug__factory } from 'generated/types/factories/Jug__factory';
-import JugHelper from './JugHelper';
-import { Spotter__factory } from 'generated/types/factories/Spotter__factory';
 
 type ChainLogKeys = keyof typeof addresses;
 
@@ -89,8 +89,7 @@ export default class ChainLogHelper {
     const ilkAddr = await this.contract.getAddress(ilkBytes32);
     if (ilkAddr && ilkAddr !== ethers.constants.AddressZero) {
       return ERC20__factory.connect(ilkAddr, this.provider);
-    } else {
-      throw new Error('invalid collateral');
     }
+    throw new Error('invalid collateral');
   }
 }
