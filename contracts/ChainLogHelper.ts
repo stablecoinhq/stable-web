@@ -12,11 +12,8 @@ import JugHelper from './JugHelper';
 import ProxyActionsHelper from './ProxyActionsHelper';
 import ProxyRegistryHelper from './ProxyRegistryHelper';
 
-import type addresses from 'generated/addresses.json';
 import type { ChainLog, DSProxy } from 'generated/types';
 import type PromiseConstructor from 'types/promise';
-
-type ChainLogKeys = keyof typeof addresses;
 
 export default class ChainLogHelper {
   private readonly provider: ethers.Signer;
@@ -27,7 +24,7 @@ export default class ChainLogHelper {
     this.contract = ChainLog__factory.connect(process.env.NEXT_PUBLIC_CHAINLOG_ADDRESS!!, provider);
   }
 
-  getAddress(key: ChainLogKeys) {
+  getAddress(key: string) {
     return this.contract.getAddress(formatBytes32String(key));
   }
 
