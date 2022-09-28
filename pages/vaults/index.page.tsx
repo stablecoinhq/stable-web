@@ -1,6 +1,7 @@
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import {
   Box,
+  Button,
   Card,
   CardContent,
   CircularProgress,
@@ -11,7 +12,9 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material';
-import { useCallback } from 'react';
+import { ethers } from 'ethers';
+import { useRouter } from 'next/router';
+import { useCallback, useState } from 'react';
 
 import { useChainLog, useDSProxy, useGetCDPs, useProxyRegistry } from 'pages/ethereum/ContractHooks';
 import usePromiseFactory from 'pages/usePromiseFactory';
@@ -25,6 +28,9 @@ type ContentProps = {
 };
 
 const Content: FC<ContentProps> = ({ cdps }) => {
+  const router = useRouter();
+  const baseUrl = '/vaults/';
+
   if (!cdps) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
@@ -45,7 +51,7 @@ const Content: FC<ContentProps> = ({ cdps }) => {
     <List>
       {cdps.map(({ id, urn, ilk }) => (
         <ListItem key={id.toString()} disablePadding>
-          <ListItemButton>
+          <ListItemButton onClick={() => router.push(baseUrl + id.toHexString())}>
             <ListItemIcon>
               <AccountBalanceWalletIcon />
             </ListItemIcon>
@@ -58,7 +64,8 @@ const Content: FC<ContentProps> = ({ cdps }) => {
 };
 
 const Page: NextPageWithEthereum = ({ ethereum, account }) => {
-  const chainLog = useChainLog(ethereum);
+  const router = useRouter();
+  const chainLog = useChainLog(ethereum.getSigner());
   const getCDPs = useGetCDPs(chainLog);
   const proxyRegistry = useProxyRegistry(chainLog);
   const dsProxy = useDSProxy(proxyRegistry, account);
@@ -66,10 +73,30 @@ const Page: NextPageWithEthereum = ({ ethereum, account }) => {
     useCallback(async () => (dsProxy ? getCDPs?.getCDPs(dsProxy) : undefined), [dsProxy, getCDPs]),
   );
 
+  const proxyExists = dsProxy && dsProxy.address !== ethers.constants.AddressZero;
+
+  const [proxyPrepared, setProxyPrepared] = useState(false);
+
+  const newProxy = async () => {
+    if (!proxyPrepared) {
+      await proxyRegistry?.buildNewProxy();
+    }
+    setProxyPrepared(true);
+  };
+
   return (
     <Card>
       <CardContent>
         <Typography variant="h5">Vaults</Typography>
+        {proxyExists ? (
+          <Button fullWidth onClick={() => router.push('/vaults/open')}>
+            Open a new Vault
+          </Button>
+        ) : (
+          <Button fullWidth onClick={newProxy}>
+            Prepare Proxy
+          </Button>
+        )}
         <Content cdps={cdps} />
       </CardContent>
     </Card>

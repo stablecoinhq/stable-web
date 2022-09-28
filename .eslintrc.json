@@ -5,11 +5,16 @@
     "next/core-web-vitals",
     "prettier"
   ],
-  "plugins": ["@typescript-eslint", "prefer-arrow"],
+  "plugins": [
+    "@typescript-eslint",
+    "filenames",
+    "prefer-arrow"
+  ],
   "rules": {
     "@typescript-eslint/consistent-type-imports": "error",
     "comma-dangle": ["error", "always-multiline"],
     "curly": ["error", "all"],
+    "filenames/match-exported": "error",
     "import/extensions": ["error", "ignorePackages", { "js": "never", "jsx": "never", "ts": "never", "tsx": "never" }],
     "import/order": ["error", {
         "alphabetize": { "order": "asc" },
@@ -67,6 +72,12 @@
       "files": ["*.d.ts"],
       "rules": {
         "max-classes-per-file": "off"
+      }
+    },
+    {
+      "files": ["pages/**/*.page.tsx"],
+      "rules": {
+        "filenames/match-exported": "off"
       }
     }
   ]

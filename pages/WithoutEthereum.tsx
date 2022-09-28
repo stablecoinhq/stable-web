@@ -2,7 +2,7 @@ import { Box, Stack, SvgIcon, Typography } from '@mui/material';
 
 import MetaMaskIcon from 'images/metamask.svg';
 
-import MetaMaskButton from './ethereum/MetaMaskButton';
+import WalletConnectButton from './ethereum/WalletConnectButton';
 
 import type { FC } from 'react';
 import type { WithNullableEthereum } from 'types/next';
@@ -16,7 +16,7 @@ const WithoutEthereum: FC<WithNullableEthereum> = ({ ethereum, account }) => (
       Ethereumウォレットが接続されていません
     </Typography>
     <p>アプリケーションを利用するためには、MetaMaskをインストールしてEthereumウォレットを接続する必要があります。</p>
-    <MetaMaskButton ethereum={ethereum} account={account} />
+    <WalletConnectButton ethereum={ethereum} account={account} />
   </Stack>
 );
 
