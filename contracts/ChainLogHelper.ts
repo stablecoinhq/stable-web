@@ -7,7 +7,7 @@ import { Jug__factory } from 'generated/types/factories/Jug__factory';
 import { Spotter__factory } from 'generated/types/factories/Spotter__factory';
 
 import GetCDPsHelper from './GetCDPsHelper';
-import IlkRegistryHelper from './IlkRgistryHelper';
+import IlkRegistryHelper from './IlkRegistryHelper';
 import JugHelper from './JugHelper';
 import ProxyActionsHelper from './ProxyActionsHelper';
 import ProxyRegistryHelper from './ProxyRegistryHelper';
