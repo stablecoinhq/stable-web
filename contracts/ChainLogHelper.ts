@@ -3,7 +3,6 @@ import { ethers } from 'ethers';
 
 import { ChainLog__factory, Dai__factory, DssCdpManager__factory, Vat__factory } from 'generated/types';
 import { ERC20__factory } from 'generated/types/factories/ERC20__factory';
-import { Jug__factory } from 'generated/types/factories/Jug__factory';
 import { Spotter__factory } from 'generated/types/factories/Spotter__factory';
 
 import GetCDPsHelper from './GetCDPsHelper';
@@ -13,6 +12,7 @@ import ProxyActionsHelper from './ProxyActionsHelper';
 import ProxyRegistryHelper from './ProxyRegistryHelper';
 
 import type { ChainLog, DSProxy } from 'generated/types';
+// eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 
 export default class ChainLogHelper {
