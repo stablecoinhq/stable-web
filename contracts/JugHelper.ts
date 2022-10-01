@@ -1,7 +1,7 @@
-import { Jug__factory } from 'generated/types/factories/Jug__factory';
+import { Jug__factory } from 'generated/types';
 
 import type { ethers } from 'ethers';
-import type { Jug } from 'generated/types/Jug';
+import type { Jug } from 'generated/types';
 
 export default class JugHelper {
   private readonly provider: ethers.Signer;
