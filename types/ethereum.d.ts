@@ -1,3 +1,4 @@
+// eslint-disable-next-line unused-imports/no-unused-imports
 import * as _ from '@metamask/providers';
 
 declare module '@metamask/providers' {

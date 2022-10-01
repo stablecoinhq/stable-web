@@ -11,12 +11,13 @@ import {
 } from 'generated/types';
 
 import GetCDPsHelper from './GetCDPsHelper';
-import IlkRegistryHelper from './IlkRgistryHelper';
+import IlkRegistryHelper from './IlkRegistryHelper';
 import JugHelper from './JugHelper';
 import ProxyActionsHelper from './ProxyActionsHelper';
 import ProxyRegistryHelper from './ProxyRegistryHelper';
 
 import type { ChainLog, DSProxy } from 'generated/types';
+// eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 
 export default class ChainLogHelper {
