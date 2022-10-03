@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { useRouter } from 'next/router';
 
-import VaultManipulator from './VaultManager';
+import VaultManipulator from '../VaultManager';
 
 import type { NextPageWithEthereum } from 'next';
 
