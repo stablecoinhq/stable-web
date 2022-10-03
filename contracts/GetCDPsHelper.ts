@@ -24,8 +24,8 @@ export default class GetCDPsHelper {
     return this.contract.getCdpsDesc(this.manager.address, proxy.address).then(([cdpIds, urns, ilks]) =>
       cdpIds.map((cdpId, i) => ({
         id: cdpId,
-        urn: urns[i]!!,
-        ilk: parseBytes32String(ilks[i]!!),
+        urn: urns[i]!,
+        ilk: parseBytes32String(ilks[i]!),
       })),
     );
   }
