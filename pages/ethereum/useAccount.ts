@@ -1,13 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import type { ethers } from 'ethers';
+import type { ExternalProvider, Web3Provider } from '@ethersproject/providers';
+import type { MetaMaskInpageProvider } from '@metamask/providers';
 
 export type EthereumAccount = {
   chainId: string;
   address: string;
 };
 
-const useAccount = (ethereum: ethers.providers.Web3Provider | null) => {
+export function isMetaMaskInPageProvider(provider: ExternalProvider): provider is ExternalProvider & MetaMaskInpageProvider {
+  return provider.isMetaMask || false;
+}
+
+const useAccount = (ethereum: Web3Provider | null) => {
   const [chainId, setChainId] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const account = useMemo<EthereumAccount | null>(() => {
@@ -18,23 +23,25 @@ const useAccount = (ethereum: ethers.providers.Web3Provider | null) => {
   }, [chainId, address]);
 
   useEffect(() => {
-    if (!ethereum) {
+    if (!ethereum || !isMetaMaskInPageProvider(ethereum.provider)) {
       return () => {};
     }
 
     const setFirstAddress = (addresses: string[]) => setAddress(addresses[0] || null);
 
-    if (ethereum.provider.request) {
-      ethereum.provider.request({ method: 'eth_chainId' }).then(setChainId);
-      ethereum.provider.request({ method: 'eth_requestAccounts', params: [] }).then(setFirstAddress);
-    }
+    ethereum.provider.request({ method: 'eth_chainId' }).then(setChainId);
+    ethereum.provider.request({ method: 'eth_accounts' }).then(setFirstAddress);
 
-    ethereum.on('chainChanged', setChainId);
-    ethereum.on('accountsChanged', setFirstAddress);
+    ethereum.provider.on('chainChanged', setChainId);
+    ethereum.provider.on('accountsChanged', setFirstAddress);
 
     return () => {
-      ethereum.removeListener('chainChanged', setChainId);
-      ethereum.removeListener('accountsChanged', setFirstAddress);
+      if (!isMetaMaskInPageProvider(ethereum.provider)) {
+        return;
+      }
+
+      ethereum.provider.removeListener('chainChanged', setChainId);
+      ethereum.provider.removeListener('accountsChanged', setFirstAddress);
     };
   }, [ethereum]);
 
