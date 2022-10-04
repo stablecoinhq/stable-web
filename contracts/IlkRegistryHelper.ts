@@ -1,18 +1,18 @@
 import { IlkRegistry__factory } from 'generated/types';
 
-import type { ethers } from 'ethers';
+import type { Web3Provider } from '@ethersproject/providers';
 import type { IlkRegistry } from 'generated/types';
 
 export default class IlkRegistryHelper {
-  private provider: ethers.Signer;
-  private contracts: IlkRegistry;
+  private readonly provider: Web3Provider;
+  private readonly contract: IlkRegistry;
 
-  constructor(provider: ethers.Signer, address: string) {
+  constructor(provider: Web3Provider, address: string) {
     this.provider = provider;
-    this.contracts = IlkRegistry__factory.connect(address, provider);
+    this.contract = IlkRegistry__factory.connect(address, provider);
   }
 
   list() {
-    return this.contracts['list()']();
+    return this.contract['list()']();
   }
 }

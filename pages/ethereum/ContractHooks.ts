@@ -4,10 +4,10 @@ import ChainLogHelper from 'contracts/ChainLogHelper';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
 import type { EthereumAccount } from './useAccount';
+import type { Web3Provider } from '@ethersproject/providers';
 import type ProxyRegistryHelper from 'contracts/ProxyRegistryHelper';
-import type { ethers } from 'ethers';
 
-export const useChainLog = (ethereum: ethers.Signer) => useMemo(() => new ChainLogHelper(ethereum), [ethereum]);
+export const useChainLog = (ethereum: Web3Provider) => useMemo(() => new ChainLogHelper(ethereum), [ethereum]);
 
 export const useGetCDPs = (chainLog: ChainLogHelper) => usePromiseFactory(useCallback(() => chainLog.getCDPs(), [chainLog]));
 export const useProxyRegistry = (chainLog: ChainLogHelper) =>

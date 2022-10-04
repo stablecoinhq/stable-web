@@ -16,15 +16,16 @@ import JugHelper from './JugHelper';
 import ProxyActionsHelper from './ProxyActionsHelper';
 import ProxyRegistryHelper from './ProxyRegistryHelper';
 
+import type { Web3Provider } from '@ethersproject/providers';
 import type { ChainLog, DSProxy } from 'generated/types';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 
 export default class ChainLogHelper {
-  private readonly provider: ethers.Signer;
+  private readonly provider: Web3Provider;
   private readonly contract: ChainLog;
 
-  constructor(provider: ethers.Signer) {
+  constructor(provider: Web3Provider) {
     this.provider = provider;
     this.contract = ChainLog__factory.connect(process.env.NEXT_PUBLIC_CHAINLOG_ADDRESS!!, provider);
   }
