@@ -14,7 +14,7 @@ export default class ProxyActionsHelper {
     if (typeof proxy === 'string') {
       this.proxy = DSProxy__factory.connect(proxy, provider.getSigner());
     } else {
-      this.proxy = proxy;
+      this.proxy = DSProxy__factory.connect(proxy.address, provider.getSigner());
     }
     this.actions = DssProxyActions__factory.connect(actions, provider.getSigner());
   }
