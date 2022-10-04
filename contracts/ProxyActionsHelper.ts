@@ -12,11 +12,11 @@ export default class ProxyActionsHelper {
 
   constructor(provider: Web3Provider, proxy: DSProxy | string, actions: string) {
     if (typeof proxy === 'string') {
-      this.proxy = DSProxy__factory.connect(proxy, provider);
+      this.proxy = DSProxy__factory.connect(proxy, provider.getSigner());
     } else {
       this.proxy = proxy;
     }
-    this.actions = DssProxyActions__factory.connect(actions, provider);
+    this.actions = DssProxyActions__factory.connect(actions, provider.getSigner());
   }
 
   // ilk: ETH-A, DAI-A, ...

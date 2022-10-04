@@ -9,7 +9,7 @@ export default class ProxyRegistryHelper {
 
   constructor(provider: Web3Provider, address: string) {
     this.provider = provider;
-    this.contract = ProxyRegistry__factory.connect(address, provider);
+    this.contract = ProxyRegistry__factory.connect(address, provider.getSigner());
   }
 
   getDSProxy(user: string) {
