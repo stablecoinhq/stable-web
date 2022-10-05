@@ -1,4 +1,4 @@
-import VaultManipulator from './VaultManager';
+import VaultManipulator from '../VaultManager';
 
 import type { NextPageWithEthereum } from 'next';
 

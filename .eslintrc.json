@@ -28,10 +28,6 @@
     "no-restricted-imports": ["error", {
       "patterns": [
         {
-          "group": ["../*"],
-          "message": "Relative path imports are prohibited. Please use absolute path from project root instead."
-        },
-        {
           "group": ["generated/types/*"],
           "message": "Direct imports from `generated/types/*` are prohibited. Please use `generated/types` instead."
         }
