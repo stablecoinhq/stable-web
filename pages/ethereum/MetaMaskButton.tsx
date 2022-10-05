@@ -3,12 +3,14 @@ import { useCallback } from 'react';
 
 import MetaMaskIcon from 'images/metamask.svg';
 
+import { isMetaMaskInPageProvider } from './useAccount';
+
 import type { FC } from 'react';
 import type { WithNullableEthereum } from 'types/next';
 
-const WalletConnectButton: FC<WithNullableEthereum> = ({ ethereum, account }) => {
+const MetaMaskButton: FC<WithNullableEthereum> = ({ ethereum, account }) => {
   const text = (() => {
-    if (!ethereum) {
+    if (!ethereum || !isMetaMaskInPageProvider(ethereum.provider)) {
       return 'Install MetaMask';
     }
 
@@ -20,12 +22,12 @@ const WalletConnectButton: FC<WithNullableEthereum> = ({ ethereum, account }) =>
   })();
 
   const onClick = useCallback(() => {
-    if (!ethereum) {
+    if (!ethereum || !isMetaMaskInPageProvider(ethereum.provider)) {
       window.open('https://metamask.io/download/', '_blank')?.focus();
       return;
     }
 
-    if (!account && ethereum.provider.request) {
+    if (!account) {
       void ethereum.provider.request({ method: 'eth_requestAccounts' });
     }
   }, [ethereum, account]);
@@ -42,4 +44,4 @@ const WalletConnectButton: FC<WithNullableEthereum> = ({ ethereum, account }) =>
   );
 };
 
-export default WalletConnectButton;
+export default MetaMaskButton;

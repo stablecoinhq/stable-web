@@ -11,5 +11,8 @@ declare module '@metamask/providers' {
   class MetaMaskInpageProvider {
     on(eventName: 'accountsChanged', listener: (accounts: string[]) => void): this;
     on(eventName: 'chainChanged', listener: (chainId: string) => void): this;
+
+    removeListener(eventName: 'accountsChanged', listener: (accounts: string[]) => void): this;
+    removeListener(eventName: 'chainChanged', listener: (chainId: string) => void): this;
   }
 }
