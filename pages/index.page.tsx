@@ -1,7 +1,6 @@
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Button, Card, CardActions, CardContent, Grid, Typography } from '@mui/material';
-import { useRouter } from 'next/router';
-import { useCallback } from 'react';
+import Link from 'next/link';
 
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
@@ -10,32 +9,26 @@ type ItemProps = {
   cardTitle: string;
   cardBody: string;
   buttonTitle: string;
-  route: string;
+  href: string;
 };
 
-const Item: FC<ItemProps> = ({ cardTitle, cardBody, buttonTitle, route }) => {
-  const router = useRouter();
-
-  const navigate = useCallback(() => {
-    void router.push(route);
-  }, [router, route]);
-
-  return (
-    <Grid item xs={6}>
-      <Card>
-        <CardContent>
-          <Typography variant="h5">{cardTitle}</Typography>
-          <Typography variant="body2">{cardBody}</Typography>
-        </CardContent>
-        <CardActions>
-          <Button endIcon={<ArrowForwardIcon />} onClick={navigate} style={{ justifyContent: 'start' }} fullWidth>
+const Item: FC<ItemProps> = ({ cardTitle, cardBody, buttonTitle, href }) => (
+  <Grid item xs={6}>
+    <Card>
+      <CardContent>
+        <Typography variant="h5">{cardTitle}</Typography>
+        <Typography variant="body2">{cardBody}</Typography>
+      </CardContent>
+      <CardActions>
+        <Link href={href} passHref>
+          <Button endIcon={<ArrowForwardIcon />} style={{ justifyContent: 'start' }} fullWidth>
             {buttonTitle}
           </Button>
-        </CardActions>
-      </Card>
-    </Grid>
-  );
-};
+        </Link>
+      </CardActions>
+    </Card>
+  </Grid>
+);
 
 const Home: NextPageWithEthereum = () => (
   <Grid container spacing={4}>
@@ -43,7 +36,7 @@ const Home: NextPageWithEthereum = () => (
       cardTitle="Manage Vaults"
       cardBody="Create a new vault or manage your existing vaults."
       buttonTitle="Vaults"
-      route="/vaults"
+      href="/vaults"
     />
   </Grid>
 );
