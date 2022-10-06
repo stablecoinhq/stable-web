@@ -1,6 +1,6 @@
 import { formatBytes32String } from '@ethersproject/strings';
 
-import { DssProxyActions__factory, DSProxy__factory } from 'generated/types';
+import { DssProxyActions__factory } from 'generated/types';
 
 import type { Web3Provider } from '@ethersproject/providers';
 import type { ethers } from 'ethers';
@@ -10,12 +10,8 @@ export default class ProxyActionsHelper {
   private readonly proxy: DSProxy;
   private readonly actions: DssProxyActions;
 
-  constructor(provider: Web3Provider, proxy: DSProxy | string, actions: string) {
-    if (typeof proxy === 'string') {
-      this.proxy = DSProxy__factory.connect(proxy, provider.getSigner());
-    } else {
-      this.proxy = DSProxy__factory.connect(proxy.address, provider.getSigner());
-    }
+  constructor(provider: Web3Provider, proxy: DSProxy, actions: string) {
+    this.proxy = proxy;
     this.actions = DssProxyActions__factory.connect(actions, provider.getSigner());
   }
 

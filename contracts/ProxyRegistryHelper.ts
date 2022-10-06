@@ -13,7 +13,7 @@ export default class ProxyRegistryHelper {
   }
 
   getDSProxy(user: string) {
-    return this.contract.proxies(user).then((address) => DSProxy__factory.connect(address, this.provider));
+    return this.contract.proxies(user).then((address) => DSProxy__factory.connect(address, this.provider.getSigner()));
   }
 
   buildNewProxy() {

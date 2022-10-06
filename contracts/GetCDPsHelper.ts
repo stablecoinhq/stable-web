@@ -17,7 +17,7 @@ export default class GetCDPsHelper {
   private readonly manager: DssCdpManager;
 
   constructor(provider: Web3Provider, address: string, manager: DssCdpManager) {
-    this.contract = GetCdps__factory.connect(address, provider);
+    this.contract = GetCdps__factory.connect(address, provider.getSigner());
     this.manager = manager;
   }
 

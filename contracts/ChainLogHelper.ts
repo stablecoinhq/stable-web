@@ -27,7 +27,7 @@ export default class ChainLogHelper {
 
   constructor(provider: Web3Provider) {
     this.provider = provider;
-    this.contract = ChainLog__factory.connect(process.env.NEXT_PUBLIC_CHAINLOG_ADDRESS!!, provider);
+    this.contract = ChainLog__factory.connect(process.env.NEXT_PUBLIC_CHAINLOG_ADDRESS!!, provider.getSigner());
   }
 
   getAddress(key: string) {
@@ -43,7 +43,7 @@ export default class ChainLogHelper {
   vat() {
     return this.contract
       .getAddress(formatBytes32String('MCD_VAT'))
-      .then((address) => Vat__factory.connect(address, this.provider));
+      .then((address) => Vat__factory.connect(address, this.provider.getSigner()));
   }
 
   jug() {
@@ -53,13 +53,13 @@ export default class ChainLogHelper {
   spot() {
     return this.contract
       .getAddress(formatBytes32String('MCD_SPOT'))
-      .then((address) => Spotter__factory.connect(address, this.provider));
+      .then((address) => Spotter__factory.connect(address, this.provider.getSigner()));
   }
 
   dssCDPManager() {
     return this.contract
       .getAddress(formatBytes32String('CDP_MANAGER'))
-      .then((address) => DssCdpManager__factory.connect(address, this.provider));
+      .then((address) => DssCdpManager__factory.connect(address, this.provider.getSigner()));
   }
 
   getCDPs() {
@@ -85,13 +85,13 @@ export default class ChainLogHelper {
 
   async dai() {
     const dai = await this.contract.getAddress(formatBytes32String('MCD_DAI'));
-    return Dai__factory.connect(dai, this.provider);
+    return Dai__factory.connect(dai, this.provider.getSigner());
   }
 
   async erc20(ilkBytes32: string) {
     const ilkAddr = await this.contract.getAddress(ilkBytes32);
     if (ilkAddr && ilkAddr !== ethers.constants.AddressZero) {
-      return ERC20__factory.connect(ilkAddr, this.provider);
+      return ERC20__factory.connect(ilkAddr, this.provider.getSigner());
     }
     throw new Error('invalid collateral');
   }

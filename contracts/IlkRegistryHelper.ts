@@ -9,7 +9,7 @@ export default class IlkRegistryHelper {
 
   constructor(provider: Web3Provider, address: string) {
     this.provider = provider;
-    this.contract = IlkRegistry__factory.connect(address, provider);
+    this.contract = IlkRegistry__factory.connect(address, provider.getSigner());
   }
 
   list() {

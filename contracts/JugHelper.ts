@@ -9,7 +9,7 @@ export default class JugHelper {
 
   constructor(provider: Web3Provider, address: string) {
     this.provider = provider;
-    this.contract = Jug__factory.connect(address, provider);
+    this.contract = Jug__factory.connect(address, provider.getSigner());
   }
 
   stabilityFee(ilkBytes32: string) {
