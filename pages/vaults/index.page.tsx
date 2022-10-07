@@ -65,7 +65,7 @@ const Content: FC<ContentProps> = ({ cdps }) => {
 
 const Page: NextPageWithEthereum = ({ ethereum, account }) => {
   const router = useRouter();
-  const chainLog = useChainLog(ethereum.getSigner());
+  const chainLog = useChainLog(ethereum);
   const getCDPs = useGetCDPs(chainLog);
   const proxyRegistry = useProxyRegistry(chainLog);
   const dsProxy = useDSProxy(proxyRegistry, account);

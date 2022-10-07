@@ -1,19 +1,19 @@
 import { DSProxy__factory, ProxyRegistry__factory } from 'generated/types';
 
-import type { ethers } from 'ethers';
+import type { Web3Provider } from '@ethersproject/providers';
 import type { ProxyRegistry } from 'generated/types';
 
 export default class ProxyRegistryHelper {
-  private readonly provider: ethers.Signer;
+  private readonly provider: Web3Provider;
   private readonly contract: ProxyRegistry;
 
-  constructor(provider: ethers.Signer, address: string) {
+  constructor(provider: Web3Provider, address: string) {
     this.provider = provider;
-    this.contract = ProxyRegistry__factory.connect(address, provider);
+    this.contract = ProxyRegistry__factory.connect(address, provider.getSigner());
   }
 
   getDSProxy(user: string) {
-    return this.contract.proxies(user).then((address) => DSProxy__factory.connect(address, this.provider));
+    return this.contract.proxies(user).then((address) => DSProxy__factory.connect(address, this.provider.getSigner()));
   }
 
   buildNewProxy() {

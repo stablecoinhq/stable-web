@@ -1,15 +1,15 @@
 import { Jug__factory } from 'generated/types';
 
-import type { ethers } from 'ethers';
+import type { Web3Provider } from '@ethersproject/providers';
 import type { Jug } from 'generated/types';
 
 export default class JugHelper {
-  private readonly provider: ethers.Signer;
+  private readonly provider: Web3Provider;
   private readonly contract: Jug;
 
-  constructor(provider: ethers.Signer, address: string) {
+  constructor(provider: Web3Provider, address: string) {
     this.provider = provider;
-    this.contract = Jug__factory.connect(address, provider);
+    this.contract = Jug__factory.connect(address, provider.getSigner());
   }
 
   stabilityFee(ilkBytes32: string) {

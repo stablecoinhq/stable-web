@@ -10,7 +10,7 @@ const VaultDetail: NextPageWithEthereum = ({ ethereum, account }) => {
   const { id } = router.query;
   const cdpId = ethers.BigNumber.from(id);
 
-  return <VaultManipulator ethereum={ethereum.getSigner()} account={account} cdpId={cdpId} />;
+  return <VaultManipulator ethereum={ethereum} account={account} cdpId={cdpId} />;
 };
 
 export default VaultDetail;

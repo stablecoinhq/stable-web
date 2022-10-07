@@ -19,13 +19,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { useChainLog, useDSProxy, useProxyRegistry, useVat } from 'pages/ethereum/ContractHooks';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
+import type { Web3Provider } from '@ethersproject/providers';
 import type ChainLogHelper from 'contracts/ChainLogHelper';
 import type { Vat } from 'generated/types';
 import type { EthereumAccount } from 'pages/ethereum/useAccount';
 import type { FC } from 'react';
 
 export type VaultManagerProps = {
-  ethereum: ethers.Signer;
+  ethereum: Web3Provider;
   account: EthereumAccount;
   cdpId?: ethers.BigNumber; // eslint-disable-line react/require-default-props
 };
@@ -94,7 +95,7 @@ const isValidAddr = (addr: string | undefined) => addr && addr !== ethers.consta
 const getBaseCollateralName = (ilkBytes32: string) => parseBytes32String(ilkBytes32).split('-')[0];
 
 type VaultManipulatorCommonProps = {
-  ethereum: ethers.Signer; // eslint-disable-line react/no-unused-prop-types
+  ethereum: Web3Provider; // eslint-disable-line react/no-unused-prop-types
   account: EthereumAccount;
   chainlog: ChainLogHelper;
   vat: Vat; // eslint-disable-line react/no-unused-prop-types
@@ -152,7 +153,7 @@ const MintManipulator: FC<VaultManipulatorCommonProps & { cdpId?: ethers.BigNumb
       [gemContract, account.address],
     ),
   );
-  const ethBalance = usePromiseFactory(useCallback(() => ethereum.getBalance(), [ethereum]));
+  const ethBalance = usePromiseFactory(useCallback(() => ethereum.getSigner().getBalance(), [ethereum]));
 
   // collateral to lock
   const [gem, setGem] = useState('0');
@@ -528,7 +529,7 @@ const UrnStatusCard: FC<{ urn: Urn | null } & { rate: ethers.BigNumber | undefin
   );
 };
 
-type VaultManagerCommonProps = { ethereum: ethers.Signer; account: EthereumAccount; chainlog: ChainLogHelper; vat: Vat };
+type VaultManagerCommonProps = { ethereum: Web3Provider; account: EthereumAccount; chainlog: ChainLogHelper; vat: Vat };
 
 /**
  * handle vaults already opend

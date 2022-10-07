@@ -2,7 +2,8 @@ import { parseBytes32String } from '@ethersproject/strings';
 
 import { GetCdps__factory } from 'generated/types';
 
-import type { BigNumber, ethers } from 'ethers';
+import type { Web3Provider } from '@ethersproject/providers';
+import type { BigNumber } from 'ethers';
 import type { DssCdpManager, GetCdps, DSProxy } from 'generated/types';
 
 export type CDP = {
@@ -15,8 +16,8 @@ export default class GetCDPsHelper {
   private readonly contract: GetCdps;
   private readonly manager: DssCdpManager;
 
-  constructor(provider: ethers.Signer, address: string, manager: DssCdpManager) {
-    this.contract = GetCdps__factory.connect(address, provider);
+  constructor(provider: Web3Provider, address: string, manager: DssCdpManager) {
+    this.contract = GetCdps__factory.connect(address, provider.getSigner());
     this.manager = manager;
   }
 
