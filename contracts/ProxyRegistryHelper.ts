@@ -1,3 +1,6 @@
+import { getContractAddress } from '@ethersproject/address';
+import { AddressZero } from '@ethersproject/constants';
+
 import { DSProxy__factory, ProxyRegistry__factory } from 'generated/types';
 
 import type { Web3Provider } from '@ethersproject/providers';
@@ -13,10 +16,25 @@ export default class ProxyRegistryHelper {
   }
 
   getDSProxy(user: string) {
-    return this.contract.proxies(user).then((address) => DSProxy__factory.connect(address, this.provider.getSigner()));
+    return this.contract.proxies(user).then((address) => {
+      if (address === AddressZero) {
+        return undefined;
+      }
+
+      return DSProxy__factory.connect(address, this.provider.getSigner());
+    });
   }
 
-  buildNewProxy() {
-    return this.contract['build()']();
+  private createDSProxy() {
+    return this.contract['build()']()
+      .then(async (pendingTx) => {
+        await pendingTx.wait();
+        return getContractAddress(pendingTx);
+      })
+      .then((address) => DSProxy__factory.connect(address, this.provider.getSigner()));
+  }
+
+  async ensureDSProxy(user: string) {
+    return (await this.getDSProxy(user)) || this.createDSProxy();
   }
 }

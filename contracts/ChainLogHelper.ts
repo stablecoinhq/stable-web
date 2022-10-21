@@ -1,20 +1,16 @@
 import { formatBytes32String } from '@ethersproject/strings';
-import { ethers } from 'ethers';
 
-import {
-  ChainLog__factory,
-  Dai__factory,
-  DssCdpManager__factory,
-  ERC20__factory,
-  Spotter__factory,
-  Vat__factory,
-} from 'generated/types';
+import { ChainLog__factory, DaiJoin__factory } from 'generated/types';
 
+import CDPManagerHelper from './CDPManagerHelper';
+import ERC20Helper from './ERC20Helper';
 import GetCDPsHelper from './GetCDPsHelper';
 import IlkRegistryHelper from './IlkRegistryHelper';
 import JugHelper from './JugHelper';
 import ProxyActionsHelper from './ProxyActionsHelper';
 import ProxyRegistryHelper from './ProxyRegistryHelper';
+import SpotHelper from './SpotHelper';
+import VatHelper from './VatHelper';
 
 import type { Web3Provider } from '@ethersproject/providers';
 import type { ChainLog, DSProxy } from 'generated/types';
@@ -30,69 +26,49 @@ export default class ChainLogHelper {
     this.contract = ChainLog__factory.connect(process.env.NEXT_PUBLIC_CHAINLOG_ADDRESS!!, provider.getSigner());
   }
 
-  getAddress(key: string) {
+  private getAddress(key: string) {
     return this.contract.getAddress(formatBytes32String(key));
   }
 
   ilkRegistry() {
-    return this.contract
-      .getAddress(formatBytes32String('ILK_REGISTRY'))
-      .then((address) => new IlkRegistryHelper(this.provider, address));
+    return this.getAddress('ILK_REGISTRY').then((address) => new IlkRegistryHelper(this.provider, address));
   }
 
   vat() {
-    return this.contract
-      .getAddress(formatBytes32String('MCD_VAT'))
-      .then((address) => Vat__factory.connect(address, this.provider.getSigner()));
+    return this.getAddress('MCD_VAT').then((address) => new VatHelper(this.provider, address));
   }
 
   jug() {
-    return this.contract.getAddress(formatBytes32String('MCD_JUG')).then((address) => new JugHelper(this.provider, address));
+    return this.getAddress('MCD_JUG').then((address) => new JugHelper(this.provider, address));
   }
 
   spot() {
-    return this.contract
-      .getAddress(formatBytes32String('MCD_SPOT'))
-      .then((address) => Spotter__factory.connect(address, this.provider.getSigner()));
+    return this.getAddress('MCD_SPOT').then((address) => new SpotHelper(this.provider, address));
   }
 
   dssCDPManager() {
-    return this.contract
-      .getAddress(formatBytes32String('CDP_MANAGER'))
-      .then((address) => DssCdpManager__factory.connect(address, this.provider.getSigner()));
+    return this.getAddress('CDP_MANAGER').then((address) => new CDPManagerHelper(this.provider, address));
   }
 
   getCDPs() {
-    return Promise.all([this.contract.getAddress(formatBytes32String('GET_CDPS')), this.dssCDPManager()]).then(
+    return Promise.all([this.getAddress('GET_CDPS'), this.dssCDPManager()]).then(
       ([address, dssCDPManager]) => new GetCDPsHelper(this.provider, address, dssCDPManager),
     );
   }
 
   proxyRegistry() {
-    return this.contract
-      .getAddress(formatBytes32String('PROXY_REGISTRY'))
-      .then((address) => new ProxyRegistryHelper(this.provider, address));
+    return this.getAddress('PROXY_REGISTRY').then((address) => new ProxyRegistryHelper(this.provider, address));
   }
 
-  /**
-   * proxy actions means to be used via ds-proxy, should not be used directory.
-   * so it returns a raw address as string.
-   */
-  async bindActions(proxy: DSProxy) {
-    const actions = await this.contract.getAddress(formatBytes32String('PROXY_ACTIONS'));
-    return new ProxyActionsHelper(this.provider, proxy, actions);
+  proxyActions(proxy: DSProxy) {
+    return this.getAddress('PROXY_ACTIONS').then((address) => new ProxyActionsHelper(this.provider, address, proxy));
   }
 
-  async dai() {
-    const dai = await this.contract.getAddress(formatBytes32String('MCD_DAI'));
-    return Dai__factory.connect(dai, this.provider.getSigner());
+  dai() {
+    return this.getAddress('MCD_DAI').then((address) => new ERC20Helper(this.provider, address));
   }
 
-  async erc20(ilkBytes32: string) {
-    const ilkAddr = await this.contract.getAddress(ilkBytes32);
-    if (ilkAddr && ilkAddr !== ethers.constants.AddressZero) {
-      return ERC20__factory.connect(ilkAddr, this.provider.getSigner());
-    }
-    throw new Error('invalid collateral');
+  daiJoin() {
+    return this.getAddress('MCD_JOIN_DAI').then((address) => DaiJoin__factory.connect(address, this.provider.getSigner()));
   }
 }
