@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import { parseUnits } from '@ethersproject/units';
 
 export const pickNumbers = (input: string) => {
   let output = input.replaceAll(/[^\d.]/g, '');
@@ -20,9 +20,9 @@ export const cutDecimals = (input: string, dec: number) => {
   return input;
 };
 
-export const toBigNumberOrUndefined = (input: string) => {
+export const toBigNumberOrUndefined = (input: string, dec: number) => {
   try {
-    return BigNumber.from(input);
+    return parseUnits(input, dec);
   } catch {
     return undefined;
   }

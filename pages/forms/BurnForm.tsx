@@ -15,9 +15,9 @@ export type BurnFormProps = {
 
 const BurnForm: FC<BurnFormProps> = ({ ilkInfo, buttonContent, onBurn }) => {
   const [daiText, setDaiText] = useState('');
-  const daiAmount = useMemo(() => toBigNumberOrUndefined(daiText), [daiText]);
+  const daiAmount = useMemo(() => toBigNumberOrUndefined(daiText, ilkInfo.dec.toNumber()), [daiText, ilkInfo.dec]);
   const [colText, setColText] = useState('');
-  const colAmount = useMemo(() => toBigNumberOrUndefined(colText), [colText]);
+  const colAmount = useMemo(() => toBigNumberOrUndefined(colText, ilkInfo.dec.toNumber()), [colText, ilkInfo.dec]);
   const [burning, setBurning] = useState(false);
 
   const onDaiChange: ChangeEventHandler<HTMLInputElement> = useCallback(

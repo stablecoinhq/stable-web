@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { cutDecimals, pickNumbers, toBigNumberOrUndefined } from './stringNumber';
 
-import type { IlkInfo } from '../../contracts/IlkRegistryHelper';
+import type { IlkInfo } from 'contracts/IlkRegistryHelper';
 import type { BigNumber } from 'ethers';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
@@ -15,9 +15,9 @@ export type MintFormProps = {
 
 const MintForm: FC<MintFormProps> = ({ ilkInfo, buttonContent, onMint }) => {
   const [amountText, setAmountText] = useState('');
-  const amount = useMemo(() => toBigNumberOrUndefined(amountText), [amountText]);
+  const amount = useMemo(() => toBigNumberOrUndefined(amountText, ilkInfo.dec.toNumber()), [amountText, ilkInfo.dec]);
   const [ratioText, setRatioText] = useState('150');
-  const ratio = useMemo(() => toBigNumberOrUndefined(ratioText), [ratioText]);
+  const ratio = useMemo(() => toBigNumberOrUndefined(ratioText, ilkInfo.dec.toNumber()), [ilkInfo.dec, ratioText]);
   const [minting, setMinting] = useState(false);
 
   const onAmountChange: ChangeEventHandler<HTMLInputElement> = useCallback(

@@ -4,7 +4,7 @@ import type CDPManagerHelper from './CDPManagerHelper';
 import type { IlkInfo } from './IlkRegistryHelper';
 import type JugHelper from './JugHelper';
 import type { Web3Provider } from '@ethersproject/providers';
-import type { BigNumber } from 'ethers';
+import type { BigNumber, PayableOverrides } from 'ethers';
 import type { DssProxyActions, DSProxy, DaiJoin } from 'generated/types';
 
 export default class ProxyActionsHelper {
@@ -20,8 +20,8 @@ export default class ProxyActionsHelper {
     return this.actions.interface.encodeFunctionData.bind(this.actions.interface);
   }
 
-  private execute(data: string) {
-    return this.proxy['execute(address,bytes)'](this.actions.address, data);
+  private execute(data: string, overrides: PayableOverrides | undefined = undefined) {
+    return this.proxy['execute(address,bytes)'](this.actions.address, data, overrides);
   }
 
   lockGemAndDraw(
@@ -33,6 +33,22 @@ export default class ProxyActionsHelper {
     collateralAmount: BigNumber,
     daiAmount: BigNumber,
   ) {
+    if (ilkInfo.symbol === 'WETH') {
+      return this.execute(
+        this.encodeFunctionData('lockETHAndDraw', [
+          cdpManager.address,
+          jug.address,
+          ilkInfo.gemJoin.address,
+          daiJoin.address,
+          cdpId,
+          daiAmount,
+        ]),
+        {
+          value: collateralAmount,
+        },
+      );
+    }
+
     return this.execute(
       this.encodeFunctionData('lockGemAndDraw', [
         cdpManager.address,
@@ -55,6 +71,22 @@ export default class ProxyActionsHelper {
     collateralAmount: BigNumber,
     daiAmount: BigNumber,
   ) {
+    if (ilkInfo.symbol === 'WETH') {
+      return this.execute(
+        this.encodeFunctionData('openLockETHAndDraw', [
+          cdpManager.address,
+          jug.address,
+          ilkInfo.gemJoin.address,
+          daiJoin.address,
+          ilkInfo.type.inBytes32,
+          daiAmount,
+        ]),
+        {
+          value: collateralAmount,
+        },
+      );
+    }
+
     return this.execute(
       this.encodeFunctionData('openLockGemAndDraw', [
         cdpManager.address,
@@ -77,6 +109,19 @@ export default class ProxyActionsHelper {
     collateralAmount: BigNumber,
     daiAmount: BigNumber,
   ) {
+    if (ilkInfo.symbol === 'WETH') {
+      return this.execute(
+        this.encodeFunctionData('wipeAndFreeETH', [
+          cdpManager.address,
+          ilkInfo.gemJoin.address,
+          daiJoin.address,
+          cdpId,
+          collateralAmount,
+          daiAmount,
+        ]),
+      );
+    }
+
     return this.execute(
       this.encodeFunctionData('wipeAndFreeGem', [
         cdpManager.address,
