@@ -21,7 +21,11 @@ export default class ProxyActionsHelper {
   }
 
   private execute(data: string, overrides: PayableOverrides | undefined = undefined) {
-    return this.proxy['execute(address,bytes)'](this.actions.address, data, overrides);
+    if (overrides) {
+      return this.proxy['execute(address,bytes)'](this.actions.address, data, overrides);
+    }
+
+    return this.proxy['execute(address,bytes)'](this.actions.address, data);
   }
 
   lockGemAndDraw(
