@@ -20,7 +20,7 @@ const BNText: FC<BNTextProps> = ({ label, value, unit }) => {
 
   return (
     <Grid item xs={6}>
-      <TextField variant="standard" fullWidth label={label} value={str} />
+      <TextField variant="standard" fullWidth label={label} value={str} inputProps={{ disabled: true }} />
     </Grid>
   );
 };
