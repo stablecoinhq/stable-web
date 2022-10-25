@@ -45,7 +45,6 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, buttonContent, onBurn }) => {
       <Grid container padding={2} spacing={2}>
         <Grid item xs={6}>
           <TextField
-            type="number"
             fullWidth
             label="Amount of DAI to redeem"
             value={daiText}
@@ -57,7 +56,6 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, buttonContent, onBurn }) => {
         </Grid>
         <Grid item xs={6}>
           <TextField
-            type="number"
             fullWidth
             label={`Amount of ${ilkInfo.name} to free`}
             value={colText}

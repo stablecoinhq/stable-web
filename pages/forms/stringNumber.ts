@@ -14,9 +14,18 @@ export const pickNumbers = (input: string) => {
 
 export const cutDecimals = (input: string, dec: number) => {
   const i = input.indexOf('.');
-  if (i > -1 && i + dec + 1 < input.length) {
+  if (i < 0) {
+    return input;
+  }
+
+  if (dec === 0) {
+    return input.substring(0, i);
+  }
+
+  if (i + dec + 1 < input.length) {
     return input.substring(0, i + dec + 1);
   }
+
   return input;
 };
 

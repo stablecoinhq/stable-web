@@ -17,7 +17,7 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, buttonContent, onMint }) => {
   const [amountText, setAmountText] = useState('');
   const amount = useMemo(() => toBigNumberOrUndefined(amountText, ilkInfo.dec.toNumber()), [amountText, ilkInfo.dec]);
   const [ratioText, setRatioText] = useState('150');
-  const ratio = useMemo(() => toBigNumberOrUndefined(ratioText, ilkInfo.dec.toNumber()), [ilkInfo.dec, ratioText]);
+  const ratio = useMemo(() => toBigNumberOrUndefined(ratioText, 0), [ratioText]);
   const [minting, setMinting] = useState(false);
 
   const onAmountChange: ChangeEventHandler<HTMLInputElement> = useCallback(
@@ -25,7 +25,7 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, buttonContent, onMint }) => {
     [ilkInfo.dec],
   );
   const onRatioChange: ChangeEventHandler<HTMLInputElement> = useCallback(
-    (event) => setRatioText(pickNumbers(event.target.value)),
+    (event) => setRatioText(cutDecimals(pickNumbers(event.target.value), 0)),
     [],
   );
 
@@ -45,7 +45,6 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, buttonContent, onMint }) => {
       <Grid container padding={2} spacing={2}>
         <Grid item xs={6}>
           <TextField
-            type="number"
             fullWidth
             label={`Amount of ${ilkInfo.name} to lock`}
             value={amountText}
@@ -56,7 +55,13 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, buttonContent, onMint }) => {
           />
         </Grid>
         <Grid item xs={6}>
-          <TextField type="number" fullWidth label="Collateralization Ratio" value={ratioText} onChange={onRatioChange} />
+          <TextField
+            fullWidth
+            label="Collateralization Ratio"
+            value={ratioText}
+            onChange={onRatioChange}
+            InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
+          />
         </Grid>
 
         <Grid item xs={12}>
