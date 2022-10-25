@@ -53,6 +53,9 @@ export default class ProxyActionsHelper {
       );
     }
 
+    /**
+     * Collateral will be sent by proxy when `transferFrom` is true
+     */
     return this.execute(
       this.encodeFunctionData('lockGemAndDraw', [
         cdpManager.address,
@@ -91,6 +94,9 @@ export default class ProxyActionsHelper {
       );
     }
 
+    /**
+     * Collateral will be sent by proxy when `transferFrom` is true
+     */
     return this.execute(
       this.encodeFunctionData('openLockGemAndDraw', [
         cdpManager.address,
