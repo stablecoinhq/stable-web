@@ -25,14 +25,12 @@ const pow = (base: BigNumber, exp: number, unit: BigNumber) => {
 
   // eslint-disable-next-line no-bitwise
   for (let tmp = exp; tmp > 0; tmp >>= 1) {
-    const mul = b.div(unit);
-
     // eslint-disable-next-line no-bitwise
     if (tmp & 1) {
-      result = result.mul(mul);
+      result = result.mul(b).div(unit);
     }
 
-    b = b.mul(mul);
+    b = b.mul(b).div(unit);
   }
 
   return unit;

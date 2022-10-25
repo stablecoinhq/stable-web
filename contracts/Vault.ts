@@ -7,7 +7,7 @@ import type { BigNumber } from 'ethers';
 import type PromiseConstructor from 'types/promise';
 
 const getDaiAmount = (colAmount: BigNumber, debtMultiplier: BigNumber, liqRatio: BigNumber, colRatio: BigNumber) =>
-  colAmount.mul(liqRatio).div(debtMultiplier).div(colRatio).mul(100);
+  colAmount.mul(liqRatio).mul(100).div(debtMultiplier).div(colRatio);
 
 export default class Vault {
   private readonly account: EthereumAccount;
