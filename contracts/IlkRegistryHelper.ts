@@ -37,8 +37,8 @@ export default class IlkRegistryHelper {
         // 6th value of result array is `join`
         .then(({ name, symbol, dec, gem, 6: join }) => ({
           type: ilkType,
-          name,
-          symbol,
+          name: symbol === 'WETH' ? 'Ethereum' : name,
+          symbol: symbol === 'WETH' ? 'ETH' : symbol,
           dec,
           gem: new ERC20Helper(this.provider, gem),
           gemJoin: GemJoin__factory.connect(join, this.provider.getSigner()),
