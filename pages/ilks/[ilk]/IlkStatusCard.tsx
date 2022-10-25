@@ -66,8 +66,8 @@ export const useIlkStatusCardProps = (chainLog: ChainLogHelper, type: IlkType): 
 
 const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidationRatio, stabilityFee }) => {
   const totalIssue = useMemo(
-    () => ilkStatus.totalDebt.mul(ilkStatus.debtMultiplier),
-    [ilkStatus.debtMultiplier, ilkStatus.totalDebt],
+    () => ilkStatus.normalizedDebt.mul(ilkStatus.debtMultiplier),
+    [ilkStatus.debtMultiplier, ilkStatus.normalizedDebt],
   );
   const curPrice = useMemo(() => ilkStatus.price.mul(liquidationRatio).div(RAY), [ilkStatus.price, liquidationRatio]);
   const annualFee = useMemo(() => pow(stabilityFee, YEAR_IN_SECONDS, RAY), [stabilityFee]);

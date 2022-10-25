@@ -6,7 +6,7 @@ import type { BigNumber } from 'ethers';
 import type { Vat } from 'generated/types';
 
 export type IlkStatus = {
-  totalDebt: BigNumber;
+  normalizedDebt: BigNumber;
   debtMultiplier: BigNumber;
   price: BigNumber;
   debtCeiling: BigNumber;
@@ -29,7 +29,7 @@ export default class VatHelper {
 
   getIlkStatus(ilkType: IlkType): Promise<IlkStatus> {
     return this.contract.ilks(ilkType.inBytes32).then(({ Art: art, rate, spot, line, dust }) => ({
-      totalDebt: art,
+      normalizedDebt: art,
       debtMultiplier: rate,
       price: spot,
       debtCeiling: line,
