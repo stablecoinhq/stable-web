@@ -33,7 +33,7 @@ const pow = (base: BigNumber, exp: number, unit: BigNumber) => {
     b = b.mul(b).div(unit);
   }
 
-  return unit;
+  return result;
 };
 
 export type IlkStatusCardProps = {
