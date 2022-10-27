@@ -1,16 +1,174 @@
-import { ethers } from 'ethers';
+import WarningIcon from '@mui/icons-material/Warning';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CircularProgress,
+  Stack,
+  SvgIcon,
+  Tab,
+  Tabs,
+  Typography,
+} from '@mui/material';
+import { BigNumber } from 'ethers';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useCallback, useMemo, useState } from 'react';
 
-import VaultManipulator from '../VaultManager';
+import Vault from 'contracts/Vault';
+import { useCDPManager, useChainLog, useProxyRegistry } from 'pages/ethereum/ContractHooks';
+import BurnForm from 'pages/forms/BurnForm';
+import MintForm from 'pages/forms/MintForm';
+import IlkStatusCard, { useIlkStatusCardProps } from 'pages/ilks/[ilk]/IlkStatusCard';
+import { getStringQuery } from 'pages/query';
+import usePromiseFactory from 'pages/usePromiseFactory';
 
+import VaultStatusCard from './VaultStatusCard';
+
+import type CDPManagerHelper from 'contracts/CDPManagerHelper';
+import type ChainLogHelper from 'contracts/ChainLogHelper';
+import type EthereumAccount from 'contracts/EthereumAccount';
+import type { CDP } from 'contracts/GetCDPsHelper';
+import type { IlkStatus } from 'contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
+import type { BurnFormProps } from 'pages/forms/BurnForm';
+import type { MintFormProps } from 'pages/forms/MintForm';
+import type { FC } from 'react';
+
+const useCDP = (cdpManager: CDPManagerHelper | undefined, cdpId: BigNumber) =>
+  usePromiseFactory(useCallback(async () => cdpManager?.getCDP(cdpId), [cdpManager, cdpId]));
+
+const useProxyAddress = (account: EthereumAccount, chainLog: ChainLogHelper) => {
+  const proxyRegistry = useProxyRegistry(chainLog);
+  return usePromiseFactory(
+    useCallback(
+      async () => proxyRegistry?.getDSProxy(account.address).then((proxy) => proxy?.address || ''),
+      [account, proxyRegistry],
+    ),
+  );
+};
+
+const NotFound: FC = () => (
+  <Stack direction="column" alignItems="center" padding={2}>
+    <Box width={128} height={128}>
+      <SvgIcon component={WarningIcon} inheritViewBox style={{ fontSize: 128 }} color="error" />
+    </Box>
+    <Typography variant="h6" component="div" padding={2}>
+      Vaultが見つかりませんでした。
+    </Typography>
+    <Link href="/vaults" passHref>
+      <Button variant="contained">一覧に戻る</Button>
+    </Link>
+  </Stack>
+);
+
+type ControllerProps = {
+  chainLog: ChainLogHelper;
+  vault: Vault;
+  ilkStatus: IlkStatus;
+  liquidationRatio: BigNumber;
+};
+
+type TabValue = 'mint' | 'burn';
+
+const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidationRatio }) => {
+  const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
+
+  const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {
+    setSelectedTab(value);
+  }, []);
+
+  const mint: MintFormProps['onMint'] = useCallback(
+    (amount, ratio) => vault.mint(chainLog, ilkStatus, liquidationRatio, amount, ratio),
+    [chainLog, ilkStatus, liquidationRatio, vault],
+  );
+  const burn: BurnFormProps['onBurn'] = useCallback((dai, col) => vault.burn(chainLog, col, dai), [chainLog, vault]);
+
+  const TabContent: FC = useCallback(() => {
+    switch (selectedTab) {
+      case 'mint':
+        return <MintForm ilkInfo={vault.ilkInfo} buttonContent="Mint" onMint={mint} />;
+      case 'burn':
+        return <BurnForm ilkInfo={vault.ilkInfo} buttonContent="Burn" onBurn={burn} />;
+    }
+  }, [burn, mint, selectedTab, vault]);
+
+  return (
+    <>
+      <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
+        <Tab label="Mint" value="mint" />
+        <Tab label="Burn" value="burn" />
+      </Tabs>
+      <TabContent />
+    </>
+  );
+};
+
+type ContentProps = {
+  account: EthereumAccount;
+  chainLog: ChainLogHelper;
+  cdp: CDP;
+};
+
+const Content: FC<ContentProps> = ({ account, chainLog, cdp }) => {
+  const ilkCard = useIlkStatusCardProps(chainLog, cdp.ilk);
+  const urnStatus = usePromiseFactory(
+    useCallback(() => chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)), [cdp, chainLog]),
+  );
+  const vault = useMemo(() => ilkCard && new Vault(account, ilkCard.ilkInfo, cdp.id), [account, cdp, ilkCard]);
+
+  if (!ilkCard || !urnStatus || !vault) {
+    return (
+      <Box display="flex" justifyContent="center" padding={2}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <Stack padding={2} spacing={2}>
+      <IlkStatusCard
+        ilkInfo={ilkCard.ilkInfo}
+        ilkStatus={ilkCard.ilkStatus}
+        liquidationRatio={ilkCard.liquidationRatio}
+        stabilityFee={ilkCard.stabilityFee}
+      />
+      <VaultStatusCard urnStatus={urnStatus} debtMultiplier={ilkCard.ilkStatus.debtMultiplier} />
+      <Controller chainLog={chainLog} vault={vault} ilkStatus={ilkCard.ilkStatus} liquidationRatio={ilkCard.liquidationRatio} />
+    </Stack>
+  );
+};
 
 const VaultDetail: NextPageWithEthereum = ({ ethereum, account }) => {
   const router = useRouter();
-  const { id } = router.query;
-  const cdpId = ethers.BigNumber.from(id);
+  const cdpId = useMemo(() => BigNumber.from(getStringQuery(router.query.id)), [router.query.id]);
+  const chainLog = useChainLog(ethereum);
+  const cdpManager = useCDPManager(chainLog);
+  const cdp = useCDP(cdpManager, cdpId);
+  const proxyAddress = useProxyAddress(account, chainLog);
 
-  return <VaultManipulator ethereum={ethereum} account={account} cdpId={cdpId} />;
+  if (!cdp) {
+    return (
+      <Box display="flex" justifyContent="center" padding={2}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (proxyAddress !== cdp.owner.address) {
+    return <NotFound />;
+  }
+
+  return (
+    <Card elevation={0}>
+      <CardHeader title={`${cdp.ilk.inString} Vault (${cdpId.toString()})`} subheader={cdp.urn} />
+      <CardContent>
+        <Content account={account} chainLog={chainLog} cdp={cdp} />
+      </CardContent>
+    </Card>
+  );
 };
 
 export default VaultDetail;

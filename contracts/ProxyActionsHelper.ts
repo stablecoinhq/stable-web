@@ -1,185 +1,146 @@
-import { formatBytes32String } from '@ethersproject/strings';
-
 import { DssProxyActions__factory } from 'generated/types';
 
+import type CDPManagerHelper from './CDPManagerHelper';
+import type { IlkInfo } from './IlkRegistryHelper';
+import type JugHelper from './JugHelper';
 import type { Web3Provider } from '@ethersproject/providers';
-import type { ethers } from 'ethers';
-import type { DssProxyActions, DSProxy } from 'generated/types';
+import type { BigNumber, PayableOverrides } from 'ethers';
+import type { DssProxyActions, DSProxy, DaiJoin } from 'generated/types';
 
 export default class ProxyActionsHelper {
   private readonly proxy: DSProxy;
   private readonly actions: DssProxyActions;
 
-  constructor(provider: Web3Provider, proxy: DSProxy, actions: string) {
+  constructor(provider: Web3Provider, address: string, proxy: DSProxy) {
     this.proxy = proxy;
-    this.actions = DssProxyActions__factory.connect(actions, provider.getSigner());
+    this.actions = DssProxyActions__factory.connect(address, provider.getSigner());
   }
 
-  // ilk: ETH-A, DAI-A, ...
-  open(cdpManager: string, ilk: string) {
-    return this.proxy['execute(address,bytes)'](
-      this.actions.address,
-      this.actions.interface.encodeFunctionData('open', [cdpManager, formatBytes32String(ilk), this.proxy.address]),
-    );
+  private get encodeFunctionData() {
+    return this.actions.interface.encodeFunctionData.bind(this.actions.interface);
   }
 
-  lockETHAndDraw(
-    cdpManager: string,
-    jug: string,
-    ethJoin: string,
-    daiJoin: string,
-    cdp: ethers.BigNumberish,
-    amtEth: ethers.BigNumber,
-    wadDai: ethers.BigNumberish,
-  ) {
-    return this.proxy['execute(address,bytes)'](
-      this.actions.address,
-      this.actions.interface.encodeFunctionData('lockETHAndDraw', [cdpManager, jug, ethJoin, daiJoin, cdp, wadDai]),
-      { value: amtEth },
-    );
+  private execute(data: string, overrides: PayableOverrides | undefined = undefined) {
+    if (overrides) {
+      return this.proxy['execute(address,bytes)'](this.actions.address, data, overrides);
+    }
+
+    return this.proxy['execute(address,bytes)'](this.actions.address, data);
   }
 
-  // ilk: ETH-A, DAI-A, ...
-  openLockEthAndDraw(
-    cdpManager: string,
-    jug: string,
-    ethJoin: string,
-    daiJoin: string,
-    ilk: string,
-    amtEth: ethers.BigNumber,
-    wadDai: ethers.BigNumberish,
-  ) {
-    return this.proxy['execute(address,bytes)'](
-      this.actions.address,
-      this.actions.interface.encodeFunctionData('openLockETHAndDraw', [
-        cdpManager,
-        jug,
-        ethJoin,
-        daiJoin,
-        formatBytes32String(ilk),
-        wadDai,
-      ]),
-      { value: amtEth },
-    );
-  }
-
-  /**
-   * if transferFrom is true, collateral will be sent to gemJoin adoptor by proxy.
-   * amtCollateral's decimal should be different per its token type.
-   */
   lockGemAndDraw(
-    cdpManager: string,
-    jug: string,
-    gemJoin: string,
-    daiJoin: string,
-    cdp: ethers.BigNumberish,
-    amtCollateral: ethers.BigNumber,
-    wadDai: ethers.BigNumberish,
-    transferFrom: boolean,
+    cdpManager: CDPManagerHelper,
+    jug: JugHelper,
+    daiJoin: DaiJoin,
+    ilkInfo: IlkInfo,
+    cdpId: BigNumber,
+    collateralAmount: BigNumber,
+    daiAmount: BigNumber,
   ) {
-    return this.proxy['execute(address,bytes)'](
-      this.actions.address,
-      this.actions.interface.encodeFunctionData('lockGemAndDraw', [
-        cdpManager,
-        jug,
-        gemJoin,
-        daiJoin,
-        cdp,
-        amtCollateral,
-        wadDai,
-        transferFrom,
+    if (ilkInfo.symbol === 'WETH') {
+      return this.execute(
+        this.encodeFunctionData('lockETHAndDraw', [
+          cdpManager.address,
+          jug.address,
+          ilkInfo.gemJoin.address,
+          daiJoin.address,
+          cdpId,
+          daiAmount,
+        ]),
+        {
+          value: collateralAmount,
+        },
+      );
+    }
+
+    /**
+     * Collateral will be sent by proxy when `transferFrom` is true
+     */
+    return this.execute(
+      this.encodeFunctionData('lockGemAndDraw', [
+        cdpManager.address,
+        jug.address,
+        ilkInfo.gemJoin.address,
+        daiJoin.address,
+        cdpId,
+        collateralAmount,
+        daiAmount,
+        /* transferFrom */ true,
       ]),
     );
   }
 
-  /**
-   * if transferFrom is true, collateral will be sent to gemJoin adoptor by proxy.
-   * amtCollateral's decimal should be different per its token type.
-   * ilk: ETH-A, DAI-A, ...
-   */
   openLockGemAndDraw(
-    cdpManager: string,
-    jug: string,
-    gemJoin: string,
-    daiJoin: string,
-    ilk: string,
-    amtCollateral: ethers.BigNumber,
-    wadDai: ethers.BigNumberish,
-    transferFrom: boolean,
+    cdpManager: CDPManagerHelper,
+    jug: JugHelper,
+    daiJoin: DaiJoin,
+    ilkInfo: IlkInfo,
+    collateralAmount: BigNumber,
+    daiAmount: BigNumber,
   ) {
-    return this.proxy['execute(address,bytes)'](
-      this.actions.address,
-      this.actions.interface.encodeFunctionData('openLockGemAndDraw', [
-        cdpManager,
-        jug,
-        gemJoin,
-        daiJoin,
-        ilk,
-        amtCollateral,
-        wadDai,
-        transferFrom,
+    if (ilkInfo.symbol === 'WETH') {
+      return this.execute(
+        this.encodeFunctionData('openLockETHAndDraw', [
+          cdpManager.address,
+          jug.address,
+          ilkInfo.gemJoin.address,
+          daiJoin.address,
+          ilkInfo.type.inBytes32,
+          daiAmount,
+        ]),
+        {
+          value: collateralAmount,
+        },
+      );
+    }
+
+    /**
+     * Collateral will be sent by proxy when `transferFrom` is true
+     */
+    return this.execute(
+      this.encodeFunctionData('openLockGemAndDraw', [
+        cdpManager.address,
+        jug.address,
+        ilkInfo.gemJoin.address,
+        daiJoin.address,
+        ilkInfo.type.inBytes32,
+        collateralAmount,
+        daiAmount,
+        /* transferFrom */ true,
       ]),
-    );
-  }
-
-  wipeAndFreeEth(
-    cdpMan: string,
-    ethJoin: string,
-    daiJoin: string,
-    cdpId: ethers.BigNumber,
-    wadCollateral: ethers.BigNumber,
-    wadDai: ethers.BigNumber,
-  ) {
-    return this.proxy['execute(address,bytes)'](
-      this.actions.address,
-      this.actions.interface.encodeFunctionData('wipeAndFreeETH', [cdpMan, ethJoin, daiJoin, cdpId, wadCollateral, wadDai]),
-    );
-  }
-
-  /**
-   * if dai amount is enough to withdraw all locked collateral, wadCollateral should be all locked collateral.
-   * if not, wadCollateral should be as withdrawable amount as possible.
-   * otherwise, unnecessary transactions needed later.
-   * locked collateral can't be used to re-mint dai as it is.
-   * to work, need to once unlock it and re-lock it
-   */
-  wipeAllAndFreeEth(
-    cdpMan: string,
-    ethJoin: string,
-    daiJoin: string,
-    cdpId: ethers.BigNumber,
-    wadCollateral: ethers.BigNumber,
-  ) {
-    return this.proxy['execute(address,bytes)'](
-      this.actions.address,
-      this.actions.interface.encodeFunctionData('wipeAllAndFreeETH', [cdpMan, ethJoin, daiJoin, cdpId, wadCollateral]),
     );
   }
 
   wipeAndFreeGem(
-    cdpMan: string,
-    gemJoin: string,
-    daiJoin: string,
-    cdpId: ethers.BigNumber,
-    amtCollateral: ethers.BigNumber,
-    wadDai: ethers.BigNumber,
+    cdpManager: CDPManagerHelper,
+    daiJoin: DaiJoin,
+    ilkInfo: IlkInfo,
+    cdpId: BigNumber,
+    collateralAmount: BigNumber,
+    daiAmount: BigNumber,
   ) {
-    return this.proxy['execute(address,bytes)'](
-      this.actions.address,
-      this.actions.interface.encodeFunctionData('wipeAndFreeGem', [cdpMan, gemJoin, daiJoin, cdpId, amtCollateral, wadDai]),
-    );
-  }
+    if (ilkInfo.symbol === 'WETH') {
+      return this.execute(
+        this.encodeFunctionData('wipeAndFreeETH', [
+          cdpManager.address,
+          ilkInfo.gemJoin.address,
+          daiJoin.address,
+          cdpId,
+          collateralAmount,
+          daiAmount,
+        ]),
+      );
+    }
 
-  wipeAllAndFreeGem(
-    cdpMan: string,
-    gemJoin: string,
-    daiJoin: string,
-    cdpId: ethers.BigNumber,
-    amtCollateral: ethers.BigNumber,
-  ) {
-    return this.proxy['execute(address,bytes)'](
-      this.actions.address,
-      this.actions.interface.encodeFunctionData('wipeAllAndFreeGem', [cdpMan, gemJoin, daiJoin, cdpId, amtCollateral]),
+    return this.execute(
+      this.encodeFunctionData('wipeAndFreeGem', [
+        cdpManager.address,
+        ilkInfo.gemJoin.address,
+        daiJoin.address,
+        cdpId,
+        collateralAmount,
+        daiAmount,
+      ]),
     );
   }
 }

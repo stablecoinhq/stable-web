@@ -1,22 +1,23 @@
-import { parseBytes32String } from '@ethersproject/strings';
-
+import IlkType from 'contracts/IlkType';
 import { GetCdps__factory } from 'generated/types';
 
+import type CDPManagerHelper from './CDPManagerHelper';
 import type { Web3Provider } from '@ethersproject/providers';
 import type { BigNumber } from 'ethers';
-import type { DssCdpManager, GetCdps, DSProxy } from 'generated/types';
+import type { GetCdps, DSProxy } from 'generated/types';
 
 export type CDP = {
   id: BigNumber;
   urn: string;
-  ilk: string;
+  ilk: IlkType;
+  owner: DSProxy;
 };
 
 export default class GetCDPsHelper {
   private readonly contract: GetCdps;
-  private readonly manager: DssCdpManager;
+  private readonly manager: CDPManagerHelper;
 
-  constructor(provider: Web3Provider, address: string, manager: DssCdpManager) {
+  constructor(provider: Web3Provider, address: string, manager: CDPManagerHelper) {
     this.contract = GetCdps__factory.connect(address, provider.getSigner());
     this.manager = manager;
   }
@@ -26,7 +27,8 @@ export default class GetCDPsHelper {
       cdpIds.map((cdpId, i) => ({
         id: cdpId,
         urn: urns[i]!,
-        ilk: parseBytes32String(ilks[i]!),
+        ilk: IlkType.fromBytes32(ilks[i]!),
+        owner: proxy,
       })),
     );
   }

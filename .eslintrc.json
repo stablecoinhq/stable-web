@@ -11,6 +11,9 @@
     "prefer-arrow",
     "unused-imports"
   ],
+  "parserOptions": {
+    "project": ["./tsconfig.json"]
+  },
   "rules": {
     "@typescript-eslint/consistent-type-imports": "error",
     "comma-dangle": ["error", "always-multiline"],
@@ -54,6 +57,9 @@
       {"selector": "variable", "format": ["camelCase", "UPPER_CASE", "PascalCase"], "leadingUnderscore": "allow", "trailingUnderscore": "allow"},
       {"selector": "typeLike", "format": ["PascalCase"]}
     ],
+    "consistent-return": "off",
+    "default-case": "off",
+    "@typescript-eslint/switch-exhaustiveness-check": "error",
     "no-dupe-class-members": "off",
     "@typescript-eslint/no-dupe-class-members": "error",
     "no-shadow": "off",

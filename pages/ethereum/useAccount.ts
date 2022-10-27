@@ -2,11 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type { ExternalProvider, Web3Provider } from '@ethersproject/providers';
 import type { MetaMaskInpageProvider } from '@metamask/providers';
-
-export type EthereumAccount = {
-  chainId: string;
-  address: string;
-};
+import type EthereumAccount from 'contracts/EthereumAccount';
 
 export function isMetaMaskInPageProvider(provider: ExternalProvider): provider is ExternalProvider & MetaMaskInpageProvider {
   return provider.isMetaMask || false;
