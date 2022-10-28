@@ -5,14 +5,12 @@ import 'styles/globals.scss';
 
 import Header from './Header';
 import WithoutEthereum from './WithoutEthereum';
-import useAccount from './ethereum/useAccount';
-import useEthereum from './ethereum/useEthereum';
+import useEthereumProvider from './ethereum/useEthereumProvider';
 
 import type { AppProps } from 'next/app';
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
-  const ethereum = useEthereum();
-  const account = useAccount(ethereum);
+  const [external, provider] = useEthereumProvider();
 
   const theme = createTheme({
     components: {
@@ -28,14 +26,14 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Header ethereum={ethereum} account={account} />
-      {ethereum && account ? (
+      <Header externalProvider={external} provider={provider} />
+      {external && provider ? (
         <Box padding={4}>
           {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-          <Component ethereum={ethereum} account={account} {...pageProps} />
+          <Component external={external} provider={provider} {...pageProps} />
         </Box>
       ) : (
-        <WithoutEthereum ethereum={ethereum} account={account} />
+        <WithoutEthereum externalProvider={external} provider={provider} />
       )}
     </ThemeProvider>
   );

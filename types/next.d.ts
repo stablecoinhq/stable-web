@@ -1,10 +1,10 @@
-import type { ethers } from 'ethers';
+import type { ExternalProvider } from '@ethersproject/providers';
+import type EthereumProvider from 'contracts/EthereumProvider';
 import type { NextPage } from 'next';
-import type { EthereumAccount } from 'pages/ethereum/useAccount';
 
 export type WithEthereum = {
-  ethereum: ethers.providers.Web3Provider;
-  account: EthereumAccount;
+  externalProvider: ExternalProvider;
+  provider: EthereumProvider;
 };
 export type WithNullableEthereum = {
   [K in keyof WithEthereum]: WithEthereum[K] | null;

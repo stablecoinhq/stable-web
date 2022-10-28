@@ -6,7 +6,7 @@ import MetaMaskButton from './ethereum/MetaMaskButton';
 import type { FC } from 'react';
 import type { WithNullableEthereum } from 'types/next';
 
-const Header: FC<WithNullableEthereum> = ({ ethereum, account }) => (
+const Header: FC<WithNullableEthereum> = ({ externalProvider, provider }) => (
   <AppBar position="static">
     <Toolbar>
       <Link href="/">
@@ -14,7 +14,7 @@ const Header: FC<WithNullableEthereum> = ({ ethereum, account }) => (
           stable-web
         </Typography>
       </Link>
-      <MetaMaskButton ethereum={ethereum} account={account} />
+      <MetaMaskButton externalProvider={externalProvider} provider={provider} />
     </Toolbar>
   </AppBar>
 );

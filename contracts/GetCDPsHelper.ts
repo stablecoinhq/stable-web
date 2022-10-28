@@ -2,7 +2,7 @@ import IlkType from 'contracts/IlkType';
 import { GetCdps__factory } from 'generated/types';
 
 import type CDPManagerHelper from './CDPManagerHelper';
-import type { Web3Provider } from '@ethersproject/providers';
+import type EthereumProvider from './EthereumProvider';
 import type { BigNumber } from 'ethers';
 import type { GetCdps, DSProxy } from 'generated/types';
 
@@ -17,7 +17,7 @@ export default class GetCDPsHelper {
   private readonly contract: GetCdps;
   private readonly manager: CDPManagerHelper;
 
-  constructor(provider: Web3Provider, address: string, manager: CDPManagerHelper) {
+  constructor(provider: EthereumProvider, address: string, manager: CDPManagerHelper) {
     this.contract = GetCdps__factory.connect(address, provider.getSigner());
     this.manager = manager;
   }

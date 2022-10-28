@@ -1,5 +1,4 @@
 import type ChainLogHelper from './ChainLogHelper';
-import type EthereumAccount from './EthereumAccount';
 import type { IlkInfo } from './IlkRegistryHelper';
 import type { IlkStatus } from './VatHelper';
 import type { BigNumber } from 'ethers';
@@ -10,12 +9,10 @@ const getDaiAmount = (colAmount: BigNumber, debtMultiplier: BigNumber, liqRatio:
   colAmount.mul(liqRatio).mul(100).div(debtMultiplier).div(colRatio);
 
 export default class Vault {
-  private readonly account: EthereumAccount;
   readonly ilkInfo: IlkInfo;
   private readonly cdpId: BigNumber;
 
-  constructor(account: EthereumAccount, ilkInfo: IlkInfo, cdpId: BigNumber) {
-    this.account = account;
+  constructor(ilkInfo: IlkInfo, cdpId: BigNumber) {
     this.ilkInfo = ilkInfo;
     this.cdpId = cdpId;
   }
@@ -30,9 +27,9 @@ export default class Vault {
     const [actions, cdpManager, jug, daiJoin] = await Promise.all([
       chainLog
         .proxyRegistry()
-        .then((proxyRegistry) => proxyRegistry.ensureDSProxy(this.account.address))
+        .then((proxyRegistry) => proxyRegistry.ensureDSProxy())
         .then((proxy) =>
-          Promise.all([chainLog.proxyActions(proxy), this.ilkInfo.gem.ensureAllowance(this.account, proxy.address, colAmount)]),
+          Promise.all([chainLog.proxyActions(proxy), this.ilkInfo.gem.ensureAllowance(proxy.address, colAmount)]),
         )
         .then(([x, _]) => x),
       chainLog.dssCDPManager(),
@@ -48,13 +45,9 @@ export default class Vault {
 
   async burn(chainLog: ChainLogHelper, colAmount: BigNumber, daiAmount: BigNumber) {
     const [actions, cdpManager, daiJoin] = await Promise.all([
-      Promise.all([
-        chainLog.proxyRegistry().then((proxyRegistry) => proxyRegistry.ensureDSProxy(this.account.address)),
-        chainLog.dai(),
-      ]).then(([proxy, dai]) =>
-        Promise.all([chainLog.proxyActions(proxy), dai.ensureAllowance(this.account, proxy.address, daiAmount)]).then(
-          ([x, _]) => x,
-        ),
+      Promise.all([chainLog.proxyRegistry().then((proxyRegistry) => proxyRegistry.ensureDSProxy()), chainLog.dai()]).then(
+        ([proxy, dai]) =>
+          Promise.all([chainLog.proxyActions(proxy), dai.ensureAllowance(proxy.address, daiAmount)]).then(([x, _]) => x),
       ),
       chainLog.dssCDPManager(),
       chainLog.daiJoin(),
@@ -65,7 +58,6 @@ export default class Vault {
 
   static async open(
     chainLog: ChainLogHelper,
-    account: EthereumAccount,
     ilkInfo: IlkInfo,
     ilkStatus: IlkStatus,
     liquidationRatio: BigNumber,
@@ -75,10 +67,8 @@ export default class Vault {
     const [actions, cdpManager, jug, daiJoin] = await Promise.all([
       chainLog
         .proxyRegistry()
-        .then((proxyRegistry) => proxyRegistry.ensureDSProxy(account.address))
-        .then((proxy) =>
-          Promise.all([chainLog.proxyActions(proxy), ilkInfo.gem.ensureAllowance(account, proxy.address, colAmount)]),
-        )
+        .then((proxyRegistry) => proxyRegistry.ensureDSProxy())
+        .then((proxy) => Promise.all([chainLog.proxyActions(proxy), ilkInfo.gem.ensureAllowance(proxy.address, colAmount)]))
         .then(([x, _]) => x),
       chainLog.dssCDPManager(),
       chainLog.jug(),

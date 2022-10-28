@@ -12,16 +12,16 @@ import ProxyRegistryHelper from './ProxyRegistryHelper';
 import SpotHelper from './SpotHelper';
 import VatHelper from './VatHelper';
 
-import type { Web3Provider } from '@ethersproject/providers';
+import type EthereumProvider from './EthereumProvider';
 import type { ChainLog, DSProxy } from 'generated/types';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 
 export default class ChainLogHelper {
-  private readonly provider: Web3Provider;
+  private readonly provider: EthereumProvider;
   private readonly contract: ChainLog;
 
-  constructor(provider: Web3Provider) {
+  constructor(provider: EthereumProvider) {
     this.provider = provider;
     this.contract = ChainLog__factory.connect(process.env.NEXT_PUBLIC_CHAINLOG_ADDRESS!!, provider.getSigner());
   }

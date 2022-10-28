@@ -3,7 +3,7 @@ import { GemJoin__factory, IlkRegistry__factory } from 'generated/types';
 
 import ERC20Helper from './ERC20Helper';
 
-import type { Web3Provider } from '@ethersproject/providers';
+import type EthereumProvider from './EthereumProvider';
 import type { BigNumber } from 'ethers';
 import type { GemJoin, IlkRegistry } from 'generated/types';
 
@@ -17,10 +17,10 @@ export type IlkInfo = {
 };
 
 export default class IlkRegistryHelper {
-  private readonly provider: Web3Provider;
+  private readonly provider: EthereumProvider;
   private readonly contract: IlkRegistry;
 
-  constructor(provider: Web3Provider, address: string) {
+  constructor(provider: EthereumProvider, address: string) {
     this.provider = provider;
     this.contract = IlkRegistry__factory.connect(address, provider.getSigner());
   }

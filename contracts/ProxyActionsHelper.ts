@@ -1,9 +1,9 @@
 import { DssProxyActions__factory } from 'generated/types';
 
 import type CDPManagerHelper from './CDPManagerHelper';
+import type EthereumProvider from './EthereumProvider';
 import type { IlkInfo } from './IlkRegistryHelper';
 import type JugHelper from './JugHelper';
-import type { Web3Provider } from '@ethersproject/providers';
 import type { BigNumber, PayableOverrides } from 'ethers';
 import type { DssProxyActions, DSProxy, DaiJoin } from 'generated/types';
 
@@ -11,7 +11,7 @@ export default class ProxyActionsHelper {
   private readonly proxy: DSProxy;
   private readonly actions: DssProxyActions;
 
-  constructor(provider: Web3Provider, address: string, proxy: DSProxy) {
+  constructor(provider: EthereumProvider, address: string, proxy: DSProxy) {
     this.proxy = proxy;
     this.actions = DssProxyActions__factory.connect(address, provider.getSigner());
   }

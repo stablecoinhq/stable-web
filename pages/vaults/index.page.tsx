@@ -20,20 +20,19 @@ import { useCallback } from 'react';
 import { useChainLog, useGetCDPs, useProxyRegistry } from 'pages/ethereum/ContractHooks';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
-import type { Web3Provider } from '@ethersproject/providers';
-import type EthereumAccount from 'contracts/EthereumAccount';
+import type EthereumProvider from 'contracts/EthereumProvider';
 import type { CDP } from 'contracts/GetCDPsHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
-const useCDPs = (ethereum: Web3Provider, account: EthereumAccount): CDP[] | undefined => {
-  const chainLog = useChainLog(ethereum);
+const useCDPs = (provider: EthereumProvider): CDP[] | undefined => {
+  const chainLog = useChainLog(provider);
   const getCDPs = useGetCDPs(chainLog);
   const proxyRegistry = useProxyRegistry(chainLog);
   return usePromiseFactory(
     useCallback(
-      async () => getCDPs && proxyRegistry?.getDSProxy(account.address).then((proxy) => (proxy ? getCDPs?.getCDPs(proxy) : [])),
-      [account, getCDPs, proxyRegistry],
+      async () => getCDPs && proxyRegistry?.getDSProxy().then((proxy) => (proxy ? getCDPs?.getCDPs(proxy) : [])),
+      [getCDPs, proxyRegistry],
     ),
   );
 };
@@ -77,8 +76,8 @@ const Content: FC<ContentProps> = ({ cdps }) => {
   );
 };
 
-const Page: NextPageWithEthereum = ({ ethereum, account }) => {
-  const cdps = useCDPs(ethereum, account);
+const Page: NextPageWithEthereum = ({ provider }) => {
+  const cdps = useCDPs(provider);
 
   return (
     <Card elevation={0}>

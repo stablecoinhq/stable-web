@@ -3,20 +3,20 @@ import { AddressZero } from '@ethersproject/constants';
 
 import { DSProxy__factory, ProxyRegistry__factory } from 'generated/types';
 
-import type { Web3Provider } from '@ethersproject/providers';
+import type EthereumProvider from './EthereumProvider';
 import type { ProxyRegistry } from 'generated/types';
 
 export default class ProxyRegistryHelper {
-  private readonly provider: Web3Provider;
+  private readonly provider: EthereumProvider;
   private readonly contract: ProxyRegistry;
 
-  constructor(provider: Web3Provider, address: string) {
+  constructor(provider: EthereumProvider, address: string) {
     this.provider = provider;
     this.contract = ProxyRegistry__factory.connect(address, provider.getSigner());
   }
 
-  getDSProxy(user: string) {
-    return this.contract.proxies(user).then((address) => {
+  getDSProxy() {
+    return this.contract.proxies(this.provider.address).then((address) => {
       if (address === AddressZero) {
         return undefined;
       }
@@ -34,7 +34,7 @@ export default class ProxyRegistryHelper {
       .then((address) => DSProxy__factory.connect(address, this.provider.getSigner()));
   }
 
-  async ensureDSProxy(user: string) {
-    return (await this.getDSProxy(user)) || this.createDSProxy();
+  async ensureDSProxy() {
+    return (await this.getDSProxy()) || this.createDSProxy();
   }
 }

@@ -2,16 +2,16 @@ import { DSProxy__factory, DssCdpManager__factory } from 'generated/types';
 
 import IlkType from './IlkType';
 
+import type EthereumProvider from './EthereumProvider';
 import type { CDP } from './GetCDPsHelper';
-import type { Web3Provider } from '@ethersproject/providers';
 import type { BigNumber } from 'ethers';
 import type { DssCdpManager } from 'generated/types';
 
 export default class CDPManagerHelper {
-  private readonly provider: Web3Provider;
+  private readonly provider: EthereumProvider;
   private readonly contract: DssCdpManager;
 
-  constructor(provider: Web3Provider, address: string) {
+  constructor(provider: EthereumProvider, address: string) {
     this.provider = provider;
     this.contract = DssCdpManager__factory.connect(address, provider.getSigner());
   }

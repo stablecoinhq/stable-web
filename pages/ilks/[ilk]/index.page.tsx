@@ -11,9 +11,8 @@ import MintForm from 'pages/forms/MintForm';
 import IlkStatusCard, { useIlkStatusCardProps } from 'pages/ilks/[ilk]/IlkStatusCard';
 import { getStringQuery } from 'pages/query';
 
-import type { Web3Provider } from '@ethersproject/providers';
 import type ChainLogHelper from 'contracts/ChainLogHelper';
-import type EthereumAccount from 'contracts/EthereumAccount';
+import type EthereumProvider from 'contracts/EthereumProvider';
 import type { IlkInfo } from 'contracts/IlkRegistryHelper';
 import type { IlkStatus } from 'contracts/VatHelper';
 import type { BigNumber } from 'ethers';
@@ -35,34 +34,32 @@ const InvalidIlk: FC = () => (
 );
 
 type OpenVaultProps = {
-  account: EthereumAccount;
   chainLog: ChainLogHelper;
   ilkInfo: IlkInfo;
   ilkStatus: IlkStatus;
   liquidationRatio: BigNumber;
 };
 
-const OpenVault: FC<OpenVaultProps> = ({ account, chainLog, ilkInfo, ilkStatus, liquidationRatio }) => {
+const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidationRatio }) => {
   const router = useRouter();
   const openVault = useCallback(
     async (amount: BigNumber, ratio: BigNumber) => {
-      await Vault.open(chainLog, account, ilkInfo, ilkStatus, liquidationRatio, amount, ratio);
+      await Vault.open(chainLog, ilkInfo, ilkStatus, liquidationRatio, amount, ratio);
       await router.push('/vaults');
     },
-    [account, chainLog, ilkInfo, ilkStatus, liquidationRatio, router],
+    [chainLog, ilkInfo, ilkStatus, liquidationRatio, router],
   );
 
   return <MintForm ilkInfo={ilkInfo} buttonContent="Open vault" onMint={openVault} />;
 };
 
 type ContentProps = {
-  ethereum: Web3Provider;
-  account: EthereumAccount;
+  provider: EthereumProvider;
   ilkType: IlkType;
 };
 
-const Content: FC<ContentProps> = ({ ethereum, account, ilkType }) => {
-  const chainLog = useChainLog(ethereum);
+const Content: FC<ContentProps> = ({ provider, ilkType }) => {
+  const chainLog = useChainLog(provider);
   const ilkCard = useIlkStatusCardProps(chainLog, ilkType);
 
   if (!ilkCard) {
@@ -86,7 +83,6 @@ const Content: FC<ContentProps> = ({ ethereum, account, ilkType }) => {
         stabilityFee={ilkCard.stabilityFee}
       />
       <OpenVault
-        account={account}
         chainLog={chainLog}
         ilkInfo={ilkCard.ilkInfo}
         ilkStatus={ilkCard.ilkStatus}
@@ -96,7 +92,7 @@ const Content: FC<ContentProps> = ({ ethereum, account, ilkType }) => {
   );
 };
 
-const OpenVaultForIlk: NextPageWithEthereum = ({ ethereum, account }) => {
+const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
   const router = useRouter();
   const ilkType = useMemo(() => {
     const typeInString = getStringQuery(router.query.ilk);
@@ -111,7 +107,7 @@ const OpenVaultForIlk: NextPageWithEthereum = ({ ethereum, account }) => {
     <Card elevation={0}>
       <CardHeader title={`Open new ${ilkType.inString} vault`} />
       <CardContent>
-        <Content ethereum={ethereum} account={account} ilkType={ilkType} />
+        <Content provider={provider} ilkType={ilkType} />
       </CardContent>
     </Card>
   );
