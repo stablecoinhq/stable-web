@@ -17,16 +17,27 @@ import type { ChainLog, DSProxy } from 'generated/types';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 
+export const UnsupportedNetworkError = new Error('This network seems to be unsupported. ChainLog not found.');
+
 export default class ChainLogHelper {
   private readonly provider: EthereumProvider;
   private readonly contract: ChainLog;
+  private existenceChecked: boolean = false;
 
   constructor(provider: EthereumProvider) {
     this.provider = provider;
     this.contract = ChainLog__factory.connect(process.env.NEXT_PUBLIC_CHAINLOG_ADDRESS!!, provider.getSigner());
   }
 
-  private getAddress(key: string) {
+  private async getAddress(key: string) {
+    if (!this.existenceChecked) {
+      if ((await this.provider.getCode(this.contract.address)) === '0x') {
+        throw UnsupportedNetworkError;
+      }
+
+      this.existenceChecked = true;
+    }
+
     return this.contract.getAddress(formatBytes32String(key));
   }
 
