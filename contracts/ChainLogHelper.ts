@@ -11,6 +11,7 @@ import ProxyActionsHelper from './ProxyActionsHelper';
 import ProxyRegistryHelper from './ProxyRegistryHelper';
 import SpotHelper from './SpotHelper';
 import VatHelper from './VatHelper';
+import { UnitFormats } from './math';
 
 import type { Web3Provider } from '@ethersproject/providers';
 import type { ChainLog, DSProxy } from 'generated/types';
@@ -65,7 +66,7 @@ export default class ChainLogHelper {
   }
 
   dai() {
-    return this.getAddress('MCD_DAI').then((address) => new ERC20Helper(this.provider, address));
+    return this.getAddress('MCD_DAI').then((address) => new ERC20Helper(this.provider, address, UnitFormats.WAD));
   }
 
   daiJoin() {

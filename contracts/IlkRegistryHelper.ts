@@ -1,17 +1,17 @@
+import { FixedFormat } from '@ethersproject/bignumber';
+
 import IlkType from 'contracts/IlkType';
 import { GemJoin__factory, IlkRegistry__factory } from 'generated/types';
 
 import ERC20Helper from './ERC20Helper';
 
 import type { Web3Provider } from '@ethersproject/providers';
-import type { BigNumber } from 'ethers';
 import type { GemJoin, IlkRegistry } from 'generated/types';
 
 export type IlkInfo = {
   type: IlkType;
   name: string;
   symbol: string;
-  dec: BigNumber;
   gem: ERC20Helper;
   gemJoin: GemJoin;
 };
@@ -35,14 +35,17 @@ export default class IlkRegistryHelper {
         .info(ilkType.inBytes32)
         // `join` property conflicts with `Array.join`.
         // 6th value of result array is `join`
-        .then(({ name, symbol, dec, gem, 6: join }) => ({
-          type: ilkType,
-          name: symbol === 'WETH' ? 'Ethereum' : name,
-          symbol: symbol === 'WETH' ? 'ETH' : symbol,
-          dec,
-          gem: new ERC20Helper(this.provider, gem),
-          gemJoin: GemJoin__factory.connect(join, this.provider.getSigner()),
-        }))
+        .then(({ name, symbol, dec, gem, 6: join }) => {
+          const format = FixedFormat.from(dec.toNumber());
+
+          return {
+            type: ilkType,
+            name: symbol === 'WETH' ? 'Ethereum' : name,
+            symbol: symbol === 'WETH' ? 'ETH' : symbol,
+            gem: new ERC20Helper(this.provider, gem, format),
+            gemJoin: GemJoin__factory.connect(join, this.provider.getSigner()),
+          };
+        })
     );
   }
 }

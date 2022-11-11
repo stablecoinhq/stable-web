@@ -16,7 +16,7 @@ import type ChainLogHelper from 'contracts/ChainLogHelper';
 import type EthereumAccount from 'contracts/EthereumAccount';
 import type { IlkInfo } from 'contracts/IlkRegistryHelper';
 import type { IlkStatus } from 'contracts/VatHelper';
-import type { BigNumber } from 'ethers';
+import type { FixedNumber } from 'ethers';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
@@ -39,13 +39,13 @@ type OpenVaultProps = {
   chainLog: ChainLogHelper;
   ilkInfo: IlkInfo;
   ilkStatus: IlkStatus;
-  liquidationRatio: BigNumber;
+  liquidationRatio: FixedNumber;
 };
 
 const OpenVault: FC<OpenVaultProps> = ({ account, chainLog, ilkInfo, ilkStatus, liquidationRatio }) => {
   const router = useRouter();
   const openVault = useCallback(
-    async (amount: BigNumber, ratio: BigNumber) => {
+    async (amount: FixedNumber, ratio: FixedNumber) => {
       await Vault.open(chainLog, account, ilkInfo, ilkStatus, liquidationRatio, amount, ratio);
       await router.push('/vaults');
     },

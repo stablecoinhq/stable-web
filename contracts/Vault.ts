@@ -1,13 +1,30 @@
+import { FixedFormat } from '@ethersproject/bignumber';
+
+import { assertFixedFormat, getBiggestDecimalsFormat, UnitFormats } from './math';
+
 import type ChainLogHelper from './ChainLogHelper';
 import type EthereumAccount from './EthereumAccount';
 import type { IlkInfo } from './IlkRegistryHelper';
 import type { IlkStatus } from './VatHelper';
-import type { BigNumber } from 'ethers';
+import type { FixedNumber, BigNumber } from 'ethers';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 
-const getDaiAmount = (colAmount: BigNumber, debtMultiplier: BigNumber, liqRatio: BigNumber, colRatio: BigNumber) =>
-  colAmount.mul(liqRatio).mul(100).div(debtMultiplier).div(colRatio);
+/**
+ * Collateral ratio has 2 decimals (percentage)
+ */
+export const COL_RATIO_FORMAT = FixedFormat.from(2);
+
+const getDaiAmount = (colAmount: FixedNumber, debtMultiplier: FixedNumber, liqRatio: FixedNumber, colRatio: FixedNumber) => {
+  const calcFormat = getBiggestDecimalsFormat(colAmount.format, UnitFormats.RAY, COL_RATIO_FORMAT, UnitFormats.WAD);
+  const result = colAmount
+    .toFormat(calcFormat)
+    .mulUnsafe(assertFixedFormat(liqRatio, UnitFormats.RAY).toFormat(calcFormat))
+    .divUnsafe(assertFixedFormat(debtMultiplier, UnitFormats.RAY).toFormat(calcFormat))
+    .divUnsafe(assertFixedFormat(colRatio, COL_RATIO_FORMAT).toFormat(calcFormat));
+
+  return result.round(UnitFormats.WAD.decimals).toFormat(UnitFormats.WAD);
+};
 
 export default class Vault {
   private readonly account: EthereumAccount;
@@ -23,9 +40,9 @@ export default class Vault {
   async mint(
     chainLog: ChainLogHelper,
     ilkStatus: IlkStatus,
-    liquidationRatio: BigNumber,
-    colAmount: BigNumber,
-    colRatio: BigNumber,
+    liquidationRatio: FixedNumber,
+    colAmount: FixedNumber,
+    colRatio: FixedNumber,
   ) {
     const [actions, cdpManager, jug, daiJoin] = await Promise.all([
       chainLog
@@ -46,7 +63,7 @@ export default class Vault {
       .then((tx) => tx.wait());
   }
 
-  async burn(chainLog: ChainLogHelper, colAmount: BigNumber, daiAmount: BigNumber) {
+  async burn(chainLog: ChainLogHelper, colAmount: FixedNumber, daiAmount: FixedNumber) {
     const [actions, cdpManager, daiJoin] = await Promise.all([
       Promise.all([
         chainLog.proxyRegistry().then((proxyRegistry) => proxyRegistry.ensureDSProxy(this.account.address)),
@@ -68,9 +85,9 @@ export default class Vault {
     account: EthereumAccount,
     ilkInfo: IlkInfo,
     ilkStatus: IlkStatus,
-    liquidationRatio: BigNumber,
-    colAmount: BigNumber,
-    colRatio: BigNumber,
+    liquidationRatio: FixedNumber,
+    colAmount: FixedNumber,
+    colRatio: FixedNumber,
   ) {
     const [actions, cdpManager, jug, daiJoin] = await Promise.all([
       chainLog

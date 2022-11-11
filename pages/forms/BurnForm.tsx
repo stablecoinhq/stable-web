@@ -1,23 +1,25 @@
 import { Button, Card, Grid, InputAdornment, TextField } from '@mui/material';
 import { useCallback, useMemo, useState } from 'react';
 
-import { cutDecimals, pickNumbers, toBigNumberOrUndefined } from './stringNumber';
+import { UnitFormats } from 'contracts/math';
+
+import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from './stringNumber';
 
 import type { IlkInfo } from 'contracts/IlkRegistryHelper';
-import type { BigNumber } from 'ethers';
+import type { FixedNumber } from 'ethers';
 import type { FC, ChangeEventHandler, MouseEventHandler, ReactNode } from 'react';
 
 export type BurnFormProps = {
   ilkInfo: IlkInfo;
   buttonContent: ReactNode;
-  onBurn: (daiAmount: BigNumber, colAmount: BigNumber) => Promise<void>;
+  onBurn: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
 };
 
 const BurnForm: FC<BurnFormProps> = ({ ilkInfo, buttonContent, onBurn }) => {
   const [daiText, setDaiText] = useState('');
-  const daiAmount = useMemo(() => toBigNumberOrUndefined(daiText, ilkInfo.dec.toNumber()), [daiText, ilkInfo.dec]);
+  const daiAmount = useMemo(() => toFixedNumberOrUndefined(daiText, UnitFormats.WAD), [daiText]);
   const [colText, setColText] = useState('');
-  const colAmount = useMemo(() => toBigNumberOrUndefined(colText, ilkInfo.dec.toNumber()), [colText, ilkInfo.dec]);
+  const colAmount = useMemo(() => toFixedNumberOrUndefined(colText, ilkInfo.gem.format), [colText, ilkInfo.gem.format]);
   const [burning, setBurning] = useState(false);
 
   const onDaiChange: ChangeEventHandler<HTMLInputElement> = useCallback(
@@ -25,8 +27,8 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, buttonContent, onBurn }) => {
     [],
   );
   const onColChange: ChangeEventHandler<HTMLInputElement> = useCallback(
-    (event) => setColText(cutDecimals(pickNumbers(event.target.value), ilkInfo.dec.toNumber())),
-    [ilkInfo.dec],
+    (event) => setColText(cutDecimals(pickNumbers(event.target.value), ilkInfo.gem.format.decimals)),
+    [ilkInfo.gem.format.decimals],
   );
 
   const onButtonClick: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
