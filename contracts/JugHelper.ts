@@ -1,19 +1,17 @@
 import { Jug__factory } from 'generated/types';
 
-import { toFixedNumber, UnitFormats } from './math';
-
-import type { Web3Provider } from '@ethersproject/providers';
+import type EthereumProvider from './EthereumProvider';
 import type IlkType from 'contracts/IlkType';
 import type { Jug } from 'generated/types';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 
 export default class JugHelper {
-  private readonly provider: Web3Provider;
+  private readonly provider: EthereumProvider;
   readonly address: string;
   private readonly contract: Jug;
 
-  constructor(provider: Web3Provider, address: string) {
+  constructor(provider: EthereumProvider, address: string) {
     this.provider = provider;
     this.address = address;
     this.contract = Jug__factory.connect(address, provider);

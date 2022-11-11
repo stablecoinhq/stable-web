@@ -29,7 +29,6 @@ import VaultStatusCard from './VaultStatusCard';
 
 import type CDPManagerHelper from 'contracts/CDPManagerHelper';
 import type ChainLogHelper from 'contracts/ChainLogHelper';
-import type EthereumAccount from 'contracts/EthereumAccount';
 import type { CDP } from 'contracts/GetCDPsHelper';
 import type { IlkStatus } from 'contracts/VatHelper';
 import type { FixedNumber } from 'ethers';
@@ -41,13 +40,10 @@ import type { FC } from 'react';
 const useCDP = (cdpManager: CDPManagerHelper | undefined, cdpId: BigNumber) =>
   usePromiseFactory(useCallback(async () => cdpManager?.getCDP(cdpId), [cdpManager, cdpId]));
 
-const useProxyAddress = (account: EthereumAccount, chainLog: ChainLogHelper) => {
+const useProxyAddress = (chainLog: ChainLogHelper) => {
   const proxyRegistry = useProxyRegistry(chainLog);
   return usePromiseFactory(
-    useCallback(
-      async () => proxyRegistry?.getDSProxy(account.address).then((proxy) => proxy?.address || ''),
-      [account, proxyRegistry],
-    ),
+    useCallback(async () => proxyRegistry?.getDSProxy().then((proxy) => proxy?.address || ''), [proxyRegistry]),
   );
 };
 
@@ -108,17 +104,16 @@ const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidati
 };
 
 type ContentProps = {
-  account: EthereumAccount;
   chainLog: ChainLogHelper;
   cdp: CDP;
 };
 
-const Content: FC<ContentProps> = ({ account, chainLog, cdp }) => {
+const Content: FC<ContentProps> = ({ chainLog, cdp }) => {
   const ilkCard = useIlkStatusCardProps(chainLog, cdp.ilk);
   const urnStatus = usePromiseFactory(
     useCallback(() => chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)), [cdp, chainLog]),
   );
-  const vault = useMemo(() => ilkCard && new Vault(account, ilkCard.ilkInfo, cdp.id), [account, cdp, ilkCard]);
+  const vault = useMemo(() => ilkCard && new Vault(ilkCard.ilkInfo, cdp.id), [cdp, ilkCard]);
 
   if (!ilkCard || !urnStatus || !vault) {
     return (
@@ -142,13 +137,13 @@ const Content: FC<ContentProps> = ({ account, chainLog, cdp }) => {
   );
 };
 
-const VaultDetail: NextPageWithEthereum = ({ ethereum, account }) => {
+const VaultDetail: NextPageWithEthereum = ({ provider }) => {
   const router = useRouter();
   const cdpId = useMemo(() => BigNumber.from(getStringQuery(router.query.id)), [router.query.id]);
-  const chainLog = useChainLog(ethereum);
+  const chainLog = useChainLog(provider);
   const cdpManager = useCDPManager(chainLog);
   const cdp = useCDP(cdpManager, cdpId);
-  const proxyAddress = useProxyAddress(account, chainLog);
+  const proxyAddress = useProxyAddress(chainLog);
 
   if (!cdp) {
     return (
@@ -166,7 +161,7 @@ const VaultDetail: NextPageWithEthereum = ({ ethereum, account }) => {
     <Card elevation={0}>
       <CardHeader title={`${cdp.ilk.inString} Vault (${cdpId.toString()})`} subheader={cdp.urn} />
       <CardContent>
-        <Content account={account} chainLog={chainLog} cdp={cdp} />
+        <Content chainLog={chainLog} cdp={cdp} />
       </CardContent>
     </Card>
   );

@@ -3,9 +3,9 @@ import { useCallback, useMemo } from 'react';
 import ChainLogHelper from 'contracts/ChainLogHelper';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
-import type { Web3Provider } from '@ethersproject/providers';
+import type EthereumProvider from 'contracts/EthereumProvider';
 
-export const useChainLog = (ethereum: Web3Provider) => useMemo(() => new ChainLogHelper(ethereum), [ethereum]);
+export const useChainLog = (provider: EthereumProvider) => useMemo(() => new ChainLogHelper(provider), [provider]);
 
 export const useCDPManager = (chainLog: ChainLogHelper) =>
   usePromiseFactory(useCallback(() => chainLog.dssCDPManager(), [chainLog]));
