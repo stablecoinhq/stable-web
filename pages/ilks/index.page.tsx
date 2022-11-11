@@ -6,14 +6,14 @@ import { useCallback } from 'react';
 import ChainLogHelper from 'contracts/ChainLogHelper';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
-import type { Web3Provider } from '@ethersproject/providers';
+import type EthereumProvider from 'contracts/EthereumProvider';
 import type IlkType from 'contracts/IlkType';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
-const useIlks = (ethereum: Web3Provider) =>
+const useIlks = (provider: EthereumProvider) =>
   usePromiseFactory(
-    useCallback(async () => new ChainLogHelper(ethereum).ilkRegistry().then((ilkRegistry) => ilkRegistry.list()), [ethereum]),
+    useCallback(async () => new ChainLogHelper(provider).ilkRegistry().then((ilkRegistry) => ilkRegistry.list()), [provider]),
   );
 
 type RenderIlkProps = {
@@ -65,8 +65,8 @@ const Content: FC<ContentProps> = ({ ilks }) => {
   );
 };
 
-const OpenVault: NextPageWithEthereum = ({ ethereum }) => {
-  const ilks = useIlks(ethereum);
+const OpenVault: NextPageWithEthereum = ({ provider }) => {
+  const ilks = useIlks(provider);
 
   return (
     <Card elevation={0}>

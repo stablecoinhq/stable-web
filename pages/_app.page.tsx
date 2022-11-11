@@ -1,18 +1,50 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Box, createTheme, ThemeProvider } from '@mui/material';
+import { useCallback } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 
 import 'styles/globals.scss';
 
 import Header from './Header';
+import UnsupportedNetwork, { propagateError } from './UnsupportedNetwork';
 import WithoutEthereum from './WithoutEthereum';
-import useAccount from './ethereum/useAccount';
-import useEthereum from './ethereum/useEthereum';
+import useEthereumProvider from './ethereum/useEthereumProvider';
 
 import type { AppProps } from 'next/app';
+import type { FC } from 'react';
+import type { FallbackProps } from 'react-error-boundary';
+import type { WithEthereum } from 'types/next';
 
-const MyApp = ({ Component, pageProps }: AppProps) => {
-  const ethereum = useEthereum();
-  const account = useAccount(ethereum);
+const RenderWithEthereum: FC<WithEthereum & AppProps> = ({ externalProvider, provider, Component, pageProps }) => {
+  const renderUnsupportedNetwork = useCallback(
+    (props: FallbackProps) => (
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      <UnsupportedNetwork externalProvider={externalProvider} {...props} />
+    ),
+    [externalProvider],
+  );
+
+  /**
+   * Since using `handleError` as an error handler of async functions,
+   * sometimes `handleError` will be called after a fallback component rendered.
+   * To prevent unexpected crash, we have to filter errors which should have already been fallen back.
+   */
+  const onError = useCallback((err: Error) => {
+    propagateError(err);
+  }, []);
+
+  return (
+    <Box padding={4}>
+      <ErrorBoundary fallbackRender={renderUnsupportedNetwork} onError={onError} resetKeys={[provider]}>
+        {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+        <Component externalProvider={externalProvider} provider={provider} {...pageProps} />
+      </ErrorBoundary>
+    </Box>
+  );
+};
+
+const MyApp = (appProps: AppProps) => {
+  const [external, provider] = useEthereumProvider();
 
   const theme = createTheme({
     components: {
@@ -28,14 +60,12 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Header ethereum={ethereum} account={account} />
-      {ethereum && account ? (
-        <Box padding={4}>
-          {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-          <Component ethereum={ethereum} account={account} {...pageProps} />
-        </Box>
+      <Header externalProvider={external} provider={provider} />
+      {external && provider ? (
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        <RenderWithEthereum externalProvider={external} provider={provider} {...appProps} />
       ) : (
-        <WithoutEthereum ethereum={ethereum} account={account} />
+        <WithoutEthereum externalProvider={external} provider={provider} />
       )}
     </ThemeProvider>
   );

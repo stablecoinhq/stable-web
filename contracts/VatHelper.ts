@@ -1,7 +1,7 @@
 import { Vat__factory } from 'generated/types';
 
+import type EthereumProvider from './EthereumProvider';
 import type IlkType from './IlkType';
-import type { Web3Provider } from '@ethersproject/providers';
 import type { BigNumber } from 'ethers';
 import type { Vat } from 'generated/types';
 
@@ -23,7 +23,7 @@ export type UrnStatus = {
 export default class VatHelper {
   private readonly contract: Vat;
 
-  constructor(provider: Web3Provider, address: string) {
+  constructor(provider: EthereumProvider, address: string) {
     this.contract = Vat__factory.connect(address, provider.getSigner());
   }
 

@@ -3,34 +3,34 @@ import { useCallback } from 'react';
 
 import MetaMaskIcon from 'images/metamask.svg';
 
-import { isMetaMaskInPageProvider } from './useAccount';
+import { isMetaMaskInPageProvider } from './useEthereumProvider';
 
 import type { FC } from 'react';
 import type { WithNullableEthereum } from 'types/next';
 
-const MetaMaskButton: FC<WithNullableEthereum> = ({ ethereum, account }) => {
+const MetaMaskButton: FC<WithNullableEthereum> = ({ externalProvider, provider }) => {
   const text = (() => {
-    if (!ethereum || !isMetaMaskInPageProvider(ethereum.provider)) {
+    if (!externalProvider || !isMetaMaskInPageProvider(externalProvider)) {
       return 'Install MetaMask';
     }
 
-    if (!account) {
+    if (!provider) {
       return 'Connect MetaMask';
     }
 
-    return `${account.address.substring(0, 16)}... (${account.chainId})`;
+    return `${provider.address.substring(0, 16)}... (${provider.chainId})`;
   })();
 
   const onClick = useCallback(() => {
-    if (!ethereum || !isMetaMaskInPageProvider(ethereum.provider)) {
+    if (!externalProvider || !isMetaMaskInPageProvider(externalProvider)) {
       window.open('https://metamask.io/download/', '_blank')?.focus();
       return;
     }
 
-    if (!account) {
-      void ethereum.provider.request({ method: 'eth_requestAccounts' });
+    if (!provider) {
+      void externalProvider.request({ method: 'eth_requestAccounts' });
     }
-  }, [ethereum, account]);
+  }, [externalProvider, provider]);
 
   return (
     <Button
