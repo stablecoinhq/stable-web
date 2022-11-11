@@ -6,7 +6,7 @@ import type CDPManagerHelper from './CDPManagerHelper';
 import type EthereumProvider from './EthereumProvider';
 import type { IlkInfo } from './IlkRegistryHelper';
 import type JugHelper from './JugHelper';
-import type { BigNumber, PayableOverrides } from 'ethers';
+import type { FixedNumber, BigNumber, PayableOverrides } from 'ethers';
 import type { DssProxyActions, DSProxy, DaiJoin } from 'generated/types';
 
 export default class ProxyActionsHelper {

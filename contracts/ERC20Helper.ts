@@ -1,7 +1,10 @@
 import { ERC20__factory } from 'generated/types';
 
+import { toBigNumber, toFixedNumber } from './math';
+
 import type EthereumProvider from './EthereumProvider';
-import type { BigNumber } from 'ethers';
+import type { FixedFormat } from '@ethersproject/bignumber';
+import type { FixedNumber } from 'ethers';
 import type { ERC20 } from 'generated/types';
 
 export default class ERC20Helper {
@@ -23,7 +26,7 @@ export default class ERC20Helper {
     return this.contract.approve(spenderAddress, toBigNumber(amount, this.format)).then((tx) => tx.wait());
   }
 
-  async ensureAllowance(spenderAddress: string, amount: BigNumber) {
+  async ensureAllowance(spenderAddress: string, amount: FixedNumber) {
     const current = await this.getAllowance(spenderAddress);
     const diff = amount.subUnsafe(current);
 
