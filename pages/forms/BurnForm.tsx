@@ -5,14 +5,15 @@ import { cutDecimals, pickNumbers, toBigNumberOrUndefined } from './stringNumber
 
 import type { IlkInfo } from 'contracts/IlkRegistryHelper';
 import type { BigNumber } from 'ethers';
-import type { FC, ChangeEventHandler, MouseEventHandler } from 'react';
+import type { FC, ChangeEventHandler, MouseEventHandler, ReactNode } from 'react';
 
 export type BurnFormProps = {
   ilkInfo: IlkInfo;
+  buttonContent: ReactNode;
   onBurn: (daiAmount: BigNumber, colAmount: BigNumber) => Promise<void>;
 };
 
-const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn }) => {
+const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn, buttonContent }) => {
   const [daiText, setDaiText] = useState('');
   const daiAmount = useMemo(() => toBigNumberOrUndefined(daiText, ilkInfo.dec.toNumber()), [daiText, ilkInfo.dec]);
   const [colText, setColText] = useState('');
@@ -67,7 +68,7 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn }) => {
 
         <Grid item xs={12}>
           <Button variant="contained" fullWidth disabled={!daiAmount || !colAmount || burning} onClick={onButtonClick}>
-            {burning ? <CircularProgress /> : 'Burn'}
+            {burning ? <CircularProgress /> : buttonContent}
           </Button>
         </Grid>
       </Grid>

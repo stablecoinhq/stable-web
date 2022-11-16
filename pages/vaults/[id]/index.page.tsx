@@ -30,7 +30,7 @@ import VaultStatusCard from './VaultStatusCard';
 import type CDPManagerHelper from 'contracts/CDPManagerHelper';
 import type ChainLogHelper from 'contracts/ChainLogHelper';
 import type { CDP } from 'contracts/GetCDPsHelper';
-import type { IlkStatus } from 'contracts/VatHelper';
+import type { IlkStatus, UrnStatus } from 'contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { BurnFormProps } from 'pages/forms/BurnForm';
 import type { MintFormProps } from 'pages/forms/MintForm';
@@ -89,9 +89,9 @@ const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidati
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
       case 'mint':
-        return <MintForm ilkInfo={vault.ilkInfo} onMint={mint} />;
+        return <MintForm ilkInfo={vault.ilkInfo} buttonContent="Mint" onMint={mint} />;
       case 'burn':
-        return <BurnForm ilkInfo={vault.ilkInfo} onBurn={burn} />;
+        return <BurnForm ilkInfo={vault.ilkInfo} buttonContent="Burn" onBurn={burn} />;
     }
   }, [burn, mint, selectedTab, vault]);
 
@@ -113,14 +113,16 @@ type ContentProps = {
 
 const Content: FC<ContentProps> = ({ chainLog, cdp }) => {
   const [isVaultManipulated, setIsVaultManipulated] = useState<boolean>(false);
+  const [urnStatus, setUrnStatus] = useState<UrnStatus | undefined>(undefined);
 
   const ilkCard = useIlkStatusCardProps(chainLog, cdp.ilk);
-  const urnStatus = usePromiseFactory(
+  usePromiseFactory(
     useCallback(
       () =>
         chainLog
           .vat()
           .then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn))
+          .then((urn) => setUrnStatus(urn))
           .finally(() => {
             if (isVaultManipulated) {
               setIsVaultManipulated(false);

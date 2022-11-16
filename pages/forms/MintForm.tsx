@@ -5,14 +5,15 @@ import { cutDecimals, pickNumbers, toBigNumberOrUndefined } from './stringNumber
 
 import type { IlkInfo } from 'contracts/IlkRegistryHelper';
 import type { BigNumber } from 'ethers';
-import type { ChangeEventHandler, FC, MouseEventHandler } from 'react';
+import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
 export type MintFormProps = {
   ilkInfo: IlkInfo;
+  buttonContent: ReactNode;
   onMint: (amount: BigNumber, ratio: BigNumber) => Promise<void>;
 };
 
-const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint }) => {
+const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent }) => {
   const [amountText, setAmountText] = useState('');
   const amount = useMemo(() => toBigNumberOrUndefined(amountText, ilkInfo.dec.toNumber()), [amountText, ilkInfo.dec]);
   const [ratioText, setRatioText] = useState('150');
@@ -65,7 +66,7 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint }) => {
 
         <Grid item xs={12}>
           <Button variant="contained" fullWidth disabled={!amount || !ratio || minting} onClick={onButtonClick}>
-            {minting ? <CircularProgress /> : 'Mint'}
+            {minting ? <CircularProgress /> : buttonContent}
           </Button>
         </Grid>
       </Grid>
