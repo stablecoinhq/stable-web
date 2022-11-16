@@ -34,7 +34,7 @@ import type { IlkStatus } from 'contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { BurnFormProps } from 'pages/forms/BurnForm';
 import type { MintFormProps } from 'pages/forms/MintForm';
-import type { FC } from 'react';
+import type { FC, Dispatch, SetStateAction } from 'react';
 
 const useCDP = (cdpManager: CDPManagerHelper | undefined, cdpId: BigNumber) =>
   usePromiseFactory(useCallback(async () => cdpManager?.getCDP(cdpId), [cdpManager, cdpId]));
@@ -65,11 +65,18 @@ type ControllerProps = {
   vault: Vault;
   ilkStatus: IlkStatus;
   liquidationRatio: BigNumber;
+  setIsVaultManipulated: Dispatch<SetStateAction<boolean>>;
 };
 
 type TabValue = 'mint' | 'burn';
 
-const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidationRatio }) => {
+const Controller: FC<ControllerProps> = ({
+  chainLog,
+  vault,
+  ilkStatus,
+  liquidationRatio,
+  setIsVaultManipulated,
+}) => {
   const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
 
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {
@@ -77,10 +84,14 @@ const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidati
   }, []);
 
   const mint: MintFormProps['onMint'] = useCallback(
-    (amount, ratio) => vault.mint(chainLog, ilkStatus, liquidationRatio, amount, ratio),
-    [chainLog, ilkStatus, liquidationRatio, vault],
+    (amount, ratio) =>
+      vault.mint(chainLog, ilkStatus, liquidationRatio, amount, ratio).finally(() => setIsVaultManipulated(true)),
+    [chainLog, ilkStatus, liquidationRatio, vault, setIsVaultManipulated],
   );
-  const burn: BurnFormProps['onBurn'] = useCallback((dai, col) => vault.burn(chainLog, col, dai), [chainLog, vault]);
+  const burn: BurnFormProps['onBurn'] = useCallback(
+    (dai, col) => vault.burn(chainLog, col, dai).finally(() => setIsVaultManipulated(true)),
+    [chainLog, vault, setIsVaultManipulated],
+  );
 
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
@@ -108,9 +119,22 @@ type ContentProps = {
 };
 
 const Content: FC<ContentProps> = ({ chainLog, cdp }) => {
+  const [isVaultManipulated, setIsVaultManipulated] = useState<boolean>(false);
+
   const ilkCard = useIlkStatusCardProps(chainLog, cdp.ilk);
   const urnStatus = usePromiseFactory(
-    useCallback(() => chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)), [cdp, chainLog]),
+    useCallback(
+      () =>
+        chainLog
+          .vat()
+          .then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn))
+          .finally(() => {
+            if (isVaultManipulated) {
+              setIsVaultManipulated(false);
+            }
+          }),
+      [cdp, chainLog, isVaultManipulated],
+    ),
   );
   const vault = useMemo(() => ilkCard && new Vault(ilkCard.ilkInfo, cdp.id), [cdp, ilkCard]);
 
@@ -131,7 +155,13 @@ const Content: FC<ContentProps> = ({ chainLog, cdp }) => {
         stabilityFee={ilkCard.stabilityFee}
       />
       <VaultStatusCard urnStatus={urnStatus} debtMultiplier={ilkCard.ilkStatus.debtMultiplier} />
-      <Controller chainLog={chainLog} vault={vault} ilkStatus={ilkCard.ilkStatus} liquidationRatio={ilkCard.liquidationRatio} />
+      <Controller
+        chainLog={chainLog}
+        vault={vault}
+        ilkStatus={ilkCard.ilkStatus}
+        liquidationRatio={ilkCard.liquidationRatio}
+        setIsVaultManipulated={setIsVaultManipulated}
+      />
     </Stack>
   );
 };
