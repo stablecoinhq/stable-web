@@ -15,7 +15,7 @@ import {
 import { BigNumber } from 'ethers';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import Vault from 'contracts/Vault';
 import { useCDPManager, useChainLog, useProxyRegistry } from 'pages/ethereum/ContractHooks';
@@ -116,21 +116,17 @@ const Content: FC<ContentProps> = ({ chainLog, cdp }) => {
   const [urnStatus, setUrnStatus] = useState<UrnStatus | undefined>(undefined);
 
   const ilkCard = useIlkStatusCardProps(chainLog, cdp.ilk);
-  usePromiseFactory(
-    useCallback(
-      () =>
-        chainLog
-          .vat()
-          .then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn))
-          .then((urn) => setUrnStatus(urn))
-          .finally(() => {
-            if (isVaultManipulated) {
-              setIsVaultManipulated(false);
-            }
-          }),
-      [cdp, chainLog, isVaultManipulated],
-    ),
-  );
+  useEffect(() => {
+    chainLog
+      .vat()
+      .then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn))
+      .then((urn) => setUrnStatus(urn))
+      .finally(() => {
+        if (isVaultManipulated) {
+          setIsVaultManipulated(false);
+        }
+      });
+  }, [cdp, chainLog, isVaultManipulated]);
   const vault = useMemo(() => ilkCard && new Vault(ilkCard.ilkInfo, cdp.id), [cdp, ilkCard]);
 
   if (!ilkCard || !urnStatus || !vault) {
