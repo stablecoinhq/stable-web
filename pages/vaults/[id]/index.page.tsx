@@ -70,13 +70,7 @@ type ControllerProps = {
 
 type TabValue = 'mint' | 'burn';
 
-const Controller: FC<ControllerProps> = ({
-  chainLog,
-  vault,
-  ilkStatus,
-  liquidationRatio,
-  setIsVaultManipulated,
-}) => {
+const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidationRatio, setIsVaultManipulated }) => {
   const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
 
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {

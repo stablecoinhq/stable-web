@@ -29,22 +29,25 @@ export default class VatHelper {
 
   async getIlkStatus(ilkType: IlkType): Promise<IlkStatus> {
     const { Art: art, rate, spot, line, dust } = await this.contract.ilks(ilkType.inBytes32);
-    return ({
+    return {
       normalizedDebt: art,
       debtMultiplier: rate,
       price: spot,
       debtCeiling: line,
       debtFloor: dust,
-    });
+    };
   }
 
   async getUrnStatus(ilkType: IlkType, urn: string): Promise<UrnStatus> {
-    const [{ art, ink }, gem] = await Promise.all([this.contract.urns(ilkType.inBytes32, urn), this.contract.gem(ilkType.inBytes32, urn)]);
-    return ({
+    const [{ art, ink }, gem] = await Promise.all([
+      this.contract.urns(ilkType.inBytes32, urn),
+      this.contract.gem(ilkType.inBytes32, urn),
+    ]);
+    return {
       urn,
       freeBalance: gem,
       lockedBalance: ink,
       debt: art,
-    });
+    };
   }
 }
