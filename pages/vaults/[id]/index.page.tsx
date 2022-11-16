@@ -78,21 +78,20 @@ const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidati
   }, []);
 
   const mint: MintFormProps['onMint'] = useCallback(
-    (amount, ratio) =>
-      vault.mint(chainLog, ilkStatus, liquidationRatio, amount, ratio).finally(() => setIsVaultManipulated(true)),
+    (amount, ratio) => vault.mint(chainLog, ilkStatus, liquidationRatio, amount, ratio).then(() => setIsVaultManipulated(true)),
     [chainLog, ilkStatus, liquidationRatio, vault, setIsVaultManipulated],
   );
   const burn: BurnFormProps['onBurn'] = useCallback(
-    (dai, col) => vault.burn(chainLog, col, dai).finally(() => setIsVaultManipulated(true)),
+    (dai, col) => vault.burn(chainLog, col, dai).then(() => setIsVaultManipulated(true)),
     [chainLog, vault, setIsVaultManipulated],
   );
 
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
       case 'mint':
-        return <MintForm ilkInfo={vault.ilkInfo} buttonContent="Mint" onMint={mint} />;
+        return <MintForm ilkInfo={vault.ilkInfo} onMint={mint} />;
       case 'burn':
-        return <BurnForm ilkInfo={vault.ilkInfo} buttonContent="Burn" onBurn={burn} />;
+        return <BurnForm ilkInfo={vault.ilkInfo} onBurn={burn} />;
     }
   }, [burn, mint, selectedTab, vault]);
 

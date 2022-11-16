@@ -1,19 +1,18 @@
-import { Button, Card, Grid, InputAdornment, TextField } from '@mui/material';
+import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from '@mui/material';
 import { useCallback, useMemo, useState } from 'react';
 
 import { cutDecimals, pickNumbers, toBigNumberOrUndefined } from './stringNumber';
 
 import type { IlkInfo } from 'contracts/IlkRegistryHelper';
 import type { BigNumber } from 'ethers';
-import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
+import type { ChangeEventHandler, FC, MouseEventHandler } from 'react';
 
 export type MintFormProps = {
   ilkInfo: IlkInfo;
-  buttonContent: ReactNode;
   onMint: (amount: BigNumber, ratio: BigNumber) => Promise<void>;
 };
 
-const MintForm: FC<MintFormProps> = ({ ilkInfo, buttonContent, onMint }) => {
+const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint }) => {
   const [amountText, setAmountText] = useState('');
   const amount = useMemo(() => toBigNumberOrUndefined(amountText, ilkInfo.dec.toNumber()), [amountText, ilkInfo.dec]);
   const [ratioText, setRatioText] = useState('150');
@@ -66,7 +65,7 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, buttonContent, onMint }) => {
 
         <Grid item xs={12}>
           <Button variant="contained" fullWidth disabled={!amount || !ratio || minting} onClick={onButtonClick}>
-            {buttonContent}
+            {minting ? <CircularProgress /> : 'Mint'}
           </Button>
         </Grid>
       </Grid>

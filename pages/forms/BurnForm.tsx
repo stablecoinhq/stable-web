@@ -1,19 +1,18 @@
-import { Button, Card, Grid, InputAdornment, TextField } from '@mui/material';
+import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from '@mui/material';
 import { useCallback, useMemo, useState } from 'react';
 
 import { cutDecimals, pickNumbers, toBigNumberOrUndefined } from './stringNumber';
 
 import type { IlkInfo } from 'contracts/IlkRegistryHelper';
 import type { BigNumber } from 'ethers';
-import type { FC, ChangeEventHandler, MouseEventHandler, ReactNode } from 'react';
+import type { FC, ChangeEventHandler, MouseEventHandler } from 'react';
 
 export type BurnFormProps = {
   ilkInfo: IlkInfo;
-  buttonContent: ReactNode;
   onBurn: (daiAmount: BigNumber, colAmount: BigNumber) => Promise<void>;
 };
 
-const BurnForm: FC<BurnFormProps> = ({ ilkInfo, buttonContent, onBurn }) => {
+const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn }) => {
   const [daiText, setDaiText] = useState('');
   const daiAmount = useMemo(() => toBigNumberOrUndefined(daiText, ilkInfo.dec.toNumber()), [daiText, ilkInfo.dec]);
   const [colText, setColText] = useState('');
@@ -68,7 +67,7 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, buttonContent, onBurn }) => {
 
         <Grid item xs={12}>
           <Button variant="contained" fullWidth disabled={!daiAmount || !colAmount || burning} onClick={onButtonClick}>
-            {buttonContent}
+            {burning ? <CircularProgress /> : 'Burn'}
           </Button>
         </Grid>
       </Grid>
