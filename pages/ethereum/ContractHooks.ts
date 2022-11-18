@@ -8,7 +8,7 @@ import type EthereumProvider from 'contracts/EthereumProvider';
 export const useChainLog = (provider: EthereumProvider) => useMemo(() => new ChainLogHelper(provider), [provider]);
 
 export const useCDPManager = (chainLog: ChainLogHelper) =>
-  usePromiseFactory(useCallback(() => chainLog.dssCDPManager(), [chainLog]));
-export const useGetCDPs = (chainLog: ChainLogHelper) => usePromiseFactory(useCallback(() => chainLog.getCDPs(), [chainLog]));
+  usePromiseFactory(useCallback(() => chainLog.dssCDPManager(), [chainLog]))[0];
+export const useGetCDPs = (chainLog: ChainLogHelper) => usePromiseFactory(useCallback(() => chainLog.getCDPs(), [chainLog]))[0];
 export const useProxyRegistry = (chainLog: ChainLogHelper) =>
-  usePromiseFactory(useCallback(() => chainLog.proxyRegistry(), [chainLog]));
+  usePromiseFactory(useCallback(() => chainLog.proxyRegistry(), [chainLog]))[0];

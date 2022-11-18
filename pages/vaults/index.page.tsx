@@ -34,7 +34,7 @@ const useCDPs = (provider: EthereumProvider): CDP[] | undefined => {
       async () => getCDPs && proxyRegistry?.getDSProxy().then((proxy) => (proxy ? getCDPs?.getCDPs(proxy) : [])),
       [getCDPs, proxyRegistry],
     ),
-  );
+  )[0];
 };
 
 type ContentProps = {

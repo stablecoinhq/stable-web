@@ -30,20 +30,20 @@ import VaultStatusCard from './VaultStatusCard';
 import type CDPManagerHelper from 'contracts/CDPManagerHelper';
 import type ChainLogHelper from 'contracts/ChainLogHelper';
 import type { CDP } from 'contracts/GetCDPsHelper';
-import type { IlkStatus, UrnStatus } from 'contracts/VatHelper';
+import type { IlkStatus } from 'contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { BurnFormProps } from 'pages/forms/BurnForm';
 import type { MintFormProps } from 'pages/forms/MintForm';
 import type { FC } from 'react';
 
 const useCDP = (cdpManager: CDPManagerHelper | undefined, cdpId: BigNumber) =>
-  usePromiseFactory(useCallback(async () => cdpManager?.getCDP(cdpId), [cdpManager, cdpId]));
+  usePromiseFactory(useCallback(async () => cdpManager?.getCDP(cdpId), [cdpManager, cdpId]))[0];
 
 const useProxyAddress = (chainLog: ChainLogHelper) => {
   const proxyRegistry = useProxyRegistry(chainLog);
   return usePromiseFactory(
     useCallback(async () => proxyRegistry?.getDSProxy().then((proxy) => proxy?.address || ''), [proxyRegistry]),
-  );
+  )[0];
 };
 
 const NotFound: FC = () => (
@@ -112,19 +112,12 @@ type ContentProps = {
 };
 
 const Content: FC<ContentProps> = ({ chainLog, cdp }) => {
-  const [urnStatus, setUrnStatus] = useState<UrnStatus | undefined>(undefined);
-
   const ilkCard = useIlkStatusCardProps(chainLog, cdp.ilk);
-  const updateUrnStatus = useCallback(() => {
-    chainLog
-      .vat()
-      .then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn))
-      .then((urn) => setUrnStatus(urn));
-  }, [cdp, chainLog]);
+  const [urnStatus, updateUrnStatus] = usePromiseFactory(
+    useCallback(() => chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)), [chainLog, cdp]),
+  );
   const vault = useMemo(() => ilkCard && new Vault(ilkCard.ilkInfo, cdp.id), [cdp, ilkCard]);
-  if (!urnStatus) {
-    updateUrnStatus();
-  }
+
   if (!ilkCard || !urnStatus || !vault) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
