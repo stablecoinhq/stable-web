@@ -1,28 +1,33 @@
 import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from '@mui/material';
+import { FixedNumber } from 'ethers';
 import { useCallback, useMemo, useState } from 'react';
 
-import { cutDecimals, pickNumbers, toBigNumberOrUndefined } from './stringNumber';
+import { COL_RATIO_FORMAT } from 'contracts/Vault';
+
+import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from './stringNumber';
 
 import type { IlkInfo } from 'contracts/IlkRegistryHelper';
-import type { BigNumber } from 'ethers';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
+
+const CENT = FixedNumber.fromString('100', COL_RATIO_FORMAT);
 
 export type MintFormProps = {
   ilkInfo: IlkInfo;
   buttonContent: ReactNode;
-  onMint: (amount: BigNumber, ratio: BigNumber) => Promise<void>;
+  onMint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
 };
 
 const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent }) => {
   const [amountText, setAmountText] = useState('');
-  const amount = useMemo(() => toBigNumberOrUndefined(amountText, ilkInfo.dec.toNumber()), [amountText, ilkInfo.dec]);
+  const amount = useMemo(() => toFixedNumberOrUndefined(amountText, ilkInfo.gem.format), [amountText, ilkInfo.gem.format]);
+  // input as percentage, return as ratio
   const [ratioText, setRatioText] = useState('150');
-  const ratio = useMemo(() => toBigNumberOrUndefined(ratioText, 0), [ratioText]);
+  const ratio = useMemo(() => toFixedNumberOrUndefined(ratioText, COL_RATIO_FORMAT)?.divUnsafe(CENT), [ratioText]);
   const [minting, setMinting] = useState(false);
 
   const onAmountChange: ChangeEventHandler<HTMLInputElement> = useCallback(
-    (event) => setAmountText(cutDecimals(pickNumbers(event.target.value), ilkInfo.dec.toNumber())),
-    [ilkInfo.dec],
+    (event) => setAmountText(cutDecimals(pickNumbers(event.target.value), ilkInfo.gem.format.decimals)),
+    [ilkInfo.gem.format.decimals],
   );
   const onRatioChange: ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => setRatioText(cutDecimals(pickNumbers(event.target.value), 0)),

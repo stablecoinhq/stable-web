@@ -1,4 +1,6 @@
-import { parseUnits } from '@ethersproject/units';
+import { FixedNumber } from 'ethers';
+
+import type { FixedFormat } from '@ethersproject/bignumber';
 
 export const pickNumbers = (input: string) => {
   let output = input.replaceAll(/[^\d.]/g, '');
@@ -29,9 +31,9 @@ export const cutDecimals = (input: string, dec: number) => {
   return input;
 };
 
-export const toBigNumberOrUndefined = (input: string, dec: number) => {
+export const toFixedNumberOrUndefined = (input: string, format: FixedFormat) => {
   try {
-    return parseUnits(input, dec);
+    return FixedNumber.fromString(input, format);
   } catch {
     return undefined;
   }

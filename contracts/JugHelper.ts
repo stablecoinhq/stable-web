@@ -1,5 +1,7 @@
 import { Jug__factory } from 'generated/types';
 
+import { toFixedNumber, UnitFormats } from './math';
+
 import type EthereumProvider from './EthereumProvider';
 import type IlkType from 'contracts/IlkType';
 import type { Jug } from 'generated/types';
@@ -22,6 +24,8 @@ export default class JugHelper {
   }
 
   getStabilityFee(ilk: IlkType) {
-    return Promise.all([this.contract.base(), this.ilkData(ilk)]).then(([base, { duty }]) => base.add(duty));
+    return Promise.all([this.contract.base(), this.ilkData(ilk)]).then(([base, { duty }]) =>
+      toFixedNumber(base, UnitFormats.RAY).addUnsafe(toFixedNumber(duty, UnitFormats.RAY)),
+    );
   }
 }
