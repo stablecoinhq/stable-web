@@ -1,10 +1,12 @@
 import { DssProxyActions__factory } from 'generated/types';
 
+import { toBigNumber, UnitFormats } from './math';
+
 import type CDPManagerHelper from './CDPManagerHelper';
 import type EthereumProvider from './EthereumProvider';
 import type { IlkInfo } from './IlkRegistryHelper';
 import type JugHelper from './JugHelper';
-import type { BigNumber, PayableOverrides } from 'ethers';
+import type { FixedNumber, BigNumber, PayableOverrides } from 'ethers';
 import type { DssProxyActions, DSProxy, DaiJoin } from 'generated/types';
 
 export default class ProxyActionsHelper {
@@ -34,8 +36,8 @@ export default class ProxyActionsHelper {
     daiJoin: DaiJoin,
     ilkInfo: IlkInfo,
     cdpId: BigNumber,
-    collateralAmount: BigNumber,
-    daiAmount: BigNumber,
+    collateralAmount: FixedNumber,
+    daiAmount: FixedNumber,
   ) {
     if (ilkInfo.symbol === 'WETH') {
       return this.execute(
@@ -45,10 +47,10 @@ export default class ProxyActionsHelper {
           ilkInfo.gemJoin.address,
           daiJoin.address,
           cdpId,
-          daiAmount,
+          toBigNumber(daiAmount, UnitFormats.WAD),
         ]),
         {
-          value: collateralAmount,
+          value: toBigNumber(collateralAmount, ilkInfo.gem.format),
         },
       );
     }
@@ -63,8 +65,8 @@ export default class ProxyActionsHelper {
         ilkInfo.gemJoin.address,
         daiJoin.address,
         cdpId,
-        collateralAmount,
-        daiAmount,
+        toBigNumber(collateralAmount, ilkInfo.gem.format),
+        toBigNumber(daiAmount, UnitFormats.WAD),
         /* transferFrom */ true,
       ]),
     );
@@ -75,8 +77,8 @@ export default class ProxyActionsHelper {
     jug: JugHelper,
     daiJoin: DaiJoin,
     ilkInfo: IlkInfo,
-    collateralAmount: BigNumber,
-    daiAmount: BigNumber,
+    collateralAmount: FixedNumber,
+    daiAmount: FixedNumber,
   ) {
     if (ilkInfo.symbol === 'WETH') {
       return this.execute(
@@ -86,10 +88,10 @@ export default class ProxyActionsHelper {
           ilkInfo.gemJoin.address,
           daiJoin.address,
           ilkInfo.type.inBytes32,
-          daiAmount,
+          toBigNumber(daiAmount, UnitFormats.WAD),
         ]),
         {
-          value: collateralAmount,
+          value: toBigNumber(collateralAmount, ilkInfo.gem.format),
         },
       );
     }
@@ -104,8 +106,8 @@ export default class ProxyActionsHelper {
         ilkInfo.gemJoin.address,
         daiJoin.address,
         ilkInfo.type.inBytes32,
-        collateralAmount,
-        daiAmount,
+        toBigNumber(collateralAmount, ilkInfo.gem.format),
+        toBigNumber(daiAmount, UnitFormats.WAD),
         /* transferFrom */ true,
       ]),
     );
@@ -116,8 +118,8 @@ export default class ProxyActionsHelper {
     daiJoin: DaiJoin,
     ilkInfo: IlkInfo,
     cdpId: BigNumber,
-    collateralAmount: BigNumber,
-    daiAmount: BigNumber,
+    collateralAmount: FixedNumber,
+    daiAmount: FixedNumber,
   ) {
     if (ilkInfo.symbol === 'WETH') {
       return this.execute(
@@ -126,8 +128,8 @@ export default class ProxyActionsHelper {
           ilkInfo.gemJoin.address,
           daiJoin.address,
           cdpId,
-          collateralAmount,
-          daiAmount,
+          toBigNumber(collateralAmount, ilkInfo.gem.format),
+          toBigNumber(daiAmount, UnitFormats.WAD),
         ]),
       );
     }
@@ -138,8 +140,8 @@ export default class ProxyActionsHelper {
         ilkInfo.gemJoin.address,
         daiJoin.address,
         cdpId,
-        collateralAmount,
-        daiAmount,
+        toBigNumber(collateralAmount, ilkInfo.gem.format),
+        toBigNumber(daiAmount, UnitFormats.WAD),
       ]),
     );
   }

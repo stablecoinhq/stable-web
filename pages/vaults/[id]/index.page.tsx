@@ -31,6 +31,7 @@ import type CDPManagerHelper from 'contracts/CDPManagerHelper';
 import type ChainLogHelper from 'contracts/ChainLogHelper';
 import type { CDP } from 'contracts/GetCDPsHelper';
 import type { IlkStatus } from 'contracts/VatHelper';
+import type { FixedNumber } from 'ethers';
 import type { NextPageWithEthereum } from 'next';
 import type { BurnFormProps } from 'pages/forms/BurnForm';
 import type { MintFormProps } from 'pages/forms/MintForm';
@@ -64,7 +65,7 @@ type ControllerProps = {
   chainLog: ChainLogHelper;
   vault: Vault;
   ilkStatus: IlkStatus;
-  liquidationRatio: BigNumber;
+  liquidationRatio: FixedNumber;
 };
 
 type TabValue = 'mint' | 'burn';
