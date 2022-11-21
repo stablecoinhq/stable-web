@@ -10,6 +10,8 @@ import { useChainLog } from 'pages/ethereum/ContractHooks';
 import MintForm from 'pages/forms/MintForm';
 import IlkStatusCard, { useIlkStatusCardProps } from 'pages/ilks/[ilk]/IlkStatusCard';
 import { getStringQuery } from 'pages/query';
+import usePromiseFactory from 'pages/usePromiseFactory';
+import WalletStatusCard from 'pages/vaults/[id]/WalletStatusCard';
 
 import type ChainLogHelper from 'contracts/ChainLogHelper';
 import type EthereumProvider from 'contracts/EthereumProvider';
@@ -61,8 +63,15 @@ type ContentProps = {
 const Content: FC<ContentProps> = ({ provider, ilkType }) => {
   const chainLog = useChainLog(provider);
   const ilkCard = useIlkStatusCardProps(chainLog, ilkType);
+  const [balance] = usePromiseFactory(
+    useCallback(async () => {
+      const ilkRegistry = await chainLog.ilkRegistry();
+      const ilk = await ilkRegistry.info(ilkType);
+      return ilk.gem.getBalance();
+    }, [chainLog, ilkType]),
+  );
 
-  if (!ilkCard) {
+  if (!ilkCard || !balance) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
         <CircularProgress />
@@ -82,6 +91,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
         liquidationRatio={ilkCard.liquidationRatio}
         stabilityFee={ilkCard.stabilityFee}
       />
+      <WalletStatusCard address={provider.address} balance={balance} />
       <OpenVault
         chainLog={chainLog}
         ilkInfo={ilkCard.ilkInfo}

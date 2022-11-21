@@ -6,7 +6,6 @@ import { GemJoin__factory, IlkRegistry__factory } from 'generated/types';
 import ERC20Helper from './ERC20Helper';
 
 import type EthereumProvider from './EthereumProvider';
-import type { BigNumber } from 'ethers';
 import type { GemJoin, IlkRegistry } from 'generated/types';
 
 export type IlkInfo = {

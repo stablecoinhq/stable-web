@@ -26,6 +26,7 @@ import { getStringQuery } from 'pages/query';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
 import VaultStatusCard from './VaultStatusCard';
+import WalletStatusCard from './WalletStatusCard';
 
 import type CDPManagerHelper from 'contracts/CDPManagerHelper';
 import type ChainLogHelper from 'contracts/ChainLogHelper';
@@ -67,11 +68,12 @@ type ControllerProps = {
   ilkStatus: IlkStatus;
   liquidationRatio: FixedNumber;
   updateUrnStatus: () => void;
+  updateBalance: () => void;
 };
 
 type TabValue = 'mint' | 'burn';
 
-const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidationRatio, updateUrnStatus: updateUrn }) => {
+const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidationRatio, updateUrnStatus, updateBalance }) => {
   const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
 
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {
@@ -79,12 +81,20 @@ const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidati
   }, []);
 
   const mint: MintFormProps['onMint'] = useCallback(
-    (amount, ratio) => vault.mint(chainLog, ilkStatus, liquidationRatio, amount, ratio).then(() => updateUrn()),
-    [chainLog, ilkStatus, liquidationRatio, vault, updateUrn],
+    (amount, ratio) =>
+      vault.mint(chainLog, ilkStatus, liquidationRatio, amount, ratio).then(() => {
+        updateBalance();
+        updateUrnStatus();
+      }),
+    [chainLog, ilkStatus, liquidationRatio, vault, updateUrnStatus, updateBalance],
   );
   const burn: BurnFormProps['onBurn'] = useCallback(
-    (dai, col) => vault.burn(chainLog, col, dai).then(() => updateUrn()),
-    [chainLog, vault, updateUrn],
+    (dai, col) =>
+      vault.burn(chainLog, col, dai).then(() => {
+        updateBalance();
+        updateUrnStatus();
+      }),
+    [chainLog, vault, updateUrnStatus, updateBalance],
   );
 
   const TabContent: FC = useCallback(() => {
@@ -110,16 +120,26 @@ const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidati
 type ContentProps = {
   chainLog: ChainLogHelper;
   cdp: CDP;
+  address: string;
 };
 
-const Content: FC<ContentProps> = ({ chainLog, cdp }) => {
+const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
   const ilkCard = useIlkStatusCardProps(chainLog, cdp.ilk);
   const [urnStatus, updateUrnStatus] = usePromiseFactory(
     useCallback(() => chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)), [chainLog, cdp]),
   );
+  const [balance, updateBalance] = usePromiseFactory(
+    useCallback(async () => {
+      if (cdp) {
+        const ilkRegistry = await chainLog.ilkRegistry();
+        const ilk = await ilkRegistry.info(cdp.ilk);
+        return ilk.gem.getBalance();
+      }
+    }, [chainLog, cdp]),
+  );
   const vault = useMemo(() => ilkCard && new Vault(ilkCard.ilkInfo, cdp.id), [cdp, ilkCard]);
 
-  if (!ilkCard || !urnStatus || !vault) {
+  if (!ilkCard || !urnStatus || !vault || !balance) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
         <CircularProgress />
@@ -136,12 +156,14 @@ const Content: FC<ContentProps> = ({ chainLog, cdp }) => {
         stabilityFee={ilkCard.stabilityFee}
       />
       <VaultStatusCard urnStatus={urnStatus} debtMultiplier={ilkCard.ilkStatus.debtMultiplier} />
+      <WalletStatusCard balance={balance} address={address} />
       <Controller
         chainLog={chainLog}
         vault={vault}
         ilkStatus={ilkCard.ilkStatus}
         liquidationRatio={ilkCard.liquidationRatio}
         updateUrnStatus={updateUrnStatus}
+        updateBalance={updateBalance}
       />
     </Stack>
   );
@@ -171,7 +193,7 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
     <Card elevation={0}>
       <CardHeader title={`${cdp.ilk.inString} Vault (${cdpId.toString()})`} subheader={cdp.urn} />
       <CardContent>
-        <Content chainLog={chainLog} cdp={cdp} />
+        <Content chainLog={chainLog} cdp={cdp} address={provider.address} />
       </CardContent>
     </Card>
   );
