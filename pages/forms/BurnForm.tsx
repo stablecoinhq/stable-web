@@ -1,4 +1,4 @@
-import { Button, Card, Grid, InputAdornment, TextField } from '@mui/material';
+import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from '@mui/material';
 import { useCallback, useMemo, useState } from 'react';
 
 import { UnitFormats } from 'contracts/math';
@@ -15,7 +15,7 @@ export type BurnFormProps = {
   onBurn: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
 };
 
-const BurnForm: FC<BurnFormProps> = ({ ilkInfo, buttonContent, onBurn }) => {
+const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn, buttonContent }) => {
   const [daiText, setDaiText] = useState('');
   const daiAmount = useMemo(() => toFixedNumberOrUndefined(daiText, UnitFormats.WAD), [daiText]);
   const [colText, setColText] = useState('');
@@ -70,7 +70,7 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, buttonContent, onBurn }) => {
 
         <Grid item xs={12}>
           <Button variant="contained" fullWidth disabled={!daiAmount || !colAmount || burning} onClick={onButtonClick}>
-            {buttonContent}
+            {burning ? <CircularProgress /> : buttonContent}
           </Button>
         </Grid>
       </Grid>

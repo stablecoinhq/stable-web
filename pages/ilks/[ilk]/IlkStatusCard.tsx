@@ -39,7 +39,7 @@ export const useIlkStatusCardProps = (chainLog: ChainLogHelper, type: IlkType): 
         })),
       [chainLog, type],
     ),
-  );
+  )[0];
 
 const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidationRatio, stabilityFee }) => {
   const totalIssue = useMemo(

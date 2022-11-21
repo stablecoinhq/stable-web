@@ -1,4 +1,4 @@
-import { Button, Card, Grid, InputAdornment, TextField } from '@mui/material';
+import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -17,7 +17,7 @@ export type MintFormProps = {
   onMint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
 };
 
-const MintForm: FC<MintFormProps> = ({ ilkInfo, buttonContent, onMint }) => {
+const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent }) => {
   const [amountText, setAmountText] = useState('');
   const amount = useMemo(() => toFixedNumberOrUndefined(amountText, ilkInfo.gem.format), [amountText, ilkInfo.gem.format]);
   // input as percentage, return as ratio
@@ -71,7 +71,7 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, buttonContent, onMint }) => {
 
         <Grid item xs={12}>
           <Button variant="contained" fullWidth disabled={!amount || !ratio || minting} onClick={onButtonClick}>
-            {buttonContent}
+            {minting ? <CircularProgress /> : buttonContent}
           </Button>
         </Grid>
       </Grid>

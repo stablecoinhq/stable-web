@@ -14,7 +14,7 @@ import type { FC } from 'react';
 const useIlks = (provider: EthereumProvider) =>
   usePromiseFactory(
     useCallback(async () => new ChainLogHelper(provider).ilkRegistry().then((ilkRegistry) => ilkRegistry.list()), [provider]),
-  );
+  )[0];
 
 type RenderIlkProps = {
   ilk: IlkType;

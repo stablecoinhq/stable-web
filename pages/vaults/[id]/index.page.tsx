@@ -38,13 +38,13 @@ import type { MintFormProps } from 'pages/forms/MintForm';
 import type { FC } from 'react';
 
 const useCDP = (cdpManager: CDPManagerHelper | undefined, cdpId: BigNumber) =>
-  usePromiseFactory(useCallback(async () => cdpManager?.getCDP(cdpId), [cdpManager, cdpId]));
+  usePromiseFactory(useCallback(async () => cdpManager?.getCDP(cdpId), [cdpManager, cdpId]))[0];
 
 const useProxyAddress = (chainLog: ChainLogHelper) => {
   const proxyRegistry = useProxyRegistry(chainLog);
   return usePromiseFactory(
     useCallback(async () => proxyRegistry?.getDSProxy().then((proxy) => proxy?.address || ''), [proxyRegistry]),
-  );
+  )[0];
 };
 
 const NotFound: FC = () => (
@@ -66,11 +66,12 @@ type ControllerProps = {
   vault: Vault;
   ilkStatus: IlkStatus;
   liquidationRatio: FixedNumber;
+  updateUrnStatus: () => void;
 };
 
 type TabValue = 'mint' | 'burn';
 
-const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidationRatio }) => {
+const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidationRatio, updateUrnStatus: updateUrn }) => {
   const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
 
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {
@@ -78,10 +79,13 @@ const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidati
   }, []);
 
   const mint: MintFormProps['onMint'] = useCallback(
-    (amount, ratio) => vault.mint(chainLog, ilkStatus, liquidationRatio, amount, ratio),
-    [chainLog, ilkStatus, liquidationRatio, vault],
+    (amount, ratio) => vault.mint(chainLog, ilkStatus, liquidationRatio, amount, ratio).then(() => updateUrn()),
+    [chainLog, ilkStatus, liquidationRatio, vault, updateUrn],
   );
-  const burn: BurnFormProps['onBurn'] = useCallback((dai, col) => vault.burn(chainLog, col, dai), [chainLog, vault]);
+  const burn: BurnFormProps['onBurn'] = useCallback(
+    (dai, col) => vault.burn(chainLog, col, dai).then(() => updateUrn()),
+    [chainLog, vault, updateUrn],
+  );
 
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
@@ -110,8 +114,8 @@ type ContentProps = {
 
 const Content: FC<ContentProps> = ({ chainLog, cdp }) => {
   const ilkCard = useIlkStatusCardProps(chainLog, cdp.ilk);
-  const urnStatus = usePromiseFactory(
-    useCallback(() => chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)), [cdp, chainLog]),
+  const [urnStatus, updateUrnStatus] = usePromiseFactory(
+    useCallback(() => chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)), [chainLog, cdp]),
   );
   const vault = useMemo(() => ilkCard && new Vault(ilkCard.ilkInfo, cdp.id), [cdp, ilkCard]);
 
@@ -132,7 +136,13 @@ const Content: FC<ContentProps> = ({ chainLog, cdp }) => {
         stabilityFee={ilkCard.stabilityFee}
       />
       <VaultStatusCard urnStatus={urnStatus} debtMultiplier={ilkCard.ilkStatus.debtMultiplier} />
-      <Controller chainLog={chainLog} vault={vault} ilkStatus={ilkCard.ilkStatus} liquidationRatio={ilkCard.liquidationRatio} />
+      <Controller
+        chainLog={chainLog}
+        vault={vault}
+        ilkStatus={ilkCard.ilkStatus}
+        liquidationRatio={ilkCard.liquidationRatio}
+        updateUrnStatus={updateUrnStatus}
+      />
     </Stack>
   );
 };
