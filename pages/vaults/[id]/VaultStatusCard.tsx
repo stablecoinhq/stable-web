@@ -38,10 +38,18 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus }) => 
       <CardHeader title="Vault Status" subheader={urn} />
       <CardContent>
         <Grid container padding={2} spacing={2}>
-          <BNText label="Free Collateral" value={freeBalance} />
-          <BNText label="Locked Collateral" value={lockedBalance} />
-          <BNText label="Debt" value={debt} />
-          <BNText label="Collateralization Ratio" value={collateralizationRatio} />
+          <BNText
+            label="Free Collateral"
+            value={freeBalance}
+            tooltipText="Amount of tokens that is currently being locked in Vault but not used as collateral."
+          />
+          <BNText
+            label="Locked Collateral"
+            value={lockedBalance}
+            tooltipText="Total amount of collateral that is locked in this vault"
+          />
+          <BNText label="Debt" value={debt} tooltipText="Total amount of debt that this Vault owes." />
+          <BNText label="Collateralization Ratio" value={collateralizationRatio} tooltipText="Collatelization ratio" />
         </Grid>
       </CardContent>
     </Card>
