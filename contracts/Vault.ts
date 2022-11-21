@@ -14,17 +14,6 @@ import type PromiseConstructor from 'types/promise';
  */
 export const COL_RATIO_FORMAT = FixedFormat.from(2);
 
-const getDaiAmount = (colAmount: FixedNumber, debtMultiplier: FixedNumber, liqRatio: FixedNumber, colRatio: FixedNumber) => {
-  const calcFormat = getBiggestDecimalsFormat(colAmount.format, UnitFormats.RAY, COL_RATIO_FORMAT, UnitFormats.WAD);
-  const result = colAmount
-    .toFormat(calcFormat)
-    .mulUnsafe(assertFixedFormat(liqRatio, UnitFormats.RAY).toFormat(calcFormat))
-    .divUnsafe(assertFixedFormat(debtMultiplier, UnitFormats.RAY).toFormat(calcFormat))
-    .divUnsafe(assertFixedFormat(colRatio, COL_RATIO_FORMAT).toFormat(calcFormat));
-
-  return result.round(UnitFormats.WAD.decimals).toFormat(UnitFormats.WAD);
-};
-
 export default class Vault {
   readonly ilkInfo: IlkInfo;
   private readonly cdpId: FixedNumber;
@@ -54,7 +43,7 @@ export default class Vault {
       chainLog.daiJoin(),
     ]);
 
-    const daiAmount = getDaiAmount(colAmount, ilkStatus.debtMultiplier, liquidationRatio, colRatio);
+    const daiAmount = Vault.getDaiAmount(colAmount, ilkStatus.debtMultiplier, liquidationRatio, colRatio);
     await actions
       .lockGemAndDraw(cdpManager, jug, daiJoin, this.ilkInfo, this.cdpId, colAmount, daiAmount)
       .then((tx) => tx.wait());
@@ -92,7 +81,23 @@ export default class Vault {
       chainLog.daiJoin(),
     ]);
 
-    const daiAmount = getDaiAmount(colAmount, ilkStatus.debtMultiplier, liquidationRatio, colRatio);
+    const daiAmount = Vault.getDaiAmount(colAmount, ilkStatus.debtMultiplier, liquidationRatio, colRatio);
     await actions.openLockGemAndDraw(cdpManager, jug, daiJoin, ilkInfo, colAmount, daiAmount).then((tx) => tx.wait());
+  }
+
+  static getDaiAmount(
+    colAmount: FixedNumber,
+    debtMultiplier: FixedNumber,
+    liqRatio: FixedNumber,
+    colRatio: FixedNumber,
+  ): FixedNumber {
+    const calcFormat = getBiggestDecimalsFormat(colAmount.format, UnitFormats.RAY, COL_RATIO_FORMAT, UnitFormats.WAD);
+    const result = colAmount
+      .toFormat(calcFormat)
+      .mulUnsafe(assertFixedFormat(liqRatio, UnitFormats.RAY).toFormat(calcFormat))
+      .divUnsafe(assertFixedFormat(debtMultiplier, UnitFormats.RAY).toFormat(calcFormat))
+      .divUnsafe(assertFixedFormat(colRatio, COL_RATIO_FORMAT).toFormat(calcFormat));
+
+    return result.round(UnitFormats.WAD.decimals).toFormat(UnitFormats.WAD);
   }
 }

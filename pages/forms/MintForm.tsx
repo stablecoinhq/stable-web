@@ -3,7 +3,8 @@ import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
-import { COL_RATIO_FORMAT } from 'contracts/Vault';
+import Vault, { COL_RATIO_FORMAT } from 'contracts/Vault';
+import BNText from 'pages/ilks/[ilk]/BNText';
 
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from './stringNumber';
 
@@ -15,16 +16,27 @@ const CENT = FixedNumber.fromString('100', COL_RATIO_FORMAT);
 export type MintFormProps = {
   ilkInfo: IlkInfo;
   buttonContent: ReactNode;
+  liquidationRatio: FixedNumber;
+  debtMultiplier: FixedNumber;
   onMint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
 };
 
-const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent }) => {
+const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidationRatio, debtMultiplier }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms.mint' });
+
   const [amountText, setAmountText] = useState('');
-  const amount = useMemo(() => toFixedNumberOrUndefined(amountText, ilkInfo.gem.format), [amountText, ilkInfo.gem.format]);
+  const collateralAmount = useMemo(
+    () => toFixedNumberOrUndefined(amountText, ilkInfo.gem.format),
+    [amountText, ilkInfo.gem.format],
+  );
   // input as percentage, return as ratio
   const [ratioText, setRatioText] = useState('150');
   const ratio = useMemo(() => toFixedNumberOrUndefined(ratioText, COL_RATIO_FORMAT)?.divUnsafe(CENT), [ratioText]);
+  const daiAmount = useMemo(() => {
+    if (collateralAmount && ratio) {
+      return Vault.getDaiAmount(collateralAmount, debtMultiplier, liquidationRatio, ratio);
+    }
+  }, [collateralAmount, ratio, debtMultiplier, liquidationRatio]);
   const [minting, setMinting] = useState(false);
 
   const onAmountChange: ChangeEventHandler<HTMLInputElement> = useCallback(
@@ -37,15 +49,15 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent }) => {
   );
 
   const onButtonClick: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
-    if (!amount || !ratio) {
+    if (!collateralAmount || !ratio) {
       return;
     }
 
     setMinting(true);
-    onMint(amount, ratio).finally(() => {
+    onMint(collateralAmount, ratio).finally(() => {
       setMinting(false);
     });
-  }, [amount, onMint, ratio]);
+  }, [collateralAmount, onMint, ratio]);
 
   return (
     <Card component="form" elevation={0}>
@@ -70,9 +82,9 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent }) => {
             InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
           />
         </Grid>
-
+        {daiAmount && <BNText label="Amount of DAI minted" value={daiAmount} />}
         <Grid item xs={12}>
-          <Button variant="contained" fullWidth disabled={!amount || !ratio || minting} onClick={onButtonClick}>
+          <Button variant="contained" fullWidth disabled={!collateralAmount || !ratio || minting} onClick={onButtonClick}>
             {minting ? <CircularProgress /> : buttonContent}
           </Button>
         </Grid>

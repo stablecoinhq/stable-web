@@ -61,7 +61,15 @@ const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidati
     [chainLog, ilkInfo, ilkStatus, liquidationRatio, router],
   );
 
-  return <MintForm ilkInfo={ilkInfo} buttonContent={t('openLabel')} onMint={openVault} />;
+  return (
+    <MintForm
+      ilkInfo={ilkInfo}
+      buttonContent={t('openLabel')}
+      onMint={openVault}
+      liquidationRatio={liquidationRatio}
+      debtMultiplier={ilkStatus.debtMultiplier}
+    />
+  );
 };
 
 type ContentProps = {
