@@ -17,7 +17,7 @@ const WalletStatusCard: FC<WalletStatusCardProps> = ({ label, balance, address }
     <CardHeader title="Wallet Status" subheader={address} />
     <CardContent>
       <Grid container padding={2} spacing={2}>
-        <BNText label={label} value={balance} />
+        <BNText label={label} value={balance} tooltipText="Total amount of token that wallet currently holds" />
       </Grid>
     </CardContent>
   </Card>

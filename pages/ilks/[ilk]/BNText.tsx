@@ -1,5 +1,4 @@
 import { Grid, TextField, Tooltip } from '@mui/material';
-import React from 'react';
 
 import type { FixedNumber } from 'ethers';
 import type { FC, ReactNode } from 'react';
