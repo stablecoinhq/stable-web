@@ -82,7 +82,7 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidati
             InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
           />
         </Grid>
-        {daiAmount && <BNText label="Amount of DAI minted" value={daiAmount} />}
+        {daiAmount && <BNText label="Amount of DAIs to be minted." value={daiAmount} />}
         <Grid item xs={12}>
           <Button variant="contained" fullWidth disabled={!collateralAmount || !ratio || minting} onClick={onButtonClick}>
             {minting ? <CircularProgress /> : buttonContent}
