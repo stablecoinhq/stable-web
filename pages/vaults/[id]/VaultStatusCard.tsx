@@ -18,15 +18,17 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, debtMultiplier }
     () => urnStatus.debt.toFormat(UnitFormats.RAY).mulUnsafe(debtMultiplier),
     [urnStatus.debt, debtMultiplier],
   );
+  const { urn, freeBalance, lockedBalance, collateralizationRatio } = urnStatus;
 
   return (
     <Card>
-      <CardHeader title="Vault Status" subheader={urnStatus.urn} />
+      <CardHeader title="Vault Status" subheader={urn} />
       <CardContent>
         <Grid container padding={2} spacing={2}>
-          <BNText label="Free Collateral" value={urnStatus.freeBalance} />
-          <BNText label="Locked Collateral" value={urnStatus.lockedBalance} />
+          <BNText label="Free Collateral" value={freeBalance} />
+          <BNText label="Locked Collateral" value={lockedBalance} />
           <BNText label="Debt" value={debt} />
+          <BNText label="Collateralization Ratio" value={collateralizationRatio} />
         </Grid>
       </CardContent>
     </Card>

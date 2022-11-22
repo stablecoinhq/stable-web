@@ -1,3 +1,5 @@
+import { FixedFormat } from '@ethersproject/bignumber';
+
 import { Vat__factory } from 'generated/types';
 
 import { toFixedNumber, UnitFormats } from './math';
@@ -19,6 +21,7 @@ export type UrnStatus = {
   urn: string;
   freeBalance: FixedNumber;
   lockedBalance: FixedNumber;
+  collateralizationRatio: FixedNumber;
   debt: FixedNumber;
 };
 
@@ -40,13 +43,16 @@ export default class VatHelper {
   }
 
   getUrnStatus(ilkType: IlkType, urn: string): Promise<UrnStatus> {
-    return Promise.all([this.contract.urns(ilkType.inBytes32, urn), this.contract.gem(ilkType.inBytes32, urn)]).then(
-      ([{ art, ink }, gem]) => ({
-        urn,
-        freeBalance: toFixedNumber(gem, UnitFormats.WAD),
-        lockedBalance: toFixedNumber(ink, UnitFormats.WAD),
-        debt: toFixedNumber(art, UnitFormats.WAD),
-      }),
-    );
+    return Promise.all([
+      this.contract.ilks(ilkType.inBytes32),
+      this.contract.urns(ilkType.inBytes32, urn),
+      this.contract.gem(ilkType.inBytes32, urn),
+    ]).then(([{ spot, rate }, { art, ink }, gem]) => ({
+      urn,
+      freeBalance: toFixedNumber(gem, UnitFormats.WAD),
+      lockedBalance: toFixedNumber(ink, UnitFormats.WAD),
+      collateralizationRatio: toFixedNumber(ink.mul(spot).mul(100).div(art.mul(rate)), FixedFormat.from(0)),
+      debt: toFixedNumber(art, UnitFormats.WAD),
+    }));
   }
 }
