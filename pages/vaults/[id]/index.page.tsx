@@ -67,34 +67,29 @@ type ControllerProps = {
   vault: Vault;
   ilkStatus: IlkStatus;
   liquidationRatio: FixedNumber;
-  updateUrnStatus: () => void;
-  updateBalance: () => void;
+  updateAllBalance: () => void;
+  selectedTab: TabValue;
+  onSelectTab: (_: unknown, value: TabValue) => void;
 };
 
 type TabValue = 'mint' | 'burn';
 
-const Controller: FC<ControllerProps> = ({ chainLog, vault, ilkStatus, liquidationRatio, updateUrnStatus, updateBalance }) => {
-  const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
-
-  const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {
-    setSelectedTab(value);
-  }, []);
-
+const Controller: FC<ControllerProps> = ({
+  chainLog,
+  vault,
+  ilkStatus,
+  liquidationRatio,
+  updateAllBalance,
+  selectedTab,
+  onSelectTab,
+}) => {
   const mint: MintFormProps['onMint'] = useCallback(
-    (amount, ratio) =>
-      vault.mint(chainLog, ilkStatus, liquidationRatio, amount, ratio).then(() => {
-        updateBalance();
-        updateUrnStatus();
-      }),
-    [chainLog, ilkStatus, liquidationRatio, vault, updateUrnStatus, updateBalance],
+    (amount, ratio) => vault.mint(chainLog, ilkStatus, liquidationRatio, amount, ratio).then(() => updateAllBalance()),
+    [chainLog, ilkStatus, liquidationRatio, vault, updateAllBalance],
   );
   const burn: BurnFormProps['onBurn'] = useCallback(
-    (dai, col) =>
-      vault.burn(chainLog, col, dai).then(() => {
-        updateBalance();
-        updateUrnStatus();
-      }),
-    [chainLog, vault, updateUrnStatus, updateBalance],
+    (dai, col) => vault.burn(chainLog, col, dai).then(() => updateAllBalance()),
+    [chainLog, vault, updateAllBalance],
   );
 
   const TabContent: FC = useCallback(() => {
@@ -125,10 +120,18 @@ type ContentProps = {
 
 const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
   const ilkCard = useIlkStatusCardProps(chainLog, cdp.ilk);
+  const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
+  const onSelectTab: (_: unknown, value: TabValue) => void = useCallback(
+    (_, value) => {
+      setSelectedTab(value);
+    },
+    [setSelectedTab],
+  );
+
   const [urnStatus, updateUrnStatus] = usePromiseFactory(
     useCallback(() => chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)), [chainLog, cdp]),
   );
-  const [balance, updateBalance] = usePromiseFactory(
+  const [tokenBalance, updateTokenBalance] = usePromiseFactory(
     useCallback(async () => {
       if (cdp) {
         const ilkRegistry = await chainLog.ilkRegistry();
@@ -137,9 +140,23 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
       }
     }, [chainLog, cdp]),
   );
+  const [daiBalance, updateDaiBalance] = usePromiseFactory(
+    useCallback(async () => {
+      if (cdp) {
+        const dai = await chainLog.dai();
+        return dai.getBalance();
+      }
+    }, [chainLog, cdp]),
+  );
   const vault = useMemo(() => ilkCard && new Vault(ilkCard.ilkInfo, cdp.id), [cdp, ilkCard]);
 
-  if (!ilkCard || !urnStatus || !vault || !balance) {
+  const updateAllBalance = () => {
+    updateDaiBalance();
+    updateTokenBalance();
+    updateUrnStatus();
+  };
+
+  if (!ilkCard || !urnStatus || !vault || !tokenBalance || !daiBalance) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
         <CircularProgress />
@@ -156,14 +173,19 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
         stabilityFee={ilkCard.stabilityFee}
       />
       <VaultStatusCard urnStatus={urnStatus} debtMultiplier={ilkCard.ilkStatus.debtMultiplier} />
-      <WalletStatusCard balance={balance} address={address} />
+      <WalletStatusCard
+        label={selectedTab === 'mint' ? 'Balance' : 'DAI balance'}
+        balance={selectedTab === 'mint' ? tokenBalance : daiBalance}
+        address={address}
+      />
       <Controller
         chainLog={chainLog}
         vault={vault}
         ilkStatus={ilkCard.ilkStatus}
         liquidationRatio={ilkCard.liquidationRatio}
-        updateUrnStatus={updateUrnStatus}
-        updateBalance={updateBalance}
+        updateAllBalance={updateAllBalance}
+        selectedTab={selectedTab}
+        onSelectTab={onSelectTab}
       />
     </Stack>
   );
