@@ -1,3 +1,4 @@
+import { FixedFormat } from '@ethersproject/bignumber';
 import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
@@ -30,7 +31,8 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidati
     [amountText, ilkInfo.gem.format],
   );
   // input as percentage, return as ratio
-  const [ratioText, setRatioText] = useState('150');
+  const initialRatio = liquidationRatio.toFormat(COL_RATIO_FORMAT).mulUnsafe(CENT).toFormat(FixedFormat.from(0));
+  const [ratioText, setRatioText] = useState(initialRatio.toString());
   const ratio = useMemo(() => toFixedNumberOrUndefined(ratioText, COL_RATIO_FORMAT)?.divUnsafe(CENT), [ratioText]);
   const daiAmount = useMemo(() => {
     if (collateralAmount && ratio) {
@@ -82,7 +84,13 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidati
             InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
           />
         </Grid>
-        {daiAmount && <BNText label="Amount of DAIs to be minted." value={daiAmount} />}
+        {daiAmount && (
+          <BNText
+            label="Amount of DAIs to be minted."
+            value={daiAmount}
+            tooltipText="Total amount of DAI that will be minted after this operation."
+          />
+        )}
         <Grid item xs={12}>
           <Button variant="contained" fullWidth disabled={!collateralAmount || !ratio || minting} onClick={onButtonClick}>
             {minting ? <CircularProgress /> : buttonContent}
