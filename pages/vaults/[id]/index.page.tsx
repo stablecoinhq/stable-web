@@ -67,9 +67,10 @@ type ControllerProps = {
   vault: Vault;
   ilkStatus: IlkStatus;
   liquidationRatio: FixedNumber;
+  tokenBalance: FixedNumber;
+  daiBalance: FixedNumber;
+  address: string;
   updateAllBalance: () => void;
-  selectedTab: TabValue;
-  onSelectTab: (_: unknown, value: TabValue) => void;
 };
 
 type TabValue = 'mint' | 'burn';
@@ -80,9 +81,17 @@ const Controller: FC<ControllerProps> = ({
   ilkStatus,
   liquidationRatio,
   updateAllBalance,
-  selectedTab,
-  onSelectTab,
+  tokenBalance,
+  daiBalance,
+  address,
 }) => {
+  const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
+  const onSelectTab: (_: unknown, value: TabValue) => void = useCallback(
+    (_, value) => {
+      setSelectedTab(value);
+    },
+    [setSelectedTab],
+  );
   const mint: MintFormProps['onMint'] = useCallback(
     (amount, ratio) => vault.mint(chainLog, ilkStatus, liquidationRatio, amount, ratio).then(() => updateAllBalance()),
     [chainLog, ilkStatus, liquidationRatio, vault, updateAllBalance],
@@ -103,6 +112,11 @@ const Controller: FC<ControllerProps> = ({
 
   return (
     <>
+      <WalletStatusCard
+        label={selectedTab === 'mint' ? 'Balance' : 'DAI balance'}
+        balance={selectedTab === 'mint' ? tokenBalance : daiBalance}
+        address={address}
+      />
       <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
         <Tab label="Mint" value="mint" />
         <Tab label="Burn" value="burn" />
@@ -120,13 +134,6 @@ type ContentProps = {
 
 const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
   const ilkCard = useIlkStatusCardProps(chainLog, cdp.ilk);
-  const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
-  const onSelectTab: (_: unknown, value: TabValue) => void = useCallback(
-    (_, value) => {
-      setSelectedTab(value);
-    },
-    [setSelectedTab],
-  );
 
   const [urnStatus, updateUrnStatus] = usePromiseFactory(
     useCallback(() => chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)), [chainLog, cdp]),
@@ -173,19 +180,15 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
         stabilityFee={ilkCard.stabilityFee}
       />
       <VaultStatusCard urnStatus={urnStatus} debtMultiplier={ilkCard.ilkStatus.debtMultiplier} />
-      <WalletStatusCard
-        label={selectedTab === 'mint' ? 'Balance' : 'DAI balance'}
-        balance={selectedTab === 'mint' ? tokenBalance : daiBalance}
-        address={address}
-      />
       <Controller
         chainLog={chainLog}
         vault={vault}
         ilkStatus={ilkCard.ilkStatus}
         liquidationRatio={ilkCard.liquidationRatio}
         updateAllBalance={updateAllBalance}
-        selectedTab={selectedTab}
-        onSelectTab={onSelectTab}
+        tokenBalance={tokenBalance}
+        daiBalance={daiBalance}
+        address={address}
       />
     </Stack>
   );

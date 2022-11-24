@@ -65,10 +65,10 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
   const ilkCard = useIlkStatusCardProps(chainLog, ilkType);
   const [balance] = usePromiseFactory(
     useCallback(async () => {
-      const ilkRegistry = await chainLog.ilkRegistry();
-      const ilk = await ilkRegistry.info(ilkType);
-      return ilk.gem.getBalance();
-    }, [chainLog, ilkType]),
+      if (ilkCard) {
+        return ilkCard.ilkInfo.gem.getBalance();
+      }
+    }, [ilkCard]),
   );
 
   if (!ilkCard || !balance) {
