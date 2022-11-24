@@ -1,24 +1,32 @@
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
+import { BigNumber, FixedNumber } from 'ethers';
 import { useMemo } from 'react';
 
 import { UnitFormats } from 'contracts/math';
 import BNText from 'pages/ilks/[ilk]/BNText';
 
-import type { UrnStatus } from 'contracts/VatHelper';
-import type { FixedNumber } from 'ethers';
+import type { IlkStatus, UrnStatus } from 'contracts/VatHelper';
 import type { FC } from 'react';
 
 export type VaultStatusCardProps = {
   urnStatus: UrnStatus;
-  debtMultiplier: FixedNumber;
+  ilkStatus: IlkStatus;
 };
 
-const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, debtMultiplier }) => {
+const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus }) => {
   const debt = useMemo(
-    () => urnStatus.debt.toFormat(UnitFormats.RAY).mulUnsafe(debtMultiplier),
-    [urnStatus.debt, debtMultiplier],
+    () => urnStatus.debt.toFormat(UnitFormats.RAY).mulUnsafe(ilkStatus.debtMultiplier),
+    [urnStatus.debt, ilkStatus.debtMultiplier],
   );
-  const { urn, freeBalance, lockedBalance, collateralizationRatio } = urnStatus;
+  const { urn, freeBalance, lockedBalance, debt: urnDebt } = urnStatus;
+  const { debtMultiplier, price } = ilkStatus;
+  const calcFormat = UnitFormats.RAY;
+  // collateralizationRatio = (ink * spot) / (art * rate)
+  const collateralizationRatio = lockedBalance
+    .toFormat(calcFormat)
+    .mulUnsafe(price.toFormat(calcFormat))
+    .divUnsafe(urnDebt.toFormat(calcFormat).mulUnsafe(debtMultiplier.toFormat(calcFormat)))
+    .mulUnsafe(FixedNumber.fromValue(BigNumber.from(100)).toFormat(calcFormat));
 
   return (
     <Card>
