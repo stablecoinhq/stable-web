@@ -140,12 +140,10 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
   );
   const [tokenBalance, updateTokenBalance] = usePromiseFactory(
     useCallback(async () => {
-      if (cdp) {
-        const ilkRegistry = await chainLog.ilkRegistry();
-        const ilk = await ilkRegistry.info(cdp.ilk);
-        return ilk.gem.getBalance();
+      if (ilkCard) {
+        return ilkCard.ilkInfo.gem.getBalance();
       }
-    }, [chainLog, cdp]),
+    }, [ilkCard]),
   );
   const [daiBalance, updateDaiBalance] = usePromiseFactory(
     useCallback(async () => {
