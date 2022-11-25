@@ -18,8 +18,20 @@ export default class ERC20Helper {
     this.format = format;
   }
 
-  private getAllowance(spenderAddress: string) {
-    return this.contract.allowance(this.provider.address, spenderAddress).then((value) => toFixedNumber(value, this.format));
+  private async getAllowance(spenderAddress: string) {
+    const value = await this.contract.allowance(this.provider.address, spenderAddress);
+    return toFixedNumber(value, this.format);
+  }
+
+  async getBalance() {
+    const symbol = await this.contract.symbol();
+    if (symbol === 'WETH') {
+      const value = await this.contract.balanceOf(this.provider.address);
+      const ethBalance = await this.provider.getBalance(this.provider.address);
+      return toFixedNumber(value.add(ethBalance), this.format);
+    }
+    const value = await this.contract.balanceOf(this.provider.address);
+    return toFixedNumber(value, this.format);
   }
 
   private approve(spenderAddress: string, amount: FixedNumber) {

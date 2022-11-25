@@ -1,32 +1,47 @@
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
+import { BigNumber, FixedNumber } from 'ethers';
 import { useMemo } from 'react';
 
 import { UnitFormats } from 'contracts/math';
 import BNText from 'pages/ilks/[ilk]/BNText';
 
-import type { UrnStatus } from 'contracts/VatHelper';
-import type { FixedNumber } from 'ethers';
+import type { IlkStatus, UrnStatus } from 'contracts/VatHelper';
 import type { FC } from 'react';
 
 export type VaultStatusCardProps = {
   urnStatus: UrnStatus;
-  debtMultiplier: FixedNumber;
+  ilkStatus: IlkStatus;
 };
 
-const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, debtMultiplier }) => {
+const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus }) => {
   const debt = useMemo(
-    () => urnStatus.debt.toFormat(UnitFormats.RAY).mulUnsafe(debtMultiplier),
-    [urnStatus.debt, debtMultiplier],
+    () => urnStatus.debt.toFormat(UnitFormats.RAY).mulUnsafe(ilkStatus.debtMultiplier),
+    [urnStatus.debt, ilkStatus.debtMultiplier],
   );
+  const { urn, freeBalance, lockedBalance, debt: urnDebt } = urnStatus;
+  // collateralizationRatio = (ink * spot) / (art * rate)
+  const collateralizationRatio = useMemo(() => {
+    const { debtMultiplier, price } = ilkStatus;
+    const calcFormat = UnitFormats.RAY;
+    if (urnDebt.isZero() || debtMultiplier.isZero()) {
+      return FixedNumber.fromValue(BigNumber.from(0));
+    }
+    return lockedBalance
+      .toFormat(calcFormat)
+      .mulUnsafe(price.toFormat(calcFormat))
+      .divUnsafe(urnDebt.toFormat(calcFormat).mulUnsafe(debtMultiplier.toFormat(calcFormat)))
+      .mulUnsafe(FixedNumber.fromValue(BigNumber.from(100)).toFormat(calcFormat));
+  }, [ilkStatus, lockedBalance, urnDebt]);
 
   return (
     <Card>
-      <CardHeader title="Vault Status" subheader={urnStatus.urn} />
+      <CardHeader title="Vault Status" subheader={urn} />
       <CardContent>
         <Grid container padding={2} spacing={2}>
-          <BNText label="Free Collateral" value={urnStatus.freeBalance} />
-          <BNText label="Locked Collateral" value={urnStatus.lockedBalance} />
+          <BNText label="Free Collateral" value={freeBalance} />
+          <BNText label="Locked Collateral" value={lockedBalance} />
           <BNText label="Debt" value={debt} />
+          <BNText label="Collateralization Ratio" value={collateralizationRatio} />
         </Grid>
       </CardContent>
     </Card>
