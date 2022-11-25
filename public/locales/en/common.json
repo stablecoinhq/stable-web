@@ -93,6 +93,10 @@
       "lockedCollateral": "Locked Collateral",
       "debt": "Debt",
       "manageVault": "Manage Vault"
+    },
+    "earn": {
+      "cardTitle": "Earn Savings",
+      "cardDesc": "Deposit your $t(terms.stableToken) to DSR and earn savings."
     }
   },
   "site": {

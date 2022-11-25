@@ -93,6 +93,10 @@
       "lockedCollateral": "ロックされた担保",
       "debt": "負債",
       "manageVault": "管理"
+    },
+    "earn": {
+      "cardTitle": "利息を得る",
+      "cardDesc": "DSRに$t(terms.stableToken)を預け入れて利息を得る"
     }
   },
   "terms": {

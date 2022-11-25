@@ -1,6 +1,6 @@
 import { formatBytes32String } from '@ethersproject/strings';
 
-import { ChainLog__factory, DaiJoin__factory } from 'generated/types';
+import { ChainLog__factory, DaiJoin__factory, Pot__factory } from 'generated/types';
 
 import { UnitFormats } from '../helpers/math';
 
@@ -9,6 +9,7 @@ import ERC20Helper from './ERC20Helper';
 import GetCDPsHelper from './GetCDPsHelper';
 import IlkRegistryHelper from './IlkRegistryHelper';
 import JugHelper from './JugHelper';
+import ProxyActionsDsrHelper from './ProxyActionsDsrHelper';
 import ProxyActionsHelper from './ProxyActionsHelper';
 import ProxyRegistryHelper from './ProxyRegistryHelper';
 import SpotHelper from './SpotHelper';
@@ -82,11 +83,19 @@ export default class ChainLogHelper {
     return this.getAddress('PROXY_ACTIONS').then((address) => new ProxyActionsHelper(this.provider, address, proxy));
   }
 
+  proxyActionsDsr(proxy: DSProxy) {
+    return this.getAddress('PROXY_ACTIONS_DSR').then((address) => new ProxyActionsDsrHelper(this.provider, address, proxy));
+  }
+
   dai() {
     return this.getAddress('MCD_DAI').then((address) => new ERC20Helper(this.provider, address, UnitFormats.WAD));
   }
 
   daiJoin() {
     return this.getAddress('MCD_JOIN_DAI').then((address) => DaiJoin__factory.connect(address, this.provider.getSigner()));
+  }
+
+  pot() {
+    return this.getAddress('MCD_POT').then((address) => Pot__factory.connect(address, this.provider))
   }
 }
