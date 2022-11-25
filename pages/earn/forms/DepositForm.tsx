@@ -8,7 +8,6 @@ import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from '../../forms/
 import type { FixedNumber } from 'ethers';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
-
 export type DepositFormProps = {
   buttonContent: ReactNode;
   onDeposit: (amount: FixedNumber) => Promise<void>;

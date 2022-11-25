@@ -8,7 +8,6 @@ import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from '../../forms/
 import type { FixedNumber } from 'ethers';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
-
 export type WithdrawFormProps = {
   buttonContent: ReactNode;
   onWithdraw: (amount: FixedNumber) => Promise<void>;

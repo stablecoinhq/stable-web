@@ -18,17 +18,20 @@ export default class ProxyActionsDsrHelper {
   get proxyAddress() {
     return this.proxy.address;
   }
-  
+
   private get encodeFunctionData() {
     return this.actions.interface.encodeFunctionData.bind(this.actions.interface);
   }
 
   private execute(data: string, overrides: PayableOverrides | undefined = undefined) {
+    // TODO: Gas limitを乗算する
+    const GAS_LIMIT = 300000;
+
     if (overrides) {
       return this.proxy['execute(address,bytes)'](this.actions.address, data, overrides);
     }
 
-    return this.proxy['execute(address,bytes)'](this.actions.address, data);
+    return this.proxy['execute(address,bytes)'](this.actions.address, data, { gasLimit: GAS_LIMIT });
   }
 
   deposit(daiJoin: DaiJoin, pot: Pot, daiAmount: FixedNumber) {

@@ -20,13 +20,19 @@ export default class Dsr {
     this.dai = dai;
   }
 
+  get proxyAddress() {
+    return this.actions.proxyAddress;
+  }
+
   async deposit(daiAmount: FixedNumber) {
     await this.dai.ensureAllowance(this.actions.proxyAddress, daiAmount);
-    await this.actions.deposit(this.daiJoin, this.pot, daiAmount);
+    const tx = await this.actions.deposit(this.daiJoin, this.pot, daiAmount);
+    await tx.wait();
   }
 
   async withdraw(daiAmount: FixedNumber) {
-    await this.actions.withdraw(this.daiJoin, this.pot, daiAmount);
+    const tx = await this.actions.withdraw(this.daiJoin, this.pot, daiAmount);
+    await tx.wait();
   }
 
   withdrawAll() {

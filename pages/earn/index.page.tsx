@@ -4,13 +4,16 @@ import { useCallback, useState } from 'react';
 import Dsr from 'contracts/Dsr';
 import { useChainLog } from 'pages/ethereum/ContractHooks';
 import usePromiseFactory from 'pages/usePromiseFactory';
+import BalanceStatusCard from 'pages/vaults/[id]/BalanceStatusCard';
 
+import SavingRateCard from './SavingRateCard';
 import DepositForm from './forms/DepositForm';
 import WithdrawForm from './forms/WithdrawForm';
 
 import type { DepositFormProps } from './forms/DepositForm';
 import type { WithdrawFormProps } from './forms/WithdrawForm';
 import type ChainLogHelper from 'contracts/ChainLogHelper';
+import type EthereumProvider from 'contracts/EthereumProvider';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
@@ -27,9 +30,8 @@ const Controller: FC<ControllerProps> = ({ dsr }) => {
     setSelectedTab(value);
   }, []);
 
-  // chainlogを使ってdsrproxy関数を呼び込む
-  const deposit: DepositFormProps['onDeposit'] = useCallback((amount) => (dsr.deposit(amount)), [dsr])
-  const withdraw: WithdrawFormProps['onWithdraw'] = useCallback((amount) => (dsr.withdraw(amount)), [dsr])
+  const deposit: DepositFormProps['onDeposit'] = useCallback((amount) => dsr.deposit(amount), [dsr]);
+  const withdraw: WithdrawFormProps['onWithdraw'] = useCallback((amount) => dsr.withdraw(amount), [dsr]);
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
       case 'deposit':
@@ -51,19 +53,35 @@ const Controller: FC<ControllerProps> = ({ dsr }) => {
 };
 
 type ContentProps = {
+  provider: EthereumProvider;
   chainLog: ChainLogHelper;
 };
 
-const Content: FC<ContentProps> = ({ chainLog }) => {
+const Content: FC<ContentProps> = ({ chainLog, provider }) => {
   // chainlogを使ってdsrを求める
   const [dsr] = usePromiseFactory(useCallback(() => Dsr.fromChainLog(chainLog), [chainLog]));
-  const [savingRate] = usePromiseFactory(useCallback(async () => {
-    if (dsr) {
-      return dsr.getSavingRate();
-    }
-  }, [dsr]));
+  const [savingRate] = usePromiseFactory(
+    useCallback(async () => {
+      if (dsr) {
+        return dsr.getSavingRate();
+      }
+    }, [dsr]),
+  );
+  const [balance] = usePromiseFactory(
+    useCallback(async () => {
+      const dai = await chainLog.dai();
+      return dai.getBalance();
+    }, [chainLog]),
+  );
+  const [deposit] = usePromiseFactory(
+    useCallback(async () => {
+      if (dsr) {
+        return dsr.getDepositAmount();
+      }
+    }, [dsr]),
+  );
 
-  if (!dsr || !savingRate) {
+  if (!dsr || !savingRate || !balance || !deposit) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
         <CircularProgress />
@@ -73,6 +91,9 @@ const Content: FC<ContentProps> = ({ chainLog }) => {
 
   return (
     <Stack padding={2} spacing={2}>
+      <SavingRateCard savingRate={savingRate} />
+      <BalanceStatusCard title="Deposit Status" address={dsr.proxyAddress} balance={deposit} label="Deposit" />
+      <BalanceStatusCard title="Wallet Status" address={provider.address} balance={balance} label="Balance" />
       <Controller dsr={dsr} />
     </Stack>
   );
@@ -83,7 +104,7 @@ const Earn: NextPageWithEthereum = ({ provider }) => {
   return (
     <Card elevation={0}>
       <CardContent>
-        <Content chainLog={chainLog} />
+        <Content chainLog={chainLog} provider={provider} />
       </CardContent>
     </Card>
   );

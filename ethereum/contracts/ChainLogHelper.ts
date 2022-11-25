@@ -96,6 +96,6 @@ export default class ChainLogHelper {
   }
 
   pot() {
-    return this.getAddress('MCD_POT').then((address) => Pot__factory.connect(address, this.provider))
+    return this.getAddress('MCD_POT').then((address) => Pot__factory.connect(address, this.provider));
   }
 }
