@@ -6,7 +6,7 @@ import type { FC, ReactNode } from 'react';
 export type BNTextProps = {
   label: ReactNode;
   value: FixedNumber;
-  tooltipText: string;
+  tooltipText: NonNullable<ReactNode>;
 };
 
 const BNText: FC<BNTextProps> = ({ label, value, tooltipText: helperText }) => (
