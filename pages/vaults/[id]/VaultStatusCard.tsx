@@ -19,14 +19,19 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus }) => 
     [urnStatus.debt, ilkStatus.debtMultiplier],
   );
   const { urn, freeBalance, lockedBalance, debt: urnDebt } = urnStatus;
-  const { debtMultiplier, price } = ilkStatus;
-  const calcFormat = UnitFormats.RAY;
   // collateralizationRatio = (ink * spot) / (art * rate)
-  const collateralizationRatio = lockedBalance
-    .toFormat(calcFormat)
-    .mulUnsafe(price.toFormat(calcFormat))
-    .divUnsafe(urnDebt.toFormat(calcFormat).mulUnsafe(debtMultiplier.toFormat(calcFormat)))
-    .mulUnsafe(FixedNumber.fromValue(BigNumber.from(100)).toFormat(calcFormat));
+  const collateralizationRatio = useMemo(() => {
+    const { debtMultiplier, price } = ilkStatus;
+    const calcFormat = UnitFormats.RAY;
+    if (urnDebt.isZero() || debtMultiplier.isZero()) {
+      return FixedNumber.fromValue(BigNumber.from(0));
+    }
+    return lockedBalance
+      .toFormat(calcFormat)
+      .mulUnsafe(price.toFormat(calcFormat))
+      .divUnsafe(urnDebt.toFormat(calcFormat).mulUnsafe(debtMultiplier.toFormat(calcFormat)))
+      .mulUnsafe(FixedNumber.fromValue(BigNumber.from(100)).toFormat(calcFormat));
+  }, [ilkStatus, lockedBalance, urnDebt]);
 
   return (
     <Card>
