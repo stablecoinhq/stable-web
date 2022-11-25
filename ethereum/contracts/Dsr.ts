@@ -1,57 +1,24 @@
 import { toFixedNumber, UnitFormats } from './math';
 
 import type ChainLogHelper from './ChainLogHelper';
-import type ERC20Helper from './ERC20Helper';
-import type ProxyActionsDsrHelper from './ProxyActionsDsrHelper';
 import type { FixedNumber } from 'ethers';
-// eslint-disable-next-line unused-imports/no-unused-imports
-import type { DaiJoin, Pot } from 'generated/types';
 
 export default class Dsr {
-  private readonly actions: ProxyActionsDsrHelper;
-  private readonly daiJoin: DaiJoin;
-  private readonly pot: Pot;
-  private readonly dai: ERC20Helper;
-  constructor(actions: ProxyActionsDsrHelper, daiJoin: DaiJoin, pot: Pot, dai: ERC20Helper) {
-    this.actions = actions;
-    this.daiJoin = daiJoin;
-    this.pot = pot;
-
-    this.dai = dai;
-  }
-
-  get proxyAddress() {
-    return this.actions.proxyAddress;
-  }
-
-  async deposit(daiAmount: FixedNumber) {
-    await this.dai.ensureAllowance(this.actions.proxyAddress, daiAmount);
-    const tx = await this.actions.deposit(this.daiJoin, this.pot, daiAmount);
+  static async deposit(chainLog: ChainLogHelper, daiAmount: FixedNumber) {
+    const [actions, daiJoin, pot] = await Promise.all([
+      Promise.all([chainLog.proxyRegistry().then((proxyRegistry) => proxyRegistry.ensureDSProxy()), chainLog.dai()]).then(
+        ([proxy, dai]) =>
+          Promise.all([chainLog.proxyActionsDsr(proxy), dai.ensureAllowance(proxy.address, daiAmount)]).then(([x, _]) => x),
+      ),
+      chainLog.daiJoin(),
+      chainLog.pot(),
+    ]);
+    const tx = await actions.deposit(daiJoin, pot, daiAmount);
     await tx.wait();
   }
 
-  async withdraw(daiAmount: FixedNumber) {
-    const tx = await this.actions.withdraw(this.daiJoin, this.pot, daiAmount);
-    await tx.wait();
-  }
-
-  withdrawAll() {
-    this.actions.withdrawAll(this.daiJoin, this.pot);
-  }
-
-  async getDepositAmount() {
-    const pie = await this.pot.pie(this.actions.proxyAddress);
-    return toFixedNumber(pie, UnitFormats.WAD);
-  }
-
-  async getSavingRate() {
-    const dsr = await this.pot.dsr();
-    return toFixedNumber(dsr, UnitFormats.RAY);
-  }
-
-  static async fromChainLog(chainLog: ChainLogHelper) {
-    const [dai, actions, daiJoin, pot] = await Promise.all([
-      chainLog.dai(),
+  static async withdraw(chainLog: ChainLogHelper, daiAmount: FixedNumber) {
+    const [actions, daiJoin, pot] = await Promise.all([
       chainLog
         .proxyRegistry()
         .then((proxyRegistry) => proxyRegistry.ensureDSProxy())
@@ -59,6 +26,36 @@ export default class Dsr {
       chainLog.daiJoin(),
       chainLog.pot(),
     ]);
-    return new Dsr(actions, daiJoin, pot, dai);
+    const tx = await actions.withdraw(daiJoin, pot, daiAmount);
+    await tx.wait();
+  }
+
+  static async withdrawAll(chainLog: ChainLogHelper) {
+    const [actions, daiJoin, pot] = await Promise.all([
+      chainLog
+        .proxyRegistry()
+        .then((proxyRegistry) => proxyRegistry.ensureDSProxy())
+        .then((proxy) => chainLog.proxyActionsDsr(proxy)),
+      chainLog.daiJoin(),
+      chainLog.pot(),
+    ]);
+    const tx = await actions.withdrawAll(daiJoin, pot);
+    await tx.wait();
+  }
+
+  static async getDepositAmount(chainLog: ChainLogHelper) {
+    const proxyRegistry = await chainLog.proxyRegistry();
+    const proxy = await proxyRegistry.getDSProxy();
+    if (proxy) {
+      const pot = await chainLog.pot();
+      const pie = await pot.pie(proxy.address);
+      return { address: proxy.address, amount: toFixedNumber(pie, UnitFormats.WAD) };
+    }
+  }
+
+  static async getSavingRate(chainLog: ChainLogHelper) {
+    const pot = await chainLog.pot();
+    const dsr = await pot.dsr();
+    return toFixedNumber(dsr, UnitFormats.RAY);
   }
 }

@@ -18,20 +18,20 @@ import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
 type ControllerProps = {
-  dsr: Dsr;
+  chainLog: ChainLogHelper;
 };
 
 type TabValue = 'deposit' | 'withdraw';
 
-const Controller: FC<ControllerProps> = ({ dsr }) => {
+const Controller: FC<ControllerProps> = ({ chainLog }) => {
   const [selectedTab, setSelectedTab] = useState<TabValue>('deposit');
 
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {
     setSelectedTab(value);
   }, []);
 
-  const deposit: DepositFormProps['onDeposit'] = useCallback((amount) => dsr.deposit(amount), [dsr]);
-  const withdraw: WithdrawFormProps['onWithdraw'] = useCallback((amount) => dsr.withdraw(amount), [dsr]);
+  const deposit: DepositFormProps['onDeposit'] = useCallback((amount) => Dsr.deposit(chainLog, amount), [chainLog]);
+  const withdraw: WithdrawFormProps['onWithdraw'] = useCallback((amount) => Dsr.withdraw(chainLog, amount), [chainLog]);
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
       case 'deposit':
@@ -58,30 +58,16 @@ type ContentProps = {
 };
 
 const Content: FC<ContentProps> = ({ chainLog, provider }) => {
-  // chainlogを使ってdsrを求める
-  const [dsr] = usePromiseFactory(useCallback(() => Dsr.fromChainLog(chainLog), [chainLog]));
-  const [savingRate] = usePromiseFactory(
-    useCallback(async () => {
-      if (dsr) {
-        return dsr.getSavingRate();
-      }
-    }, [dsr]),
-  );
+  const [savingRate] = usePromiseFactory(useCallback(async () => Dsr.getSavingRate(chainLog), [chainLog]));
   const [balance] = usePromiseFactory(
     useCallback(async () => {
       const dai = await chainLog.dai();
       return dai.getBalance();
     }, [chainLog]),
   );
-  const [deposit] = usePromiseFactory(
-    useCallback(async () => {
-      if (dsr) {
-        return dsr.getDepositAmount();
-      }
-    }, [dsr]),
-  );
+  const [deposit] = usePromiseFactory(useCallback(async () => Dsr.getDepositAmount(chainLog), [chainLog]));
 
-  if (!dsr || !savingRate || !balance || !deposit) {
+  if (!savingRate || !balance) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
         <CircularProgress />
@@ -92,9 +78,23 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
   return (
     <Stack padding={2} spacing={2}>
       <SavingRateCard savingRate={savingRate} />
-      <BalanceStatusCard title="Deposit Status" address={dsr.proxyAddress} balance={deposit} label="Deposit" />
-      <BalanceStatusCard title="Wallet Status" address={provider.address} balance={balance} label="Balance" />
-      <Controller dsr={dsr} />
+      {deposit && (
+        <BalanceStatusCard
+          title="Deposit Status"
+          address={deposit.address}
+          balance={deposit.amount}
+          label="Deposit"
+          tooltipText="Amount of DAI currently being deposited at DSR"
+        />
+      )}
+      <BalanceStatusCard
+        title="Wallet Status"
+        address={provider.address}
+        balance={balance}
+        label="DAI Balance"
+        tooltipText="Amount of token that wallet currently holds"
+      />
+      <Controller chainLog={chainLog} />
     </Stack>
   );
 };
