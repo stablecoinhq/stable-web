@@ -62,7 +62,7 @@ const Content: FC<ContentProps> = ({ cdps }) => {
     <List>
       {cdps.map(({ id, urn, ilk }) => (
         <ListItem key={id.toString()} disablePadding>
-          <Link href={`/vaults/${id.toHexString()}`} passHref>
+          <Link href={`/vaults/${id.toString()}`} passHref>
             <ListItemButton>
               <ListItemIcon>
                 <AccountBalanceWalletIcon />
