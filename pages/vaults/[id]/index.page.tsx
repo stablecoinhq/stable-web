@@ -12,6 +12,7 @@ import {
   Tabs,
   Typography,
 } from '@mui/material';
+import { FixedNumber } from 'ethers';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCallback, useMemo, useState } from 'react';
@@ -33,14 +34,13 @@ import type CDPManagerHelper from 'contracts/CDPManagerHelper';
 import type ChainLogHelper from 'contracts/ChainLogHelper';
 import type { CDP } from 'contracts/GetCDPsHelper';
 import type { IlkStatus } from 'contracts/VatHelper';
-import type { FixedNumber } from 'ethers';
 import type { NextPageWithEthereum } from 'next';
 import type { BurnFormProps } from 'pages/forms/BurnForm';
 import type { MintFormProps } from 'pages/forms/MintForm';
 import type { FC } from 'react';
 
-const useCDP = (cdpManager: CDPManagerHelper | undefined, cdpId: FixedNumber | undefined) =>
-  usePromiseFactory(useCallback(async () => cdpId && cdpManager?.getCDP(cdpId), [cdpManager, cdpId]))[0];
+const useCDP = (cdpManager: CDPManagerHelper | undefined, cdpId: FixedNumber) =>
+  usePromiseFactory(useCallback(async () => cdpManager?.getCDP(cdpId), [cdpManager, cdpId]))[0];
 
 const useProxyAddress = (chainLog: ChainLogHelper) => {
   const proxyRegistry = useProxyRegistry(chainLog);
@@ -195,7 +195,10 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
 
 const VaultDetail: NextPageWithEthereum = ({ provider }) => {
   const router = useRouter();
-  const cdpId = useMemo(() => toFixedNumberOrUndefined(getStringQuery(router.query.id), INT_FORMAT), [router.query.id]);
+  const cdpId = useMemo(
+    () => toFixedNumberOrUndefined(getStringQuery(router.query.id), INT_FORMAT) || FixedNumber.fromString('0', INT_FORMAT),
+    [router.query.id],
+  );
   const chainLog = useChainLog(provider);
   const cdpManager = useCDPManager(chainLog);
   const cdp = useCDP(cdpManager, cdpId);
