@@ -62,7 +62,7 @@
     },
     "vault": {
       "backToList": "$t(pages.errors.backToList)",
-      "cardDesc": "Create a new vault or manage your existing vaults.",
+      "cardDesc": "Create a new $t(terms.vault_one) or manage your existing $t(terms.vault_other).",
       "cardTitle": "Manage $t(terms.vault_other)",
       "listTitle": "Vaults",
       "new": "New $t(terms.vault_one)",

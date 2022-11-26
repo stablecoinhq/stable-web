@@ -2,7 +2,7 @@
 module.exports = {
   i18n: {
     defaultLocale: 'en',
-    locales: ['en'],
+    locales: ['en', 'ja'],
   },
   localePath: require('path').resolve('./public/locales'),
 };
