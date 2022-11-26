@@ -1,5 +1,6 @@
 import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from '@mui/material';
 import { FixedNumber } from 'ethers';
+import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
 import { COL_RATIO_FORMAT } from 'contracts/Vault';
@@ -18,6 +19,7 @@ export type MintFormProps = {
 };
 
 const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'forms.mint' });
   const [amountText, setAmountText] = useState('');
   const amount = useMemo(() => toFixedNumberOrUndefined(amountText, ilkInfo.gem.format), [amountText, ilkInfo.gem.format]);
   // input as percentage, return as ratio
@@ -51,7 +53,7 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent }) => {
         <Grid item xs={6}>
           <TextField
             fullWidth
-            label={`Amount of ${ilkInfo.name} to lock`}
+            label={t('lockAmount', { gem: ilkInfo.name })}
             value={amountText}
             onChange={onAmountChange}
             InputProps={{
@@ -62,7 +64,7 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent }) => {
         <Grid item xs={6}>
           <TextField
             fullWidth
-            label="Collateralization Ratio"
+            label={t('colRatio')}
             value={ratioText}
             onChange={onRatioChange}
             InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}

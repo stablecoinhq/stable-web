@@ -1,0 +1,84 @@
+{
+  "cards": {
+    "ilk": {
+      "annualFee": "Annual Fee",
+      "annualFeeDesc": "The Maker Protocol collects a Stability Fee on Dai that is generated from Maker Vaults. It is a variable-rate fee that changes when Maker’s governing body votes on proposals put forth by Risk Teams.",
+      "currentPrice": "Current Price",
+      "currentPriceDesc": "Current price of collateral {{collateral}} in DAI",
+      "debtFloor": "Debt Floor",
+      "debtFloorDesc": "The minimum amount of DAI that can be minted for this type of Vault. This value is also called the \"Dust Limit\".",
+      "liqRatio": "Liquidation Ratio",
+      "liqRatioDesc": "If the $t(terms.vault) reaches below the minimum collateralization level it is considered undercollateralized and is subject to liquidation. Your collateral will then be partially auctioned off to cover outstanding debt and liquidation fee.",
+      "maxLiquidity": "Maximum Liquidity",
+      "maxLiquidityDesc": "The Maximum Liquidity specified, the amount of DAI that the users can be issued for this type of Vault.",
+      "title": "{{ilk}} $t(terms.collateral) status",
+      "totalIssue": "Total Issue",
+      "totalIssueDesc": "Total amount of DAI issued by collateral"
+    },
+    "vault": {
+      "colRatio": "$t(terms.colRatio)",
+      "debt": "Debt",
+      "debtDesc": "Total amount of debt that this $t(terms.vault) owes",
+      "freeCollateral": "Free Collateral",
+      "freeCollateralDesc": "Amount of tokens that is currently being locked in Vault but not used as collateral",
+      "lockedCollateral": "Locked Collateral",
+      "lockedCollateralDesc": "Total amount of collateral that is locked in this vault",
+      "title": "Vault status"
+    },
+    "wallet": {
+      "title": "Wallet status"
+    }
+  },
+  "forms": {
+    "burn": {
+      "redeemAmount": "Amount of $t(terms.stableToken) to redeem",
+      "freeAmount": "Amount of {{gem}} to free"
+    },
+    "mint": {
+      "colRatio": "$t(terms.colRatio)",
+      "lockAmount": "Amount of {{gem}} to lock"
+    }
+  },
+  "metamask": {
+    "name": "MetaMask",
+    "buttons": {
+      "connect": "Connect $t(metamask.name)",
+      "install": "Install $t(metamask.name)"
+    }
+  },
+  "pages": {
+    "errors": {
+      "backToList": "Back to the list",
+      "changeNetwork": "Change network",
+      "notConnected": "No Ethereum wallet is connected",
+      "requireConnection": "$t(metamask.name) must be installed and connected in order to use this application.",
+      "unsupportedNetwork": "This network is not supported.<br />Select another network on $t(metamask.name)."
+    },
+    "ilk": {
+      "backToList": "$t(pages.errors.backToList)",
+      "noIlks": "No ilks found",
+      "openLabel": "Open new $t(terms.vault_one)",
+      "openDesc": "Open new {{ilk}} $t(terms.vault_one)"
+    },
+    "vault": {
+      "backToList": "$t(pages.errors.backToList)",
+      "cardDesc": "Create a new vault or manage your existing vaults.",
+      "cardTitle": "Manage $t(terms.vault_other)",
+      "listTitle": "Vaults",
+      "new": "New $t(terms.vault_one)",
+      "noVaults": "No $t(terms.vault_other) found",
+      "notFound": "The specified $t(terms.vault_one) not found",
+      "title": "{{ilk}} $t(terms.vault_one) ({{id}})"
+    }
+  },
+  "site": {
+    "title": "stable-web"
+  },
+  "terms": {
+    "collateral": "collateral",
+    "colRatio": "Collateralization Ratio",
+    "stableToken": "DAI",
+    "vault_one": "vault",
+    "vault_other": "vaults"
+  }
+}

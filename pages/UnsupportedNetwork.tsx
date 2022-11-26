@@ -1,5 +1,6 @@
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Stack, SvgIcon, Typography } from '@mui/material';
+import { useTranslation } from 'next-i18next';
 import { useCallback } from 'react';
 
 import { UnsupportedNetworkError } from 'contracts/ChainLogHelper';
@@ -21,6 +22,8 @@ export const propagateError = (err: Error) => {
 };
 
 const UnsupportedNetwork: FC<UnsupportedNetworkProps> = ({ error, externalProvider }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.errors' });
+
   const changeNetwork = useCallback(() => {
     if (isMetaMaskInPageProvider(externalProvider)) {
       void externalProvider.request({
@@ -41,13 +44,10 @@ const UnsupportedNetwork: FC<UnsupportedNetworkProps> = ({ error, externalProvid
       <Box width={128} height={128}>
         <SvgIcon component={WarningIcon} inheritViewBox style={{ fontSize: 128 }} color="error" />
       </Box>
-      <Typography variant="h6" component="div" padding={2}>
-        選択されたネットワークはサポートされていません。
-        <br />
-        MetaMaskで別のネットワークを選択してください。
-      </Typography>
+      {/* eslint-disable-next-line react/no-danger,@typescript-eslint/naming-convention */}
+      <Typography variant="h6" component="div" padding={2} dangerouslySetInnerHTML={{ __html: t('unsupportedNetwork') }} />
       <Button variant="contained" onClick={changeNetwork}>
-        ネットワークを変更
+        {t('changeNetwork')}
       </Button>
     </Stack>
   );
