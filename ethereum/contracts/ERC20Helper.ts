@@ -1,6 +1,6 @@
 import { ERC20__factory } from 'generated/types';
 
-import { toBigNumber, toFixedNumber } from '../math';
+import { toBigNumber, toFixedNumber } from '../helpers/math';
 
 import type EthereumProvider from '../EthereumProvider';
 import type { FixedFormat } from '@ethersproject/bignumber';

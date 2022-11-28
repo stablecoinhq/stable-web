@@ -1,9 +1,8 @@
 import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from '@mui/material';
 import { useCallback, useMemo, useState } from 'react';
 
-import { UnitFormats } from 'ethereum/math';
-
-import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from './stringNumber';
+import { UnitFormats } from 'ethereum/helpers/math';
+import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { FixedNumber } from 'ethers';

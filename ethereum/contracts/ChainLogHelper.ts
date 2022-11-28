@@ -2,7 +2,7 @@ import { formatBytes32String } from '@ethersproject/strings';
 
 import { ChainLog__factory, DaiJoin__factory } from 'generated/types';
 
-import { UnitFormats } from '../math';
+import { UnitFormats } from '../helpers/math';
 
 import CDPManagerHelper from './CDPManagerHelper';
 import ERC20Helper from './ERC20Helper';

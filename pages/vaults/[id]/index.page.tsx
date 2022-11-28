@@ -18,14 +18,14 @@ import { useRouter } from 'next/router';
 import { useCallback, useMemo, useState } from 'react';
 
 import Vault from 'ethereum/Vault';
-import { INT_FORMAT } from 'ethereum/math';
+import { INT_FORMAT } from 'ethereum/helpers/math';
+import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import { useCDPManager, useChainLog, useProxyRegistry } from 'ethereum/react/ContractHooks';
 import IlkStatusCard, { useIlkStatusCardProps } from 'ethereum/react/cards/IlkStatusCard';
 import VaultStatusCard from 'ethereum/react/cards/VaultStatusCard';
 import WalletStatusCard from 'ethereum/react/cards/WalletStatusCard';
 import BurnForm from 'pages/forms/BurnForm';
 import MintForm from 'pages/forms/MintForm';
-import { toFixedNumberOrUndefined } from 'pages/forms/stringNumber';
 import { getStringQuery } from 'pages/query';
 import usePromiseFactory from 'pages/usePromiseFactory';
 

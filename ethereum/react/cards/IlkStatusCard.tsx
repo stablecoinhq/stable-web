@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
 import { useCallback, useMemo } from 'react';
 
-import { pow, UnitFormats } from 'ethereum/math';
+import { pow, UnitFormats } from 'ethereum/helpers/math';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
 import BNText from './BNText';

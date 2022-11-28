@@ -3,8 +3,7 @@ import { FixedNumber } from 'ethers';
 import { useCallback, useMemo, useState } from 'react';
 
 import { COL_RATIO_FORMAT } from 'ethereum/Vault';
-
-import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from './stringNumber';
+import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';

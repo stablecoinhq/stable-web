@@ -1,7 +1,7 @@
 import { DSProxy__factory, DssCdpManager__factory } from 'generated/types';
 
 import IlkType from '../IlkType';
-import { INT_FORMAT, toBigNumber } from '../math';
+import { INT_FORMAT, toBigNumber } from '../helpers/math';
 
 import type EthereumProvider from '../EthereumProvider';
 import type { CDP } from './GetCDPsHelper';

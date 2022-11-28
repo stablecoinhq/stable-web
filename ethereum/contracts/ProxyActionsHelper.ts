@@ -1,6 +1,6 @@
 import { DssProxyActions__factory } from 'generated/types';
 
-import { INT_FORMAT, toBigNumber, UnitFormats } from '../math';
+import { INT_FORMAT, toBigNumber, UnitFormats } from '../helpers/math';
 
 import type EthereumProvider from '../EthereumProvider';
 import type CDPManagerHelper from './CDPManagerHelper';

@@ -1,7 +1,7 @@
 import IlkType from 'ethereum/IlkType';
 import { GetCdps__factory } from 'generated/types';
 
-import { INT_FORMAT, toFixedNumber } from '../math';
+import { INT_FORMAT, toFixedNumber } from '../helpers/math';
 
 import type EthereumProvider from '../EthereumProvider';
 import type CDPManagerHelper from './CDPManagerHelper';

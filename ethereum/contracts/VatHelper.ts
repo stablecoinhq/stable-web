@@ -1,6 +1,6 @@
 import { Vat__factory } from 'generated/types';
 
-import { toFixedNumber, UnitFormats } from '../math';
+import { toFixedNumber, UnitFormats } from '../helpers/math';
 
 import type EthereumProvider from '../EthereumProvider';
 import type IlkType from '../IlkType';

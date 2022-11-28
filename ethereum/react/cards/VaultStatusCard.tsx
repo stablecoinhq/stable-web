@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, Grid } from '@mui/material';
 import { BigNumber, FixedNumber } from 'ethers';
 import { useMemo } from 'react';
 
-import { UnitFormats } from 'ethereum/math';
+import { UnitFormats } from 'ethereum/helpers/math';
 
 import BNText from './BNText';
 

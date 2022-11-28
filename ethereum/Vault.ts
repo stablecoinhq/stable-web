@@ -1,6 +1,6 @@
 import { FixedFormat } from '@ethersproject/bignumber';
 
-import { assertFixedFormat, getBiggestDecimalsFormat, UnitFormats } from './math';
+import { assertFixedFormat, getBiggestDecimalsFormat, UnitFormats } from './helpers/math';
 
 import type ChainLogHelper from './contracts/ChainLogHelper';
 import type { IlkInfo } from './contracts/IlkRegistryHelper';
