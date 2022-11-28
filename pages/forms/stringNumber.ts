@@ -31,9 +31,9 @@ export const cutDecimals = (input: string, dec: number) => {
   return input;
 };
 
-export const toFixedNumberOrUndefined = (input: string, format: FixedFormat) => {
+export const toFixedNumberOrUndefined = (input: string | undefined, format: FixedFormat) => {
   try {
-    return FixedNumber.fromString(input, format);
+    return input === undefined ? undefined : FixedNumber.fromString(input, format);
   } catch {
     return undefined;
   }

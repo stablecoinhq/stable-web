@@ -5,7 +5,7 @@ import { assertFixedFormat, getBiggestDecimalsFormat, UnitFormats } from './math
 import type ChainLogHelper from './ChainLogHelper';
 import type { IlkInfo } from './IlkRegistryHelper';
 import type { IlkStatus } from './VatHelper';
-import type { FixedNumber, BigNumber } from 'ethers';
+import type { FixedNumber } from 'ethers';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 
@@ -27,9 +27,9 @@ const getDaiAmount = (colAmount: FixedNumber, debtMultiplier: FixedNumber, liqRa
 
 export default class Vault {
   readonly ilkInfo: IlkInfo;
-  private readonly cdpId: BigNumber;
+  private readonly cdpId: FixedNumber;
 
-  constructor(ilkInfo: IlkInfo, cdpId: BigNumber) {
+  constructor(ilkInfo: IlkInfo, cdpId: FixedNumber) {
     this.ilkInfo = ilkInfo;
     this.cdpId = cdpId;
   }

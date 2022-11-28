@@ -1,10 +1,11 @@
 import { DSProxy__factory, DssCdpManager__factory } from 'generated/types';
 
 import IlkType from './IlkType';
+import { INT_FORMAT, toBigNumber } from './math';
 
 import type EthereumProvider from './EthereumProvider';
 import type { CDP } from './GetCDPsHelper';
-import type { BigNumber } from 'ethers';
+import type { FixedNumber } from 'ethers';
 import type { DssCdpManager } from 'generated/types';
 
 export default class CDPManagerHelper {
@@ -20,19 +21,21 @@ export default class CDPManagerHelper {
     return this.contract.address;
   }
 
-  private getIlkType(cdpId: BigNumber) {
-    return this.contract.ilks(cdpId).then((typeBytes32) => IlkType.fromBytes32(typeBytes32));
+  private getIlkType(cdpId: FixedNumber) {
+    return this.contract.ilks(toBigNumber(cdpId, INT_FORMAT)).then((typeBytes32) => IlkType.fromBytes32(typeBytes32));
   }
 
-  private getUrn(cdpId: BigNumber) {
-    return this.contract.urns(cdpId);
+  private getUrn(cdpId: FixedNumber) {
+    return this.contract.urns(toBigNumber(cdpId, INT_FORMAT));
   }
 
-  private getOwner(cdpId: BigNumber) {
-    return this.contract.owns(cdpId).then((address) => DSProxy__factory.connect(address, this.provider.getSigner()));
+  private getOwner(cdpId: FixedNumber) {
+    return this.contract
+      .owns(toBigNumber(cdpId, INT_FORMAT))
+      .then((address) => DSProxy__factory.connect(address, this.provider.getSigner()));
   }
 
-  getCDP(cdpId: BigNumber): Promise<CDP> {
+  getCDP(cdpId: FixedNumber): Promise<CDP> {
     return Promise.all([this.getUrn(cdpId), this.getIlkType(cdpId), this.getOwner(cdpId)]).then(([urn, ilk, owner]) => ({
       id: cdpId,
       urn,

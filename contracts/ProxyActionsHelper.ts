@@ -1,12 +1,12 @@
 import { DssProxyActions__factory } from 'generated/types';
 
-import { toBigNumber, UnitFormats } from './math';
+import { INT_FORMAT, toBigNumber, UnitFormats } from './math';
 
 import type CDPManagerHelper from './CDPManagerHelper';
 import type EthereumProvider from './EthereumProvider';
 import type { IlkInfo } from './IlkRegistryHelper';
 import type JugHelper from './JugHelper';
-import type { FixedNumber, BigNumber, PayableOverrides } from 'ethers';
+import type { FixedNumber, PayableOverrides } from 'ethers';
 import type { DssProxyActions, DSProxy, DaiJoin } from 'generated/types';
 
 export default class ProxyActionsHelper {
@@ -35,7 +35,7 @@ export default class ProxyActionsHelper {
     jug: JugHelper,
     daiJoin: DaiJoin,
     ilkInfo: IlkInfo,
-    cdpId: BigNumber,
+    cdpId: FixedNumber,
     collateralAmount: FixedNumber,
     daiAmount: FixedNumber,
   ) {
@@ -46,7 +46,7 @@ export default class ProxyActionsHelper {
           jug.address,
           ilkInfo.gemJoin.address,
           daiJoin.address,
-          cdpId,
+          toBigNumber(cdpId, INT_FORMAT),
           toBigNumber(daiAmount, UnitFormats.WAD),
         ]),
         {
@@ -64,7 +64,7 @@ export default class ProxyActionsHelper {
         jug.address,
         ilkInfo.gemJoin.address,
         daiJoin.address,
-        cdpId,
+        toBigNumber(cdpId, INT_FORMAT),
         toBigNumber(collateralAmount, ilkInfo.gem.format),
         toBigNumber(daiAmount, UnitFormats.WAD),
         /* transferFrom */ true,
@@ -117,7 +117,7 @@ export default class ProxyActionsHelper {
     cdpManager: CDPManagerHelper,
     daiJoin: DaiJoin,
     ilkInfo: IlkInfo,
-    cdpId: BigNumber,
+    cdpId: FixedNumber,
     collateralAmount: FixedNumber,
     daiAmount: FixedNumber,
   ) {
@@ -127,7 +127,7 @@ export default class ProxyActionsHelper {
           cdpManager.address,
           ilkInfo.gemJoin.address,
           daiJoin.address,
-          cdpId,
+          toBigNumber(cdpId, INT_FORMAT),
           toBigNumber(collateralAmount, ilkInfo.gem.format),
           toBigNumber(daiAmount, UnitFormats.WAD),
         ]),
@@ -139,7 +139,7 @@ export default class ProxyActionsHelper {
         cdpManager.address,
         ilkInfo.gemJoin.address,
         daiJoin.address,
-        cdpId,
+        toBigNumber(cdpId, INT_FORMAT),
         toBigNumber(collateralAmount, ilkInfo.gem.format),
         toBigNumber(daiAmount, UnitFormats.WAD),
       ]),

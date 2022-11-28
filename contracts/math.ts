@@ -4,6 +4,8 @@ import { FixedNumber } from 'ethers';
 
 import type { BigNumber } from 'ethers';
 
+export const INT_FORMAT = FixedFormat.from(0);
+
 /* eslint-disable @typescript-eslint/naming-convention */
 /**
  * Number formats of Maker Protocol

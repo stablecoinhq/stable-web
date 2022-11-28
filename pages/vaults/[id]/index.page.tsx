@@ -12,15 +12,17 @@ import {
   Tabs,
   Typography,
 } from '@mui/material';
-import { BigNumber } from 'ethers';
+import { FixedNumber } from 'ethers';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCallback, useMemo, useState } from 'react';
 
 import Vault from 'contracts/Vault';
+import { INT_FORMAT } from 'contracts/math';
 import { useCDPManager, useChainLog, useProxyRegistry } from 'pages/ethereum/ContractHooks';
 import BurnForm from 'pages/forms/BurnForm';
 import MintForm from 'pages/forms/MintForm';
+import { toFixedNumberOrUndefined } from 'pages/forms/stringNumber';
 import IlkStatusCard, { useIlkStatusCardProps } from 'pages/ilks/[ilk]/IlkStatusCard';
 import { getStringQuery } from 'pages/query';
 import usePromiseFactory from 'pages/usePromiseFactory';
@@ -32,13 +34,12 @@ import type CDPManagerHelper from 'contracts/CDPManagerHelper';
 import type ChainLogHelper from 'contracts/ChainLogHelper';
 import type { CDP } from 'contracts/GetCDPsHelper';
 import type { IlkStatus } from 'contracts/VatHelper';
-import type { FixedNumber } from 'ethers';
 import type { NextPageWithEthereum } from 'next';
 import type { BurnFormProps } from 'pages/forms/BurnForm';
 import type { MintFormProps } from 'pages/forms/MintForm';
 import type { FC } from 'react';
 
-const useCDP = (cdpManager: CDPManagerHelper | undefined, cdpId: BigNumber) =>
+const useCDP = (cdpManager: CDPManagerHelper | undefined, cdpId: FixedNumber) =>
   usePromiseFactory(useCallback(async () => cdpManager?.getCDP(cdpId), [cdpManager, cdpId]))[0];
 
 const useProxyAddress = (chainLog: ChainLogHelper) => {
@@ -194,7 +195,10 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
 
 const VaultDetail: NextPageWithEthereum = ({ provider }) => {
   const router = useRouter();
-  const cdpId = useMemo(() => BigNumber.from(getStringQuery(router.query.id)), [router.query.id]);
+  const cdpId = useMemo(
+    () => toFixedNumberOrUndefined(getStringQuery(router.query.id), INT_FORMAT) || FixedNumber.fromString('0', INT_FORMAT),
+    [router.query.id],
+  );
   const chainLog = useChainLog(provider);
   const cdpManager = useCDPManager(chainLog);
   const cdp = useCDP(cdpManager, cdpId);
@@ -214,7 +218,7 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
 
   return (
     <Card elevation={0}>
-      <CardHeader title={`${cdp.ilk.inString} Vault (${cdpId.toString()})`} subheader={cdp.urn} />
+      <CardHeader title={`${cdp.ilk.inString} Vault (${cdpId?.toString()})`} subheader={cdp.urn} />
       <CardContent>
         <Content chainLog={chainLog} cdp={cdp} address={provider.address} />
       </CardContent>
