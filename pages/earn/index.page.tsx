@@ -19,19 +19,26 @@ import type { FC } from 'react';
 
 type ControllerProps = {
   savingRate: Savings;
+  updateAllBalance: () => void;
 };
 
 type TabValue = 'deposit' | 'withdraw';
 
-const Controller: FC<ControllerProps> = ({ savingRate }) => {
+const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance }) => {
   const [selectedTab, setSelectedTab] = useState<TabValue>('deposit');
 
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {
     setSelectedTab(value);
   }, []);
 
-  const deposit: DepositFormProps['onDeposit'] = useCallback((amount) => savingRate.deposit(amount), [savingRate]);
-  const withdraw: WithdrawFormProps['onWithdraw'] = useCallback((amount) => savingRate.withdraw(amount), [savingRate]);
+  const deposit: DepositFormProps['onDeposit'] = useCallback(
+    (amount) => savingRate.deposit(amount).then(() => updateAllBalance()),
+    [savingRate, updateAllBalance],
+  );
+  const withdraw: WithdrawFormProps['onWithdraw'] = useCallback(
+    (amount) => savingRate.withdraw(amount).then(() => updateAllBalance()),
+    [savingRate, updateAllBalance],
+  );
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
       case 'deposit':
@@ -60,13 +67,20 @@ type ContentProps = {
 const Content: FC<ContentProps> = ({ chainLog, provider }) => {
   const [savingRate] = usePromiseFactory(useCallback(() => Savings.fromChainlog(chainLog), [chainLog]));
   const [annualRate] = usePromiseFactory(useCallback(async () => savingRate && savingRate.getAnnualRate(), [savingRate]));
-  const [balance] = usePromiseFactory(
+  const [balance, updateBalance] = usePromiseFactory(
     useCallback(async () => {
       const dai = await chainLog.dai();
       return dai.getBalance();
     }, [chainLog]),
   );
-  const [deposit] = usePromiseFactory(useCallback(async () => savingRate && savingRate.getDepositAmount(), [savingRate]));
+  const [deposit, updateDeposit] = usePromiseFactory(
+    useCallback(async () => savingRate && savingRate.getDepositAmount(), [savingRate]),
+  );
+
+  const updateAllBalance = () => {
+    updateBalance();
+    updateDeposit();
+  };
 
   if (!savingRate || !balance || !annualRate) {
     return (
@@ -95,7 +109,7 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
         label="DAI Balance"
         tooltipText="Amount of token that wallet currently holds"
       />
-      <Controller savingRate={savingRate} />
+      <Controller savingRate={savingRate} updateAllBalance={updateAllBalance} />
     </Stack>
   );
 };

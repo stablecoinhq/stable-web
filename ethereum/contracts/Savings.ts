@@ -1,4 +1,6 @@
-import { toFixedNumber, UnitFormats } from './math';
+import { BigNumber } from 'ethers';
+
+import { pow, toFixedNumber, UnitFormats, YEAR_IN_SECONDS } from './math';
 
 import type ChainLogHelper from './ChainLogHelper';
 import type ERC20Helper from './ERC20Helper';
@@ -46,14 +48,33 @@ export default class Savings {
   async getDepositAmount() {
     const proxy = await this.proxyRegistry.getDSProxy();
     if (proxy) {
-      const pie = await this.pot.pie(proxy.address);
-      return { address: proxy.address, amount: toFixedNumber(pie, UnitFormats.WAD) };
+      const [pie, chi, rho, dsr] = await Promise.all([
+        this.pot.pie(proxy.address),
+        this.pot.chi(),
+        this.pot.rho(),
+        this.pot.dsr(),
+      ]);
+      // 収益を加算する
+      // pie * (dsr ** (now - rho) * chi)
+      const now = Math.floor(new Date().getTime() / 1000);
+      const unitFormat = UnitFormats.RAY;
+      const currentChi =
+        now > rho.toNumber()
+          ? pow(toFixedNumber(dsr, unitFormat), now - rho.toNumber()).mulUnsafe(toFixedNumber(chi, unitFormat))
+          : toFixedNumber(chi, unitFormat);
+      const amount = toFixedNumber(pie, UnitFormats.WAD).toFormat(unitFormat).mulUnsafe(currentChi).round(18);
+      return {
+        address: proxy.address,
+        amount,
+      };
     }
   }
 
   async getAnnualRate() {
     const dsr = await this.pot.dsr();
-    return toFixedNumber(dsr, UnitFormats.RAY);
+    return pow(toFixedNumber(dsr, UnitFormats.RAY), YEAR_IN_SECONDS).subUnsafe(
+      toFixedNumber(BigNumber.from(1), UnitFormats.RAY),
+    );
   }
 
   static async fromChainlog(chainLog: ChainLogHelper): Promise<Savings> {
