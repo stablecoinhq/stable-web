@@ -2,6 +2,8 @@ import { formatBytes32String } from '@ethersproject/strings';
 
 import { ChainLog__factory, DaiJoin__factory } from 'generated/types';
 
+import { UnitFormats } from '../math';
+
 import CDPManagerHelper from './CDPManagerHelper';
 import ERC20Helper from './ERC20Helper';
 import GetCDPsHelper from './GetCDPsHelper';
@@ -11,9 +13,8 @@ import ProxyActionsHelper from './ProxyActionsHelper';
 import ProxyRegistryHelper from './ProxyRegistryHelper';
 import SpotHelper from './SpotHelper';
 import VatHelper from './VatHelper';
-import { UnitFormats } from './math';
 
-import type EthereumProvider from './EthereumProvider';
+import type EthereumProvider from '../EthereumProvider';
 import type { ChainLog, DSProxy } from 'generated/types';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';

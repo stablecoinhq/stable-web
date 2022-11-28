@@ -3,11 +3,11 @@ import { Box, Button, Card, CardActions, CardContent, CardHeader, CircularProgre
 import Link from 'next/link';
 import { useCallback } from 'react';
 
-import ChainLogHelper from 'contracts/ChainLogHelper';
+import ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
-import type EthereumProvider from 'contracts/EthereumProvider';
-import type IlkType from 'contracts/IlkType';
+import type EthereumProvider from 'ethereum/EthereumProvider';
+import type IlkType from 'ethereum/IlkType';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 

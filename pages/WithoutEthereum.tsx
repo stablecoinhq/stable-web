@@ -1,8 +1,7 @@
 import { Box, Stack, SvgIcon, Typography } from '@mui/material';
 
+import MetaMaskButton from 'ethereum/react/MetaMaskButton';
 import MetaMaskIcon from 'images/metamask.svg';
-
-import MetaMaskButton from './ethereum/MetaMaskButton';
 
 import type { FC } from 'react';
 import type { WithNullableEthereum } from 'types/next';

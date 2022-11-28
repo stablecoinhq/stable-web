@@ -2,9 +2,9 @@ import { FixedFormat } from '@ethersproject/bignumber';
 
 import { assertFixedFormat, getBiggestDecimalsFormat, UnitFormats } from './math';
 
-import type ChainLogHelper from './ChainLogHelper';
-import type { IlkInfo } from './IlkRegistryHelper';
-import type { IlkStatus } from './VatHelper';
+import type ChainLogHelper from './contracts/ChainLogHelper';
+import type { IlkInfo } from './contracts/IlkRegistryHelper';
+import type { IlkStatus } from './contracts/VatHelper';
 import type { FixedNumber } from 'ethers';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';

@@ -17,23 +17,22 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCallback, useMemo, useState } from 'react';
 
-import Vault from 'contracts/Vault';
-import { INT_FORMAT } from 'contracts/math';
-import { useCDPManager, useChainLog, useProxyRegistry } from 'pages/ethereum/ContractHooks';
+import Vault from 'ethereum/Vault';
+import { INT_FORMAT } from 'ethereum/math';
+import { useCDPManager, useChainLog, useProxyRegistry } from 'ethereum/react/ContractHooks';
+import IlkStatusCard, { useIlkStatusCardProps } from 'ethereum/react/cards/IlkStatusCard';
+import VaultStatusCard from 'ethereum/react/cards/VaultStatusCard';
+import WalletStatusCard from 'ethereum/react/cards/WalletStatusCard';
 import BurnForm from 'pages/forms/BurnForm';
 import MintForm from 'pages/forms/MintForm';
 import { toFixedNumberOrUndefined } from 'pages/forms/stringNumber';
-import IlkStatusCard, { useIlkStatusCardProps } from 'pages/ilks/[ilk]/IlkStatusCard';
 import { getStringQuery } from 'pages/query';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
-import VaultStatusCard from './VaultStatusCard';
-import WalletStatusCard from './WalletStatusCard';
-
-import type CDPManagerHelper from 'contracts/CDPManagerHelper';
-import type ChainLogHelper from 'contracts/ChainLogHelper';
-import type { CDP } from 'contracts/GetCDPsHelper';
-import type { IlkStatus } from 'contracts/VatHelper';
+import type CDPManagerHelper from 'ethereum/contracts/CDPManagerHelper';
+import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
+import type { CDP } from 'ethereum/contracts/GetCDPsHelper';
+import type { IlkStatus } from 'ethereum/contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { BurnFormProps } from 'pages/forms/BurnForm';
 import type { MintFormProps } from 'pages/forms/MintForm';

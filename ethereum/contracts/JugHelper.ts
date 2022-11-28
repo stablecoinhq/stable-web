@@ -1,9 +1,9 @@
 import { Jug__factory } from 'generated/types';
 
-import { toFixedNumber, UnitFormats } from './math';
+import { toFixedNumber, UnitFormats } from '../math';
 
-import type EthereumProvider from './EthereumProvider';
-import type IlkType from 'contracts/IlkType';
+import type EthereumProvider from '../EthereumProvider';
+import type IlkType from 'ethereum/IlkType';
 import type { Jug } from 'generated/types';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';

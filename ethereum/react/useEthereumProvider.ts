@@ -1,7 +1,7 @@
 import detectEthereumProvider from '@metamask/detect-provider';
 import { useEffect, useMemo, useState } from 'react';
 
-import EthereumProvider from 'contracts/EthereumProvider';
+import EthereumProvider from 'ethereum/EthereumProvider';
 
 import type { ExternalProvider } from '@ethersproject/providers';
 import type { MetaMaskInpageProvider } from '@metamask/providers';

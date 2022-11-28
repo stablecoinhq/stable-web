@@ -1,7 +1,7 @@
 import { AppBar, Toolbar, Typography } from '@mui/material';
 import Link from 'next/link';
 
-import MetaMaskButton from './ethereum/MetaMaskButton';
+import MetaMaskButton from 'ethereum/react/MetaMaskButton';
 
 import type { FC } from 'react';
 import type { WithNullableEthereum } from 'types/next';

@@ -4,11 +4,11 @@ import { useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import 'styles/globals.scss';
+import useEthereumProvider from 'ethereum/react/useEthereumProvider';
 
 import Header from './Header';
 import UnsupportedNetwork, { propagateError } from './UnsupportedNetwork';
 import WithoutEthereum from './WithoutEthereum';
-import useEthereumProvider from './ethereum/useEthereumProvider';
 
 import type { AppProps } from 'next/app';
 import type { FC } from 'react';

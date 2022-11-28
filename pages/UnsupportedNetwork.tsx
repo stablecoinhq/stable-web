@@ -2,9 +2,8 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Stack, SvgIcon, Typography } from '@mui/material';
 import { useCallback } from 'react';
 
-import { UnsupportedNetworkError } from 'contracts/ChainLogHelper';
-
-import { isMetaMaskInPageProvider } from './ethereum/useEthereumProvider';
+import { UnsupportedNetworkError } from 'ethereum/contracts/ChainLogHelper';
+import { isMetaMaskInPageProvider } from 'ethereum/react/useEthereumProvider';
 
 import type { ExternalProvider } from '@ethersproject/providers';
 import type { FC } from 'react';

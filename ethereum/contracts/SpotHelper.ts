@@ -1,9 +1,9 @@
 import { Spotter__factory } from 'generated/types';
 
-import { toFixedNumber, UnitFormats } from './math';
+import { toFixedNumber, UnitFormats } from '../math';
 
-import type EthereumProvider from './EthereumProvider';
-import type IlkType from './IlkType';
+import type EthereumProvider from '../EthereumProvider';
+import type IlkType from '../IlkType';
 import type { Spotter } from 'generated/types';
 
 export default class SpotHelper {

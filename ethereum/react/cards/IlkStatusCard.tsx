@@ -1,15 +1,15 @@
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
 import { useCallback, useMemo } from 'react';
 
-import { pow, UnitFormats } from 'contracts/math';
+import { pow, UnitFormats } from 'ethereum/math';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
 import BNText from './BNText';
 
-import type ChainLogHelper from 'contracts/ChainLogHelper';
-import type { IlkInfo } from 'contracts/IlkRegistryHelper';
-import type IlkType from 'contracts/IlkType';
-import type { IlkStatus } from 'contracts/VatHelper';
+import type IlkType from 'ethereum/IlkType';
+import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
+import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
+import type { IlkStatus } from 'ethereum/contracts/VatHelper';
 import type { FixedNumber } from 'ethers';
 import type { FC } from 'react';
 

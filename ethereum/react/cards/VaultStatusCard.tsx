@@ -2,10 +2,11 @@ import { Card, CardContent, CardHeader, Grid } from '@mui/material';
 import { BigNumber, FixedNumber } from 'ethers';
 import { useMemo } from 'react';
 
-import { UnitFormats } from 'contracts/math';
-import BNText from 'pages/ilks/[ilk]/BNText';
+import { UnitFormats } from 'ethereum/math';
 
-import type { IlkStatus, UrnStatus } from 'contracts/VatHelper';
+import BNText from './BNText';
+
+import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { FC } from 'react';
 
 export type VaultStatusCardProps = {

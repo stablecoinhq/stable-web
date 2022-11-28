@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from 'react';
 
-import ChainLogHelper from 'contracts/ChainLogHelper';
+import ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
-import type EthereumProvider from 'contracts/EthereumProvider';
+import type EthereumProvider from 'ethereum/EthereumProvider';
 
 export const useChainLog = (provider: EthereumProvider) => useMemo(() => new ChainLogHelper(provider), [provider]);
 

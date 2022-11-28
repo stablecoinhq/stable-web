@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
 
-import BNText from 'pages/ilks/[ilk]/BNText';
+import BNText from './BNText';
 
 import type { FixedNumber } from 'ethers';
 import type { FC } from 'react';

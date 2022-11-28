@@ -2,11 +2,11 @@ import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from 
 import { FixedNumber } from 'ethers';
 import { useCallback, useMemo, useState } from 'react';
 
-import { COL_RATIO_FORMAT } from 'contracts/Vault';
+import { COL_RATIO_FORMAT } from 'ethereum/Vault';
 
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from './stringNumber';
 
-import type { IlkInfo } from 'contracts/IlkRegistryHelper';
+import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
 const CENT = FixedNumber.fromString('100', COL_RATIO_FORMAT);
