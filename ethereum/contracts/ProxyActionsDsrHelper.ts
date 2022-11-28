@@ -23,15 +23,19 @@ export default class ProxyActionsDsrHelper {
     return this.actions.interface.encodeFunctionData.bind(this.actions.interface);
   }
 
-  private execute(data: string, overrides: PayableOverrides | undefined = undefined) {
-    // TODO: Gas limitを乗算する
-    const GAS_LIMIT = 300000;
+  private async execute(data: string, overrides: PayableOverrides | undefined = undefined) {
+
+    const estimatedGas = await this.proxy.estimateGas['execute(address,bytes)'](this.actions.address, data);
+
+    const GAS_LIMIT_MULTIPLIER = 130;
 
     if (overrides) {
       return this.proxy['execute(address,bytes)'](this.actions.address, data, overrides);
     }
 
-    return this.proxy['execute(address,bytes)'](this.actions.address, data, { gasLimit: GAS_LIMIT });
+    return this.proxy['execute(address,bytes)'](this.actions.address, data, {
+      gasLimit: estimatedGas.mul(GAS_LIMIT_MULTIPLIER).div(100),
+    });
   }
 
   deposit(daiJoin: DaiJoin, pot: Pot, daiAmount: FixedNumber) {
