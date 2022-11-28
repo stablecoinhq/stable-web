@@ -154,6 +154,7 @@ const Controller: FC<ControllerProps> = ({
         balance={selectedTab === 'mint' ? tokenBalance : daiBalance}
         unit={selectedTab === 'mint' ? vault.ilkInfo.symbol : 'DAI'}
         address={address}
+        tooltipText="Amount of token that the wallet currently holds"
       />
       <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
         <Tab label={terms('mint')} value="mint" />

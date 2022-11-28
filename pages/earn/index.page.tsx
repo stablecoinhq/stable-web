@@ -1,7 +1,7 @@
 import { Box, Card, CardContent, CircularProgress, Stack, Tab, Tabs } from '@mui/material';
 import { useCallback, useState } from 'react';
 
-import Dsr from 'contracts/Dsr';
+import Savings from 'contracts/Savings';
 import { useChainLog } from 'pages/ethereum/ContractHooks';
 import usePromiseFactory from 'pages/usePromiseFactory';
 import BalanceStatusCard from 'pages/vaults/[id]/BalanceStatusCard';
@@ -18,20 +18,20 @@ import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
 type ControllerProps = {
-  chainLog: ChainLogHelper;
+  savingRate: Savings;
 };
 
 type TabValue = 'deposit' | 'withdraw';
 
-const Controller: FC<ControllerProps> = ({ chainLog }) => {
+const Controller: FC<ControllerProps> = ({ savingRate }) => {
   const [selectedTab, setSelectedTab] = useState<TabValue>('deposit');
 
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {
     setSelectedTab(value);
   }, []);
 
-  const deposit: DepositFormProps['onDeposit'] = useCallback((amount) => Dsr.deposit(chainLog, amount), [chainLog]);
-  const withdraw: WithdrawFormProps['onWithdraw'] = useCallback((amount) => Dsr.withdraw(chainLog, amount), [chainLog]);
+  const deposit: DepositFormProps['onDeposit'] = useCallback((amount) => savingRate.deposit(amount), [savingRate]);
+  const withdraw: WithdrawFormProps['onWithdraw'] = useCallback((amount) => savingRate.withdraw(amount), [savingRate]);
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
       case 'deposit':
@@ -58,16 +58,17 @@ type ContentProps = {
 };
 
 const Content: FC<ContentProps> = ({ chainLog, provider }) => {
-  const [savingRate] = usePromiseFactory(useCallback(async () => Dsr.getSavingRate(chainLog), [chainLog]));
+  const [savingRate] = usePromiseFactory(useCallback(() => Savings.fromChainlog(chainLog), [chainLog]));
+  const [annualRate] = usePromiseFactory(useCallback(async () => savingRate && savingRate.getAnnualRate(), [savingRate]));
   const [balance] = usePromiseFactory(
     useCallback(async () => {
       const dai = await chainLog.dai();
       return dai.getBalance();
     }, [chainLog]),
   );
-  const [deposit] = usePromiseFactory(useCallback(async () => Dsr.getDepositAmount(chainLog), [chainLog]));
+  const [deposit] = usePromiseFactory(useCallback(async () => savingRate && savingRate.getDepositAmount(), [savingRate]));
 
-  if (!savingRate || !balance) {
+  if (!savingRate || !balance || !annualRate) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
         <CircularProgress />
@@ -77,7 +78,7 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
 
   return (
     <Stack padding={2} spacing={2}>
-      <SavingRateCard savingRate={savingRate} />
+      <SavingRateCard annualRate={annualRate} />
       {deposit && (
         <BalanceStatusCard
           title="Deposit Status"
@@ -94,13 +95,14 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
         label="DAI Balance"
         tooltipText="Amount of token that wallet currently holds"
       />
-      <Controller chainLog={chainLog} />
+      <Controller savingRate={savingRate} />
     </Stack>
   );
 };
 
 const Earn: NextPageWithEthereum = ({ provider }) => {
   const chainLog = useChainLog(provider);
+
   return (
     <Card elevation={0}>
       <CardContent>
