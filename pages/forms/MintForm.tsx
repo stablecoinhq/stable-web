@@ -1,10 +1,11 @@
-import { BigNumber, FixedFormat } from '@ethersproject/bignumber';
+import { FixedFormat } from '@ethersproject/bignumber';
 import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
 import Vault, { COL_RATIO_FORMAT } from 'contracts/Vault';
+import { UnitFormats } from 'contracts/math';
 import BNText from 'pages/ilks/[ilk]/BNText';
 
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from './stringNumber';
@@ -40,7 +41,7 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidati
     if (collateralAmount && ratio && !ratio?.isZero()) {
       return Vault.getDaiAmount(collateralAmount, debtMultiplier, liquidationRatio, ratio);
     }
-    return FixedNumber.fromValue(BigNumber.from(0));
+    return FixedNumber.fromString('0', UnitFormats.WAD);
   }, [collateralAmount, ratio, debtMultiplier, liquidationRatio]);
   const [minting, setMinting] = useState(false);
 
