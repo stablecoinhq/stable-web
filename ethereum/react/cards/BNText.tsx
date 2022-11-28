@@ -1,4 +1,4 @@
-import { Grid, TextField, Tooltip } from '@mui/material';
+import { Grid, InputAdornment, TextField, Tooltip } from '@mui/material';
 
 import type { FixedNumber } from 'ethers';
 import type { FC, ReactNode } from 'react';
@@ -6,13 +6,22 @@ import type { FC, ReactNode } from 'react';
 export type BNTextProps = {
   label: ReactNode;
   value: FixedNumber;
+  unit: string;
   tooltipText?: ReactNode;
 };
 
-const BNText: FC<BNTextProps> = ({ label, value, tooltipText }) => {
+const BNText: FC<BNTextProps> = ({ label, value, tooltipText, unit }) => {
   const content = (
     <Grid item xs={6}>
-      <TextField variant="standard" fullWidth label={label} value={value.toString()} inputProps={{ disabled: true }} />
+      <TextField
+        variant="standard"
+        fullWidth
+        label={label}
+        value={value.toString()}
+        inputProps={{ disabled: true }}
+        // eslint-disable-next-line react/jsx-no-duplicate-props
+        InputProps={{ endAdornment: <InputAdornment position="end">{unit}</InputAdornment>, disabled: false }}
+      />
     </Grid>
   );
 
