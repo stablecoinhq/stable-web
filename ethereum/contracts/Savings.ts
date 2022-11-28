@@ -24,6 +24,9 @@ export default class Savings {
   }
 
   async deposit(daiAmount: FixedNumber) {
+    if (daiAmount.isNegative() || daiAmount.isZero()) {
+      return;
+    }
     const proxy = await this.proxyRegistry.ensureDSProxy();
     await this.dai.ensureAllowance(proxy.address, daiAmount, 3);
     const actions = await this.chainLog.proxyActionsDsr(proxy);
@@ -32,6 +35,9 @@ export default class Savings {
   }
 
   async withdraw(daiAmount: FixedNumber) {
+    if (daiAmount.isNegative() || daiAmount.isZero()) {
+      return;
+    }
     const proxy = await this.proxyRegistry.ensureDSProxy();
     const actions = await this.chainLog.proxyActionsDsr(proxy);
     const tx = await actions.withdraw(this.daiJoin, this.pot, daiAmount);
