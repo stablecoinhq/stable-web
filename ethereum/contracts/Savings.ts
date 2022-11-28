@@ -1,6 +1,6 @@
 import { BigNumber } from 'ethers';
 
-import { pow, toFixedNumber, UnitFormats, YEAR_IN_SECONDS } from './math';
+import { INT_FORMAT, pow, toFixedNumber, UnitFormats, YEAR_IN_SECONDS } from './math';
 
 import type ChainLogHelper from './ChainLogHelper';
 import type ERC20Helper from './ERC20Helper';
@@ -83,7 +83,7 @@ export default class Savings {
   async getAnnualRate() {
     const dsr = await this.pot.dsr();
     return pow(toFixedNumber(dsr, UnitFormats.RAY), YEAR_IN_SECONDS).subUnsafe(
-      toFixedNumber(BigNumber.from(1), UnitFormats.RAY),
+      toFixedNumber(BigNumber.from(1), INT_FORMAT).toFormat(UnitFormats.RAY),
     );
   }
 
