@@ -38,9 +38,9 @@ export default class Savings {
     await tx.wait();
   }
 
-  async withdrawAll(chainLog: ChainLogHelper) {
+  async withdrawAll() {
     const proxy = await this.proxyRegistry.ensureDSProxy();
-    const actions = await chainLog.proxyActionsDsr(proxy);
+    const actions = await this.chainLog.proxyActionsDsr(proxy);
     const tx = await actions.withdrawAll(this.daiJoin, this.pot);
     await tx.wait();
   }

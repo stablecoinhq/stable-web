@@ -1,7 +1,9 @@
 import { Box, Card, CardContent, CircularProgress, Stack, Tab, Tabs } from '@mui/material';
+import { FixedNumber } from 'ethers';
 import { useCallback, useState } from 'react';
 
 import Savings from 'contracts/Savings';
+import { UnitFormats } from 'contracts/math';
 import { useChainLog } from 'pages/ethereum/ContractHooks';
 import usePromiseFactory from 'pages/usePromiseFactory';
 import BalanceStatusCard from 'pages/vaults/[id]/BalanceStatusCard';
@@ -20,11 +22,12 @@ import type { FC } from 'react';
 type ControllerProps = {
   savingRate: Savings;
   updateAllBalance: () => void;
+  depositAmount: FixedNumber | undefined;
 };
 
 type TabValue = 'deposit' | 'withdraw';
 
-const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance }) => {
+const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, depositAmount }) => {
   const [selectedTab, setSelectedTab] = useState<TabValue>('deposit');
 
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {
@@ -39,20 +42,32 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance }) => {
     (amount) => savingRate.withdraw(amount).then(() => updateAllBalance()),
     [savingRate, updateAllBalance],
   );
+
+  const withdrawAll: WithdrawFormProps['onWithdrawAll'] = useCallback(
+    () => savingRate.withdrawAll().then(() => updateAllBalance()),
+    [savingRate, updateAllBalance],
+  );
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
       case 'deposit':
         return <DepositForm buttonContent="Deposit" onDeposit={deposit} />;
       case 'withdraw':
-        return <WithdrawForm buttonContent="Withdraw" onWithdraw={withdraw} />;
+        return (
+          <WithdrawForm
+            buttonContent="Withdraw"
+            onWithdraw={withdraw}
+            onWithdrawAll={withdrawAll}
+            depositAmount={depositAmount || FixedNumber.from(0, UnitFormats.WAD)}
+          />
+        );
     }
-  }, [deposit, withdraw, selectedTab]);
+  }, [deposit, withdraw, selectedTab, withdrawAll, depositAmount]);
 
   return (
     <>
       <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
         <Tab label="Deposit" value="deposit" />
-        <Tab label="Withdraw" value="withdraw" />
+        <Tab label="Withdraw" value="withdraw" disabled={!depositAmount} />
       </Tabs>
       <TabContent />
     </>
@@ -109,7 +124,7 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
         label="DAI Balance"
         tooltipText="Amount of token that wallet currently holds"
       />
-      <Controller savingRate={savingRate} updateAllBalance={updateAllBalance} />
+      <Controller savingRate={savingRate} updateAllBalance={updateAllBalance} depositAmount={deposit?.amount} />
     </Stack>
   );
 };

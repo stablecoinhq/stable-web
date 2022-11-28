@@ -24,7 +24,6 @@ export default class ProxyActionsDsrHelper {
   }
 
   private async execute(data: string, overrides: PayableOverrides | undefined = undefined) {
-
     const estimatedGas = await this.proxy.estimateGas['execute(address,bytes)'](this.actions.address, data);
 
     const GAS_LIMIT_MULTIPLIER = 130;
