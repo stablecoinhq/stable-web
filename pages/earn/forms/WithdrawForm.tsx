@@ -34,6 +34,10 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
 
   const formats = UnitFormats.WAD;
   const amount = useMemo(() => toFixedNumberOrUndefined(amountText, formats), [amountText, formats]);
+  const isInvalidWithdrawAmount = useMemo(
+    () => amount && depositAmount.subUnsafe(amount).isNegative(),
+    [amount, depositAmount],
+  );
   // input as percentage, return as ratio
   const [withdrawing, setWithdrawing] = useState(false);
 
@@ -64,10 +68,12 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
       setWithdrawing(true);
       onWithdrawAll().finally(() => {
         setWithdrawing(false);
+        setWithdrawState('neutral');
+        setAmountText('');
       });
     }
 
-    if (!amount) {
+    if (!amount || isInvalidWithdrawAmount) {
       return;
     }
 
@@ -75,7 +81,7 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
     onWithdraw(amount).finally(() => {
       setWithdrawing(false);
     });
-  }, [amount, onWithdraw, onWithdrawAll, withdrawState]);
+  }, [amount, onWithdraw, onWithdrawAll, withdrawState, isInvalidWithdrawAmount]);
 
   return (
     <Card component="form" elevation={0}>
@@ -91,6 +97,8 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
           <TextField
             fullWidth
             label="Amount of DAI to withdraw"
+            error={isInvalidWithdrawAmount}
+            helperText={isInvalidWithdrawAmount && 'Insufficient deposit amount'}
             value={amountText}
             disabled={withdrawState === 'withdrawAll' || withdrawing}
             onChange={onAmountChange}
@@ -104,7 +112,7 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
           <Button
             variant="contained"
             fullWidth
-            disabled={withdrawing || !(withdrawState !== 'neutral')}
+            disabled={withdrawing || !(withdrawState !== 'neutral') || isInvalidWithdrawAmount}
             onClick={onButtonClick}
           >
             {withdrawing ? <CircularProgress /> : buttonContent}

@@ -23,11 +23,12 @@ type ControllerProps = {
   savingRate: Savings;
   updateAllBalance: () => void;
   depositAmount: FixedNumber | undefined;
+  balance: FixedNumber;
 };
 
 type TabValue = 'deposit' | 'withdraw';
 
-const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, depositAmount }) => {
+const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, depositAmount, balance }) => {
   const [selectedTab, setSelectedTab] = useState<TabValue>('deposit');
 
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {
@@ -50,7 +51,7 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, deposit
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
       case 'deposit':
-        return <DepositForm buttonContent="Deposit" onDeposit={deposit} />;
+        return <DepositForm buttonContent="Deposit" onDeposit={deposit} balance={balance} />;
       case 'withdraw':
         return (
           <WithdrawForm
@@ -61,13 +62,13 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, deposit
           />
         );
     }
-  }, [deposit, withdraw, selectedTab, withdrawAll, depositAmount]);
+  }, [deposit, withdraw, selectedTab, withdrawAll, depositAmount, balance]);
 
   return (
     <>
       <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
         <Tab label="Deposit" value="deposit" />
-        <Tab label="Withdraw" value="withdraw" disabled={!depositAmount} />
+        <Tab label="Withdraw" value="withdraw" disabled={!depositAmount || depositAmount?.isZero()} />
       </Tabs>
       <TabContent />
     </>
@@ -124,7 +125,12 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
         label="DAI Balance"
         tooltipText="Amount of token that wallet currently holds"
       />
-      <Controller savingRate={savingRate} updateAllBalance={updateAllBalance} depositAmount={deposit?.amount} />
+      <Controller
+        savingRate={savingRate}
+        updateAllBalance={updateAllBalance}
+        depositAmount={deposit?.amount}
+        balance={balance}
+      />
     </Stack>
   );
 };

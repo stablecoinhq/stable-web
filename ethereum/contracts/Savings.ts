@@ -25,7 +25,7 @@ export default class Savings {
 
   async deposit(daiAmount: FixedNumber) {
     const proxy = await this.proxyRegistry.ensureDSProxy();
-    await this.dai.ensureAllowance(proxy.address, daiAmount);
+    await this.dai.ensureAllowance(proxy.address, daiAmount, 3);
     const actions = await this.chainLog.proxyActionsDsr(proxy);
     const tx = await actions.deposit(this.daiJoin, this.pot, daiAmount);
     await tx.wait();
@@ -62,7 +62,11 @@ export default class Savings {
         now > rho.toNumber()
           ? pow(toFixedNumber(dsr, unitFormat), now - rho.toNumber()).mulUnsafe(toFixedNumber(chi, unitFormat))
           : toFixedNumber(chi, unitFormat);
-      const amount = toFixedNumber(pie, UnitFormats.WAD).toFormat(unitFormat).mulUnsafe(currentChi).round(18);
+      const amount = toFixedNumber(pie, UnitFormats.WAD)
+        .toFormat(unitFormat)
+        .mulUnsafe(currentChi)
+        .round(18)
+        .toFormat(UnitFormats.WAD);
       return {
         address: proxy.address,
         amount,

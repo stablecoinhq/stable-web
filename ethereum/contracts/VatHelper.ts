@@ -45,7 +45,6 @@ export default class VatHelper {
         urn,
         freeBalance: toFixedNumber(gem, UnitFormats.WAD),
         lockedBalance: toFixedNumber(ink, UnitFormats.WAD),
-        // 間違っている、正しくは art * rate
         debt: toFixedNumber(art, UnitFormats.WAD),
       }),
     );
