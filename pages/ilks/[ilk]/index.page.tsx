@@ -67,7 +67,7 @@ const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidati
       buttonContent={t('openLabel')}
       onMint={openVault}
       liquidationRatio={liquidationRatio}
-      price={ilkStatus.price}
+      ilkStatus={ilkStatus}
     />
   );
 };

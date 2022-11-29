@@ -22,7 +22,7 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
     [urnStatus.debt, ilkStatus.debtMultiplier],
   );
   const { urn, freeBalance, lockedBalance, debt: urnDebt } = urnStatus;
-  // collateralizationRatio = (ink * spot) / (art * rate)
+  // Collateralization Ratio = Vat.urn.ink * Vat.ilk.spot * Spot.ilk.mat / (Vat.urn.art * Vat.ilk.rate)
   const collateralizationRatio = useMemo(() => {
     const { debtMultiplier, price } = ilkStatus;
     const calcFormat = UnitFormats.RAY;

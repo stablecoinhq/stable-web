@@ -118,13 +118,13 @@ const Controller: FC<ControllerProps> = ({
             buttonContent="Mint"
             onMint={mint}
             liquidationRatio={liquidationRatio}
-            price={ilkStatus.price}
+            ilkStatus={ilkStatus}
           />
         );
       case 'burn':
         return <BurnForm ilkInfo={vault.ilkInfo} buttonContent="Burn" onBurn={burn} />;
     }
-  }, [burn, mint, selectedTab, vault, liquidationRatio, ilkStatus.price]);
+  }, [burn, mint, selectedTab, vault, liquidationRatio, ilkStatus]);
 
   return (
     <>
