@@ -1,6 +1,6 @@
 import { DssProxyActions__factory } from 'generated/types';
 
-import { INT_FORMAT, toBigNumber, UnitFormats } from './math';
+import { INT_FORMAT, multiplyGasLimit, toBigNumber, UnitFormats } from './math';
 
 import type CDPManagerHelper from './CDPManagerHelper';
 import type EthereumProvider from './EthereumProvider';
@@ -22,12 +22,15 @@ export default class ProxyActionsHelper {
     return this.actions.interface.encodeFunctionData.bind(this.actions.interface);
   }
 
-  private execute(data: string, overrides: PayableOverrides | undefined = undefined) {
+  private async execute(data: string, overrides: PayableOverrides | undefined = undefined) {
+    const estimatedGasLimit = await this.proxy.estimateGas['execute(address,bytes)'](this.actions.address, data);
+    const mulipliedGasLimit = multiplyGasLimit(estimatedGasLimit);
     if (overrides) {
-      return this.proxy['execute(address,bytes)'](this.actions.address, data, overrides);
+      return this.proxy['execute(address,bytes)'](this.actions.address, data, { ...overrides, gasLimit: mulipliedGasLimit });
     }
-
-    return this.proxy['execute(address,bytes)'](this.actions.address, data);
+    return this.proxy['execute(address,bytes)'](this.actions.address, data, {
+      gasLimit: mulipliedGasLimit,
+    });
   }
 
   lockGemAndDraw(

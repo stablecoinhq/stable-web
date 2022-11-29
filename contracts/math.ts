@@ -59,3 +59,8 @@ export const pow = (base: FixedNumber, exp: number) => {
 
   return toFixedNumber(result, base.format);
 };
+
+export function multiplyGasLimit(estimatedGasLimit: BigNumber) {
+  const GAS_LIMIT_MULTIPLIER = 120;
+  return estimatedGasLimit.mul(GAS_LIMIT_MULTIPLIER).div(100);
+}
