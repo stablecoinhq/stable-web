@@ -39,7 +39,7 @@ export default class ProxyActionsHelper {
     collateralAmount: FixedNumber,
     daiAmount: FixedNumber,
   ) {
-    if (ilkInfo.symbol === 'WETH') {
+    if (ilkInfo.symbol === 'ETH') {
       return this.execute(
         this.encodeFunctionData('lockETHAndDraw', [
           cdpManager.address,
@@ -80,7 +80,10 @@ export default class ProxyActionsHelper {
     collateralAmount: FixedNumber,
     daiAmount: FixedNumber,
   ) {
-    if (ilkInfo.symbol === 'WETH') {
+    console.log(
+      `DaiAmount ${toBigNumber(daiAmount, UnitFormats.WAD)}, Eth amount ${toBigNumber(collateralAmount, ilkInfo.gem.format)}`,
+    );
+    if (ilkInfo.symbol === 'ETH') {
       return this.execute(
         this.encodeFunctionData('openLockETHAndDraw', [
           cdpManager.address,
@@ -121,7 +124,7 @@ export default class ProxyActionsHelper {
     collateralAmount: FixedNumber,
     daiAmount: FixedNumber,
   ) {
-    if (ilkInfo.symbol === 'WETH') {
+    if (ilkInfo.symbol === 'ETH') {
       return this.execute(
         this.encodeFunctionData('wipeAndFreeETH', [
           cdpManager.address,

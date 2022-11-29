@@ -19,13 +19,12 @@ export type MintFormProps = {
   ilkInfo: IlkInfo;
   buttonContent: ReactNode;
   liquidationRatio: FixedNumber;
-  debtMultiplier: FixedNumber;
+  price: FixedNumber;
   onMint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
 };
 
-const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidationRatio, debtMultiplier }) => {
+const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidationRatio, price }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms.mint' });
-
   const [amountText, setAmountText] = useState('');
   const collateralAmount = useMemo(
     () => toFixedNumberOrUndefined(amountText, ilkInfo.gem.format),
@@ -39,10 +38,10 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidati
   const ratio = useMemo(() => toFixedNumberOrUndefined(ratioText, COL_RATIO_FORMAT)?.divUnsafe(CENT), [ratioText]);
   const daiAmount = useMemo(() => {
     if (collateralAmount && ratio && !ratio?.isZero()) {
-      return Vault.getDaiAmount(collateralAmount, debtMultiplier, liquidationRatio, ratio);
+      return Vault.getDaiAmount(collateralAmount, liquidationRatio, ratio, price);
     }
     return FixedNumber.fromString('0', UnitFormats.WAD);
-  }, [collateralAmount, ratio, debtMultiplier, liquidationRatio]);
+  }, [collateralAmount, ratio, liquidationRatio, price]);
   const [minting, setMinting] = useState(false);
 
   const onAmountChange: ChangeEventHandler<HTMLInputElement> = useCallback(
