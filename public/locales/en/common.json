@@ -12,7 +12,7 @@
       "maxLiquidity": "Maximum Liquidity",
       "maxLiquidityDesc": "The Maximum Liquidity specified, the amount of DAI that the users can be issued for this type of Vault.",
       "title": "{{ilk}} $t(terms.collateral) status",
-      "totalIssue": "Total Issue",
+      "totalIssue": "Total Issued",
       "totalIssueDesc": "Total amount of DAI issued by collateral"
     },
     "vault": {
