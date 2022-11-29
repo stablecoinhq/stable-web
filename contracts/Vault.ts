@@ -1,11 +1,11 @@
 import { FixedFormat } from '@ethersproject/bignumber';
+import { FixedNumber } from 'ethers';
 
 import { assertFixedFormat, getBiggestDecimalsFormat, UnitFormats } from './math';
 
 import type ChainLogHelper from './ChainLogHelper';
 import type { IlkInfo } from './IlkRegistryHelper';
 import type { IlkStatus } from './VatHelper';
-import type { FixedNumber } from 'ethers';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 
@@ -92,6 +92,9 @@ export default class Vault {
     price: FixedNumber,
     debtMultiplier: FixedNumber,
   ): FixedNumber {
+    if (colRatio.isZero() || debtMultiplier.isZero()) {
+      return FixedNumber.fromString('0', UnitFormats.WAD);
+    }
     const calcFormat = getBiggestDecimalsFormat(colAmount.format, UnitFormats.RAY, COL_RATIO_FORMAT, UnitFormats.WAD);
     const result = colAmount
       .toFormat(calcFormat)

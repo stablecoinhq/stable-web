@@ -27,7 +27,7 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
     const { debtMultiplier, price } = ilkStatus;
     const calcFormat = UnitFormats.RAY;
     if (urnDebt.isZero() || debtMultiplier.isZero()) {
-      return FixedNumber.fromValue(BigNumber.from(0));
+      return FixedNumber.fromString('0', calcFormat);
     }
     return lockedBalance
       .toFormat(calcFormat)

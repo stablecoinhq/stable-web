@@ -39,7 +39,7 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidati
   const ratio = useMemo(() => toFixedNumberOrUndefined(ratioText, COL_RATIO_FORMAT)?.divUnsafe(CENT), [ratioText]);
   const daiAmount = useMemo(() => {
     const { price, debtMultiplier } = ilkStatus;
-    if (collateralAmount && ratio && !ratio?.isZero()) {
+    if (collateralAmount && ratio) {
       return Vault.getDaiAmount(collateralAmount, ratio, liquidationRatio, price, debtMultiplier);
     }
     return FixedNumber.fromString('0', UnitFormats.WAD);
