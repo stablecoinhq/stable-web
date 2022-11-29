@@ -23,7 +23,7 @@ export default class ProxyActionsHelper {
   }
 
   private async execute(data: string, overrides: PayableOverrides | undefined = undefined) {
-    const estimatedGasLimit = await this.proxy.estimateGas['execute(address,bytes)'](this.actions.address, data);
+    const estimatedGasLimit = await this.proxy.estimateGas['execute(address,bytes)'](this.actions.address, data, overrides);
     const mulipliedGasLimit = multiplyGasLimit(estimatedGasLimit);
     if (overrides) {
       return this.proxy['execute(address,bytes)'](this.actions.address, data, { ...overrides, gasLimit: mulipliedGasLimit });
@@ -83,9 +83,6 @@ export default class ProxyActionsHelper {
     collateralAmount: FixedNumber,
     daiAmount: FixedNumber,
   ) {
-    console.log(
-      `DaiAmount ${toBigNumber(daiAmount, UnitFormats.WAD)}, Eth amount ${toBigNumber(collateralAmount, ilkInfo.gem.format)}`,
-    );
     if (ilkInfo.symbol === 'ETH') {
       return this.execute(
         this.encodeFunctionData('openLockETHAndDraw', [
@@ -101,7 +98,6 @@ export default class ProxyActionsHelper {
         },
       );
     }
-
     /**
      * Collateral will be sent by proxy when `transferFrom` is true
      */
