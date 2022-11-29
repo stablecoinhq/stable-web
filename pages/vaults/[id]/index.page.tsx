@@ -193,7 +193,7 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
         liquidationRatio={ilkCard.liquidationRatio}
         stabilityFee={ilkCard.stabilityFee}
       />
-      <VaultStatusCard urnStatus={urnStatus} ilkStatus={ilkCard.ilkStatus} />
+      <VaultStatusCard urnStatus={urnStatus} ilkStatus={ilkCard.ilkStatus} liquidationRatio={ilkCard.liquidationRatio} />
       <Controller
         chainLog={chainLog}
         vault={vault}

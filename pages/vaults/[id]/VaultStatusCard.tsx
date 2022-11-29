@@ -12,11 +12,11 @@ import type { FC } from 'react';
 export type VaultStatusCardProps = {
   urnStatus: UrnStatus;
   ilkStatus: IlkStatus;
+  liquidationRatio: FixedNumber;
 };
 
-const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus }) => {
+const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liquidationRatio }) => {
   const { t } = useTranslation('common', { keyPrefix: 'cards.vault' });
-
   const debt = useMemo(
     () => urnStatus.debt.toFormat(UnitFormats.RAY).mulUnsafe(ilkStatus.debtMultiplier),
     [urnStatus.debt, ilkStatus.debtMultiplier],
@@ -31,10 +31,11 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus }) => 
     }
     return lockedBalance
       .toFormat(calcFormat)
+      .mulUnsafe(liquidationRatio.toFormat(calcFormat))
       .mulUnsafe(price.toFormat(calcFormat))
       .divUnsafe(urnDebt.toFormat(calcFormat).mulUnsafe(debtMultiplier.toFormat(calcFormat)))
       .mulUnsafe(FixedNumber.fromValue(BigNumber.from(100)).toFormat(calcFormat));
-  }, [ilkStatus, lockedBalance, urnDebt]);
+  }, [ilkStatus, lockedBalance, urnDebt, liquidationRatio]);
 
   return (
     <Card>
