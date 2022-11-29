@@ -20,7 +20,7 @@ const BNText: FC<BNTextProps> = ({ label, value, tooltipText, unit }) => {
         value={value.toString()}
         inputProps={{ disabled: true }}
         // eslint-disable-next-line react/jsx-no-duplicate-props
-        InputProps={{ endAdornment: <InputAdornment position="end">{unit}</InputAdornment>, disabled: false }}
+        InputProps={{ endAdornment: <InputAdornment position="end">{unit}</InputAdornment> }}
       />
     </Grid>
   );
