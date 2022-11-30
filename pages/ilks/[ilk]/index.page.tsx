@@ -72,6 +72,7 @@ const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidati
       ilkStatus={ilkStatus}
       collateralBalance={balance}
       debt={FixedNumber.fromString('0', UnitFormats.WAD)}
+      lockedBalance={FixedNumber.fromString('0', UnitFormats.WAD)}
     />
   );
 };

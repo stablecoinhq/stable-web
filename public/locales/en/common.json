@@ -40,7 +40,7 @@
       "mintAmountLabel": "Amount of $t(units.stableToken)s to be minted.",
       "mintAmountTooltipText": "Amount of $t(units.stableToken)s to be minted.",
       "error": {
-        "insufficentAmount": "Insufficient balance.",
+        "insufficientBalance": "Insufficient balance.",
         "collateralTooLow": "Collateralization ratio is too low.",
         "debtTooLow": "Amount of $t(units.stableToken) being minted is too low.",
         "issuingTooMuchCoins": "Amount of $t(units.stableToken) issued is above Maximum Liquidity"

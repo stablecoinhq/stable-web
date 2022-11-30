@@ -74,6 +74,7 @@ type ControllerProps = {
   vault: Vault;
   ilkStatus: IlkStatus;
   debt: FixedNumber;
+  lockedBalance: FixedNumber;
   liquidationRatio: FixedNumber;
   tokenBalance: FixedNumber;
   daiBalance: FixedNumber;
@@ -90,6 +91,7 @@ const Controller: FC<ControllerProps> = ({
   liquidationRatio,
   updateAllBalance,
   debt,
+  lockedBalance,
   tokenBalance,
   daiBalance,
   address,
@@ -121,13 +123,14 @@ const Controller: FC<ControllerProps> = ({
             onMint={mint}
             liquidationRatio={liquidationRatio}
             collateralBalance={tokenBalance}
+            lockedBalance={lockedBalance}
             debt={debt}
           />
         );
       case 'burn':
         return <BurnForm ilkInfo={vault.ilkInfo} buttonContent="Burn" onBurn={burn} />;
     }
-  }, [burn, mint, selectedTab, vault, liquidationRatio, ilkStatus, tokenBalance, debt]);
+  }, [burn, mint, selectedTab, vault, liquidationRatio, ilkStatus, tokenBalance, debt, lockedBalance]);
 
   return (
     <>
@@ -210,6 +213,7 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
         liquidationRatio={ilkCard.liquidationRatio}
         updateAllBalance={updateAllBalance}
         debt={urnStatus.debt}
+        lockedBalance={urnStatus.lockedBalance}
         tokenBalance={tokenBalance}
         daiBalance={daiBalance}
         address={address}
