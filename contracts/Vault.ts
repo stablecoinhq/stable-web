@@ -1,11 +1,11 @@
 import { FixedFormat } from '@ethersproject/bignumber';
+import { FixedNumber } from 'ethers';
 
 import { assertFixedFormat, getBiggestDecimalsFormat, UnitFormats } from './math';
 
 import type ChainLogHelper from './ChainLogHelper';
 import type { IlkInfo } from './IlkRegistryHelper';
 import type { IlkStatus } from './VatHelper';
-import type { FixedNumber } from 'ethers';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 
@@ -13,17 +13,6 @@ import type PromiseConstructor from 'types/promise';
  * Collateral ratio has 2 decimals (percentage)
  */
 export const COL_RATIO_FORMAT = FixedFormat.from(2);
-
-const getDaiAmount = (colAmount: FixedNumber, debtMultiplier: FixedNumber, liqRatio: FixedNumber, colRatio: FixedNumber) => {
-  const calcFormat = getBiggestDecimalsFormat(colAmount.format, UnitFormats.RAY, COL_RATIO_FORMAT, UnitFormats.WAD);
-  const result = colAmount
-    .toFormat(calcFormat)
-    .mulUnsafe(assertFixedFormat(liqRatio, UnitFormats.RAY).toFormat(calcFormat))
-    .divUnsafe(assertFixedFormat(debtMultiplier, UnitFormats.RAY).toFormat(calcFormat))
-    .divUnsafe(assertFixedFormat(colRatio, COL_RATIO_FORMAT).toFormat(calcFormat));
-
-  return result.round(UnitFormats.WAD.decimals).toFormat(UnitFormats.WAD);
-};
 
 export default class Vault {
   readonly ilkInfo: IlkInfo;
@@ -54,7 +43,7 @@ export default class Vault {
       chainLog.daiJoin(),
     ]);
 
-    const daiAmount = getDaiAmount(colAmount, ilkStatus.debtMultiplier, liquidationRatio, colRatio);
+    const daiAmount = Vault.getDaiAmount(colAmount, colRatio, liquidationRatio, ilkStatus.price);
     await actions
       .lockGemAndDraw(cdpManager, jug, daiJoin, this.ilkInfo, this.cdpId, colAmount, daiAmount)
       .then((tx) => tx.wait());
@@ -92,7 +81,20 @@ export default class Vault {
       chainLog.daiJoin(),
     ]);
 
-    const daiAmount = getDaiAmount(colAmount, ilkStatus.debtMultiplier, liquidationRatio, colRatio);
+    const daiAmount = Vault.getDaiAmount(colAmount, colRatio, liquidationRatio, ilkStatus.price);
     await actions.openLockGemAndDraw(cdpManager, jug, daiJoin, ilkInfo, colAmount, daiAmount).then((tx) => tx.wait());
+  }
+
+  static getDaiAmount(colAmount: FixedNumber, colRatio: FixedNumber, liqRatio: FixedNumber, price: FixedNumber): FixedNumber {
+    if (colRatio.isZero()) {
+      return FixedNumber.fromString('0', UnitFormats.WAD);
+    }
+    const calcFormat = getBiggestDecimalsFormat(colAmount.format, UnitFormats.RAY, COL_RATIO_FORMAT, UnitFormats.WAD);
+    const result = colAmount
+      .toFormat(calcFormat)
+      .mulUnsafe(assertFixedFormat(price, UnitFormats.RAY).toFormat(calcFormat))
+      .mulUnsafe(assertFixedFormat(liqRatio, UnitFormats.RAY).toFormat(calcFormat))
+      .divUnsafe(assertFixedFormat(colRatio, COL_RATIO_FORMAT).toFormat(calcFormat).toFormat(calcFormat));
+    return result.round(UnitFormats.WAD.decimals).toFormat(UnitFormats.WAD);
   }
 }

@@ -12,29 +12,30 @@ import type { FC } from 'react';
 export type VaultStatusCardProps = {
   urnStatus: UrnStatus;
   ilkStatus: IlkStatus;
+  liquidationRatio: FixedNumber;
 };
 
-const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus }) => {
+const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liquidationRatio }) => {
   const { t } = useTranslation('common', { keyPrefix: 'cards.vault' });
-
   const debt = useMemo(
     () => urnStatus.debt.toFormat(UnitFormats.RAY).mulUnsafe(ilkStatus.debtMultiplier),
     [urnStatus.debt, ilkStatus.debtMultiplier],
   );
   const { urn, freeBalance, lockedBalance, debt: urnDebt } = urnStatus;
-  // collateralizationRatio = (ink * spot) / (art * rate)
+  // Collateralization Ratio = Vat.urn.ink * Vat.ilk.spot * Spot.ilk.mat / (Vat.urn.art * Vat.ilk.rate)
   const collateralizationRatio = useMemo(() => {
     const { debtMultiplier, price } = ilkStatus;
     const calcFormat = UnitFormats.RAY;
     if (urnDebt.isZero() || debtMultiplier.isZero()) {
-      return FixedNumber.fromValue(BigNumber.from(0));
+      return FixedNumber.fromString('0', calcFormat);
     }
     return lockedBalance
       .toFormat(calcFormat)
+      .mulUnsafe(liquidationRatio.toFormat(calcFormat))
       .mulUnsafe(price.toFormat(calcFormat))
       .divUnsafe(urnDebt.toFormat(calcFormat).mulUnsafe(debtMultiplier.toFormat(calcFormat)))
       .mulUnsafe(FixedNumber.fromValue(BigNumber.from(100)).toFormat(calcFormat));
-  }, [ilkStatus, lockedBalance, urnDebt]);
+  }, [ilkStatus, lockedBalance, urnDebt, liquidationRatio]);
 
   return (
     <Card>

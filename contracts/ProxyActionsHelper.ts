@@ -1,6 +1,6 @@
 import { DssProxyActions__factory } from 'generated/types';
 
-import { INT_FORMAT, toBigNumber, UnitFormats } from './math';
+import { INT_FORMAT, multiplyGasLimit, toBigNumber, UnitFormats } from './math';
 
 import type CDPManagerHelper from './CDPManagerHelper';
 import type EthereumProvider from './EthereumProvider';
@@ -22,12 +22,17 @@ export default class ProxyActionsHelper {
     return this.actions.interface.encodeFunctionData.bind(this.actions.interface);
   }
 
-  private execute(data: string, overrides: PayableOverrides | undefined = undefined) {
+  private async execute(data: string, overrides: PayableOverrides | undefined = undefined) {
+    const estimatedGasLimit = overrides
+      ? await this.proxy.estimateGas['execute(address,bytes)'](this.actions.address, data, overrides)
+      : await this.proxy.estimateGas['execute(address,bytes)'](this.actions.address, data);
+    const mulipliedGasLimit = multiplyGasLimit(estimatedGasLimit);
     if (overrides) {
-      return this.proxy['execute(address,bytes)'](this.actions.address, data, overrides);
+      return this.proxy['execute(address,bytes)'](this.actions.address, data, { ...overrides, gasLimit: mulipliedGasLimit });
     }
-
-    return this.proxy['execute(address,bytes)'](this.actions.address, data);
+    return this.proxy['execute(address,bytes)'](this.actions.address, data, {
+      gasLimit: mulipliedGasLimit,
+    });
   }
 
   lockGemAndDraw(
@@ -39,7 +44,7 @@ export default class ProxyActionsHelper {
     collateralAmount: FixedNumber,
     daiAmount: FixedNumber,
   ) {
-    if (ilkInfo.symbol === 'WETH') {
+    if (ilkInfo.symbol === 'ETH') {
       return this.execute(
         this.encodeFunctionData('lockETHAndDraw', [
           cdpManager.address,
@@ -80,7 +85,7 @@ export default class ProxyActionsHelper {
     collateralAmount: FixedNumber,
     daiAmount: FixedNumber,
   ) {
-    if (ilkInfo.symbol === 'WETH') {
+    if (ilkInfo.symbol === 'ETH') {
       return this.execute(
         this.encodeFunctionData('openLockETHAndDraw', [
           cdpManager.address,
@@ -95,7 +100,6 @@ export default class ProxyActionsHelper {
         },
       );
     }
-
     /**
      * Collateral will be sent by proxy when `transferFrom` is true
      */
@@ -121,7 +125,7 @@ export default class ProxyActionsHelper {
     collateralAmount: FixedNumber,
     daiAmount: FixedNumber,
   ) {
-    if (ilkInfo.symbol === 'WETH') {
+    if (ilkInfo.symbol === 'ETH') {
       return this.execute(
         this.encodeFunctionData('wipeAndFreeETH', [
           cdpManager.address,

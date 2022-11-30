@@ -112,11 +112,19 @@ const Controller: FC<ControllerProps> = ({
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
       case 'mint':
-        return <MintForm ilkInfo={vault.ilkInfo} buttonContent="Mint" onMint={mint} />;
+        return (
+          <MintForm
+            ilkInfo={vault.ilkInfo}
+            buttonContent="Mint"
+            onMint={mint}
+            liquidationRatio={liquidationRatio}
+            price={ilkStatus.price}
+          />
+        );
       case 'burn':
         return <BurnForm ilkInfo={vault.ilkInfo} buttonContent="Burn" onBurn={burn} />;
     }
-  }, [burn, mint, selectedTab, vault]);
+  }, [burn, mint, selectedTab, vault, liquidationRatio, ilkStatus]);
 
   return (
     <>
@@ -185,7 +193,7 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
         liquidationRatio={ilkCard.liquidationRatio}
         stabilityFee={ilkCard.stabilityFee}
       />
-      <VaultStatusCard urnStatus={urnStatus} ilkStatus={ilkCard.ilkStatus} />
+      <VaultStatusCard urnStatus={urnStatus} ilkStatus={ilkCard.ilkStatus} liquidationRatio={ilkCard.liquidationRatio} />
       <Controller
         chainLog={chainLog}
         vault={vault}
