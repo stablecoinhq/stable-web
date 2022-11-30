@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Box, createTheme, ThemeProvider } from '@mui/material';
+import { appWithTranslation } from 'next-i18next';
 import { useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-import 'styles/globals.scss';
 import useEthereumProvider from 'ethereum/react/useEthereumProvider';
+import 'styles/globals.scss';
+
+import nextI18NextConfig from '../next-i18next.config';
 
 import Header from './Header';
 import UnsupportedNetwork, { propagateError } from './UnsupportedNetwork';
@@ -71,4 +74,4 @@ const MyApp = (appProps: AppProps) => {
   );
 };
 
-export default MyApp;
+export default appWithTranslation(MyApp, nextI18NextConfig);

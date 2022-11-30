@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
+import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo } from 'react';
 
 import { pow, UnitFormats } from 'ethereum/helpers/math';
@@ -42,6 +43,7 @@ export const useIlkStatusCardProps = (chainLog: ChainLogHelper, type: IlkType): 
   )[0];
 
 const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidationRatio, stabilityFee }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'cards.ilk' });
   const totalIssue = useMemo(
     () => ilkStatus.normalizedDebt.toFormat(UnitFormats.RAY).mulUnsafe(ilkStatus.debtMultiplier),
     [ilkStatus.debtMultiplier, ilkStatus.normalizedDebt],
@@ -51,33 +53,19 @@ const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidation
 
   return (
     <Card>
-      <CardHeader title={`${ilkInfo.type.inString} Collateral Status`} subheader={ilkInfo.name} />
+      <CardHeader title={t('title', { ilk: ilkInfo.type.inString })} subheader={ilkInfo.name} />
       <CardContent>
         <Grid container padding={2} spacing={2}>
-          <BNText label="Total Issue" value={totalIssue} tooltipText="Total amount of DAI issued by collateral" />
-          <BNText label="Current Price" value={curPrice} tooltipText={`Current price of collateral ${ilkInfo.name} in DAI`} />
+          <BNText label={t('totalIssue')} value={totalIssue} tooltipText={t('totalIssueDesc')} />
           <BNText
-            label="Liquidation Ratio"
-            value={liquidationRatio}
-            tooltipText="If the Vault reaches below the minimum collateralization level it is considered undercollateralized and is subject to liquidation. Your collateral will then be partially auctioned off to cover outstanding debt and liquidation fee."
+            label={t('currentPrice')}
+            value={curPrice}
+            tooltipText={t('currentPriceDesc', { collateral: ilkInfo.name })}
           />
-          <BNText
-            label="Annual Fee"
-            value={annualFee}
-            tooltipText="The Maker Protocol collects a Stability Fee on Dai that is generated from Maker Vaults. It is a variable-rate fee that changes when Maker’s governing body votes on proposals put forth by Risk Teams."
-          />
-          <BNText
-            label="Maximum Liquidity"
-            value={ilkStatus.debtCeiling}
-            tooltipText="The Maximum Liquidity specified, the amount of DAI that the users can be issued for this type of Vault."
-          />
-          <BNText
-            label="Debt Floor"
-            value={ilkStatus.debtFloor}
-            tooltipText={
-              'The Debt Floor specifies the minimum amount of DAI that can be minted for this type of Vault. This value is also called the "Dust Limit".'
-            }
-          />
+          <BNText label={t('liqRatio')} value={liquidationRatio} tooltipText={t('liqRatioDesc')} />
+          <BNText label={t('annualFee')} value={annualFee} tooltipText={t('annualFeeDesc')} />
+          <BNText label={t('maxLiquidity')} value={ilkStatus.debtCeiling} tooltipText={t('maxLiquidityDesc')} />
+          <BNText label={t('debtFloor')} value={ilkStatus.debtFloor} tooltipText={t('debtFloorDesc')} />
         </Grid>
       </CardContent>
     </Card>

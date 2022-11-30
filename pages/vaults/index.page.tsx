@@ -14,11 +14,14 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material';
+import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import { useCallback } from 'react';
 
 import { useChainLog, useGetCDPs, useProxyRegistry } from 'ethereum/react/ContractHooks';
 import usePromiseFactory from 'pages/usePromiseFactory';
+
+import getTranslationProps from '../getTranslationProps';
 
 import type EthereumProvider from 'ethereum/EthereumProvider';
 import type { CDP } from 'ethereum/contracts/GetCDPsHelper';
@@ -42,6 +45,8 @@ type ContentProps = {
 };
 
 const Content: FC<ContentProps> = ({ cdps }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.vault' });
+
   if (!cdps) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
@@ -53,7 +58,7 @@ const Content: FC<ContentProps> = ({ cdps }) => {
   if (cdps.length === 0) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
-        <Typography variant="subtitle1">No vaults found.</Typography>
+        <Typography variant="subtitle1">{t('noVaults')}</Typography>
       </Box>
     );
   }
@@ -77,16 +82,19 @@ const Content: FC<ContentProps> = ({ cdps }) => {
 };
 
 const Page: NextPageWithEthereum = ({ provider }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.vault' });
+
   const cdps = useCDPs(provider);
 
   return (
     <Card elevation={0}>
       <CardHeader
-        title="Vaults"
+        title={t('listTitle')}
         action={
           <Link href="/ilks" passHref>
             <Fab variant="extended" color="primary">
-              <AddIcon sx={{ mr: 1 }} /> New Vault
+              <AddIcon sx={{ mr: 1 }} />
+              {t('new')}
             </Fab>
           </Link>
         }
@@ -98,4 +106,5 @@ const Page: NextPageWithEthereum = ({ provider }) => {
   );
 };
 
+export const getStaticProps = getTranslationProps;
 export default Page;

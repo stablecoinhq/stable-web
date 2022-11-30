@@ -1,10 +1,13 @@
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Box, Button, Card, CardActions, CardContent, CardHeader, CircularProgress, Grid, Typography } from '@mui/material';
+import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import { useCallback } from 'react';
 
 import ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import usePromiseFactory from 'pages/usePromiseFactory';
+
+import getTranslationProps from '../getTranslationProps';
 
 import type EthereumProvider from 'ethereum/EthereumProvider';
 import type IlkType from 'ethereum/IlkType';
@@ -20,26 +23,32 @@ type RenderIlkProps = {
   ilk: IlkType;
 };
 
-const RenderIlk: FC<RenderIlkProps> = ({ ilk }) => (
-  <Grid item xs={6}>
-    <Card>
-      <CardHeader title={ilk.inString} />
-      <CardActions>
-        <Link href={`/ilks/${ilk.inString}`} passHref>
-          <Button endIcon={<ArrowForwardIcon />} style={{ justifyContent: 'start' }} fullWidth>
-            Open new {ilk.inString} vault
-          </Button>
-        </Link>
-      </CardActions>
-    </Card>
-  </Grid>
-);
+const RenderIlk: FC<RenderIlkProps> = ({ ilk }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
+
+  return (
+    <Grid item xs={6}>
+      <Card>
+        <CardHeader title={ilk.inString} />
+        <CardActions>
+          <Link href={`/ilks/${ilk.inString}`} passHref>
+            <Button endIcon={<ArrowForwardIcon />} style={{ justifyContent: 'start' }} fullWidth>
+              {t('openDesc', { ilk: ilk.inString })}
+            </Button>
+          </Link>
+        </CardActions>
+      </Card>
+    </Grid>
+  );
+};
 
 type ContentProps = {
   ilks: IlkType[] | undefined;
 };
 
 const Content: FC<ContentProps> = ({ ilks }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
+
   if (!ilks) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
@@ -51,7 +60,7 @@ const Content: FC<ContentProps> = ({ ilks }) => {
   if (ilks.length === 0) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
-        <Typography variant="subtitle1">No ilks found.</Typography>
+        <Typography variant="subtitle1">{t('noIlks')}</Typography>
       </Box>
     );
   }
@@ -66,11 +75,13 @@ const Content: FC<ContentProps> = ({ ilks }) => {
 };
 
 const OpenVault: NextPageWithEthereum = ({ provider }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
+
   const ilks = useIlks(provider);
 
   return (
     <Card elevation={0}>
-      <CardHeader title="Open new vault" />
+      <CardHeader title={t('openLabel')} />
       <CardContent>
         <Content ilks={ilks} />
       </CardContent>
@@ -78,4 +89,5 @@ const OpenVault: NextPageWithEthereum = ({ provider }) => {
   );
 };
 
+export const getStaticProps = getTranslationProps;
 export default OpenVault;

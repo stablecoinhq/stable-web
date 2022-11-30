@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
 import { BigNumber, FixedNumber } from 'ethers';
+import { useTranslation } from 'next-i18next';
 import { useMemo } from 'react';
 
 import { UnitFormats } from 'ethereum/helpers/math';
@@ -12,45 +13,40 @@ import type { FC } from 'react';
 export type VaultStatusCardProps = {
   urnStatus: UrnStatus;
   ilkStatus: IlkStatus;
+  liquidationRatio: FixedNumber;
 };
 
-const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus }) => {
+const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liquidationRatio }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'cards.vault' });
   const debt = useMemo(
     () => urnStatus.debt.toFormat(UnitFormats.RAY).mulUnsafe(ilkStatus.debtMultiplier),
     [urnStatus.debt, ilkStatus.debtMultiplier],
   );
   const { urn, freeBalance, lockedBalance, debt: urnDebt } = urnStatus;
-  // collateralizationRatio = (ink * spot) / (art * rate)
+  // Collateralization Ratio = Vat.urn.ink * Vat.ilk.spot * Spot.ilk.mat / (Vat.urn.art * Vat.ilk.rate)
   const collateralizationRatio = useMemo(() => {
     const { debtMultiplier, price } = ilkStatus;
     const calcFormat = UnitFormats.RAY;
     if (urnDebt.isZero() || debtMultiplier.isZero()) {
-      return FixedNumber.fromValue(BigNumber.from(0));
+      return FixedNumber.fromString('0', calcFormat);
     }
     return lockedBalance
       .toFormat(calcFormat)
+      .mulUnsafe(liquidationRatio.toFormat(calcFormat))
       .mulUnsafe(price.toFormat(calcFormat))
       .divUnsafe(urnDebt.toFormat(calcFormat).mulUnsafe(debtMultiplier.toFormat(calcFormat)))
       .mulUnsafe(FixedNumber.fromValue(BigNumber.from(100)).toFormat(calcFormat));
-  }, [ilkStatus, lockedBalance, urnDebt]);
+  }, [ilkStatus, lockedBalance, urnDebt, liquidationRatio]);
 
   return (
     <Card>
-      <CardHeader title="Vault Status" subheader={urn} />
+      <CardHeader title={t('title')} subheader={urn} />
       <CardContent>
         <Grid container padding={2} spacing={2}>
-          <BNText
-            label="Free Collateral"
-            value={freeBalance}
-            tooltipText="Amount of tokens that is currently being locked in Vault but not used as collateral."
-          />
-          <BNText
-            label="Locked Collateral"
-            value={lockedBalance}
-            tooltipText="Total amount of collateral that is locked in this vault"
-          />
-          <BNText label="Debt" value={debt} tooltipText="Total amount of debt that this Vault owes." />
-          <BNText label="Collateralization Ratio" value={collateralizationRatio} tooltipText="Collatelization ratio" />
+          <BNText label={t('freeCollateral')} value={freeBalance} tooltipText={t('freeCollateralDesc')} />
+          <BNText label={t('lockedCollateral')} value={lockedBalance} tooltipText={t('lockedCollateralDesc')} />
+          <BNText label={t('debt')} value={debt} tooltipText={t('debtDesc')} />
+          <BNText label={t('colRatio')} value={collateralizationRatio} />
         </Grid>
       </CardContent>
     </Card>

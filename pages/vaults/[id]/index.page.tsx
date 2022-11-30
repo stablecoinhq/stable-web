@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import { FixedNumber } from 'ethers';
+import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCallback, useMemo, useState } from 'react';
@@ -26,6 +27,8 @@ import VaultStatusCard from 'ethereum/react/cards/VaultStatusCard';
 import WalletStatusCard from 'ethereum/react/cards/WalletStatusCard';
 import BurnForm from 'pages/forms/BurnForm';
 import MintForm from 'pages/forms/MintForm';
+import getEmptyPaths from 'pages/getEmptyPaths';
+import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
@@ -48,19 +51,23 @@ const useProxyAddress = (chainLog: ChainLogHelper) => {
   )[0];
 };
 
-const NotFound: FC = () => (
-  <Stack direction="column" alignItems="center" padding={2}>
-    <Box width={128} height={128}>
-      <SvgIcon component={WarningIcon} inheritViewBox style={{ fontSize: 128 }} color="error" />
-    </Box>
-    <Typography variant="h6" component="div" padding={2}>
-      Vaultが見つかりませんでした。
-    </Typography>
-    <Link href="/vaults" passHref>
-      <Button variant="contained">一覧に戻る</Button>
-    </Link>
-  </Stack>
-);
+const NotFound: FC = () => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.vault' });
+
+  return (
+    <Stack direction="column" alignItems="center" padding={2}>
+      <Box width={128} height={128}>
+        <SvgIcon component={WarningIcon} inheritViewBox style={{ fontSize: 128 }} color="error" />
+      </Box>
+      <Typography variant="h6" component="div" padding={2}>
+        {t('notFound')}
+      </Typography>
+      <Link href="/vaults" passHref>
+        <Button variant="contained">{t('backToList')}</Button>
+      </Link>
+    </Stack>
+  );
+};
 
 type ControllerProps = {
   chainLog: ChainLogHelper;
@@ -104,11 +111,19 @@ const Controller: FC<ControllerProps> = ({
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
       case 'mint':
-        return <MintForm ilkInfo={vault.ilkInfo} buttonContent="Mint" onMint={mint} />;
+        return (
+          <MintForm
+            ilkInfo={vault.ilkInfo}
+            buttonContent="Mint"
+            onMint={mint}
+            liquidationRatio={liquidationRatio}
+            price={ilkStatus.price}
+          />
+        );
       case 'burn':
         return <BurnForm ilkInfo={vault.ilkInfo} buttonContent="Burn" onBurn={burn} />;
     }
-  }, [burn, mint, selectedTab, vault]);
+  }, [burn, mint, selectedTab, vault, liquidationRatio, ilkStatus]);
 
   return (
     <>
@@ -177,7 +192,7 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
         liquidationRatio={ilkCard.liquidationRatio}
         stabilityFee={ilkCard.stabilityFee}
       />
-      <VaultStatusCard urnStatus={urnStatus} ilkStatus={ilkCard.ilkStatus} />
+      <VaultStatusCard urnStatus={urnStatus} ilkStatus={ilkCard.ilkStatus} liquidationRatio={ilkCard.liquidationRatio} />
       <Controller
         chainLog={chainLog}
         vault={vault}
@@ -193,6 +208,8 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
 };
 
 const VaultDetail: NextPageWithEthereum = ({ provider }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.vault' });
+
   const router = useRouter();
   const cdpId = useMemo(
     () => toFixedNumberOrUndefined(getStringQuery(router.query.id), INT_FORMAT) || FixedNumber.fromString('0', INT_FORMAT),
@@ -217,7 +234,7 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
 
   return (
     <Card elevation={0}>
-      <CardHeader title={`${cdp.ilk.inString} Vault (${cdpId?.toString()})`} subheader={cdp.urn} />
+      <CardHeader title={t('title', { ilk: cdp.ilk.inString, id: cdpId?.toString() })} subheader={cdp.urn} />
       <CardContent>
         <Content chainLog={chainLog} cdp={cdp} address={provider.address} />
       </CardContent>
@@ -225,4 +242,6 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
   );
 };
 
+export const getStaticPaths = getEmptyPaths;
+export const getStaticProps = getTranslationProps;
 export default VaultDetail;

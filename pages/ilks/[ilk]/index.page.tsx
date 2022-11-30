@@ -1,5 +1,6 @@
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Card, CardContent, CardHeader, CircularProgress, Stack, SvgIcon, Typography } from '@mui/material';
+import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCallback, useMemo } from 'react';
@@ -10,6 +11,8 @@ import { useChainLog } from 'ethereum/react/ContractHooks';
 import IlkStatusCard, { useIlkStatusCardProps } from 'ethereum/react/cards/IlkStatusCard';
 import WalletStatusCard from 'ethereum/react/cards/WalletStatusCard';
 import MintForm from 'pages/forms/MintForm';
+import getEmptyPaths from 'pages/getEmptyPaths';
+import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
@@ -21,19 +24,23 @@ import type { FixedNumber } from 'ethers';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
-const InvalidIlk: FC = () => (
-  <Stack direction="column" alignItems="center" padding={2}>
-    <Box width={128} height={128}>
-      <SvgIcon component={WarningIcon} inheritViewBox style={{ fontSize: 128 }} color="error" />
-    </Box>
-    <Typography variant="h6" component="div" padding={2}>
-      指定された担保が見つかりませんでした。
-    </Typography>
-    <Link href="/ilks" passHref>
-      <Button variant="contained">一覧に戻る</Button>
-    </Link>
-  </Stack>
-);
+const InvalidIlk: FC = () => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
+
+  return (
+    <Stack direction="column" alignItems="center" padding={2}>
+      <Box width={128} height={128}>
+        <SvgIcon component={WarningIcon} inheritViewBox style={{ fontSize: 128 }} color="error" />
+      </Box>
+      <Typography variant="h6" component="div" padding={2}>
+        {t('notFound')}
+      </Typography>
+      <Link href="/ilks" passHref>
+        <Button variant="contained">{t('backToList')}</Button>
+      </Link>
+    </Stack>
+  );
+};
 
 type OpenVaultProps = {
   chainLog: ChainLogHelper;
@@ -43,6 +50,8 @@ type OpenVaultProps = {
 };
 
 const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidationRatio }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
+
   const router = useRouter();
   const openVault = useCallback(
     async (amount: FixedNumber, ratio: FixedNumber) => {
@@ -52,7 +61,15 @@ const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidati
     [chainLog, ilkInfo, ilkStatus, liquidationRatio, router],
   );
 
-  return <MintForm ilkInfo={ilkInfo} buttonContent="Open vault" onMint={openVault} />;
+  return (
+    <MintForm
+      ilkInfo={ilkInfo}
+      buttonContent={t('openLabel')}
+      onMint={openVault}
+      liquidationRatio={liquidationRatio}
+      price={ilkStatus.price}
+    />
+  );
 };
 
 type ContentProps = {
@@ -103,6 +120,8 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
 };
 
 const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
+
   const router = useRouter();
   const ilkType = useMemo(() => {
     const typeInString = getStringQuery(router.query.ilk);
@@ -115,7 +134,7 @@ const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
 
   return (
     <Card elevation={0}>
-      <CardHeader title={`Open new ${ilkType.inString} vault`} />
+      <CardHeader title={t('openDesc', { ilk: ilkType.inString })} />
       <CardContent>
         <Content provider={provider} ilkType={ilkType} />
       </CardContent>
@@ -123,4 +142,6 @@ const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
   );
 };
 
+export const getStaticPaths = getEmptyPaths;
+export const getStaticProps = getTranslationProps;
 export default OpenVaultForIlk;

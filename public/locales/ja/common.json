@@ -1,0 +1,46 @@
+{
+  "cards": {
+    "ilk": {
+      "title": "$t(terms.collateral) {{ilk}} の状態"
+    },
+    "vault": {
+      "title": "$t(terms.vault_one)の状態"
+    },
+    "wallet": {
+      "title": "ウォレットの状態"
+    }
+  },
+  "metamask": {
+    "buttons": {
+      "connect": "$t(metamask.name)を接続",
+      "install": "$t(metamask.name)をインストール"
+    }
+  },
+  "pages": {
+    "errors": {
+      "backToList": "一覧に戻る",
+      "changeNetwork": "ネットワークを変更",
+      "notConnected": "Ethereumウォレットが接続されていません",
+      "requireConnection": "アプリケーションを利用するためには$t(metamask.name)がインストールされている必要があります",
+      "unsupportedNetwork": "このネットワークはサポートされていません。<br />$t(metamask.name)で別のネットワークを選択してください。"
+    },
+    "ilk": {
+      "noIlks": "担保が見つかりませんでした",
+      "openLabel": "$t(terms.vault_one)を新規作成",
+      "openDesc": "{{ilk}} $t(terms.vault_one)を新規作成"
+    },
+    "vault": {
+      "cardDesc": "$t(terms.vault_one)の新規作成や既存の$t(terms.vault_other)の操作",
+      "cardTitle": "$t(terms.vault_other)管理",
+      "listTitle": "$t(terms.vault_one)",
+      "new": "新規$t(terms.vault_one)",
+      "noVaults": "$t(terms.vault_other)がありません",
+      "notFound": "指定された$t(terms.vault_one)が見つかりませんでした"
+    }
+  },
+  "terms": {
+    "collateral": "担保",
+    "vault_one": "Vault",
+    "vault_other": "Vault"
+  }
+}

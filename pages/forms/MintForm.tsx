@@ -1,9 +1,13 @@
+import { FixedFormat } from '@ethersproject/bignumber';
 import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from '@mui/material';
 import { FixedNumber } from 'ethers';
+import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
-import { COL_RATIO_FORMAT } from 'ethereum/Vault';
+import Vault, { COL_RATIO_FORMAT } from 'ethereum/Vault';
+import { UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
+import BNText from 'ethereum/react/cards/BNText';
 
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
@@ -13,15 +17,30 @@ const CENT = FixedNumber.fromString('100', COL_RATIO_FORMAT);
 export type MintFormProps = {
   ilkInfo: IlkInfo;
   buttonContent: ReactNode;
+  price: FixedNumber;
+  liquidationRatio: FixedNumber;
   onMint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
 };
 
-const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent }) => {
+const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidationRatio, price }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'forms.mint' });
   const [amountText, setAmountText] = useState('');
-  const amount = useMemo(() => toFixedNumberOrUndefined(amountText, ilkInfo.gem.format), [amountText, ilkInfo.gem.format]);
+  const collateralAmount = useMemo(
+    () => toFixedNumberOrUndefined(amountText, ilkInfo.gem.format),
+    [amountText, ilkInfo.gem.format],
+  );
   // input as percentage, return as ratio
-  const [ratioText, setRatioText] = useState('150');
+  const [ratioText, setRatioText] = useState(() => {
+    const initialRatio = liquidationRatio.toFormat(COL_RATIO_FORMAT).mulUnsafe(CENT).toFormat(FixedFormat.from(0));
+    return initialRatio.toString();
+  });
   const ratio = useMemo(() => toFixedNumberOrUndefined(ratioText, COL_RATIO_FORMAT)?.divUnsafe(CENT), [ratioText]);
+  const daiAmount = useMemo(() => {
+    if (collateralAmount && ratio) {
+      return Vault.getDaiAmount(collateralAmount, ratio, liquidationRatio, price);
+    }
+    return FixedNumber.fromString('0', UnitFormats.WAD);
+  }, [collateralAmount, ratio, liquidationRatio, price]);
   const [minting, setMinting] = useState(false);
 
   const onAmountChange: ChangeEventHandler<HTMLInputElement> = useCallback(
@@ -34,15 +53,15 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent }) => {
   );
 
   const onButtonClick: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
-    if (!amount || !ratio) {
+    if (!collateralAmount || !ratio) {
       return;
     }
 
     setMinting(true);
-    onMint(amount, ratio).finally(() => {
+    onMint(collateralAmount, ratio).finally(() => {
       setMinting(false);
     });
-  }, [amount, onMint, ratio]);
+  }, [collateralAmount, onMint, ratio]);
 
   return (
     <Card component="form" elevation={0}>
@@ -50,7 +69,7 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent }) => {
         <Grid item xs={6}>
           <TextField
             fullWidth
-            label={`Amount of ${ilkInfo.name} to lock`}
+            label={t('lockAmount', { gem: ilkInfo.name })}
             value={amountText}
             onChange={onAmountChange}
             InputProps={{
@@ -61,15 +80,15 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent }) => {
         <Grid item xs={6}>
           <TextField
             fullWidth
-            label="Collateralization Ratio"
+            label={t('colRatio')}
             value={ratioText}
             onChange={onRatioChange}
             InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
           />
         </Grid>
-
+        <BNText label="Amount of DAIs to be minted." value={daiAmount} tooltipText="Amount of DAIs to be minted." />
         <Grid item xs={12}>
-          <Button variant="contained" fullWidth disabled={!amount || !ratio || minting} onClick={onButtonClick}>
+          <Button variant="contained" fullWidth disabled={!collateralAmount || !ratio || minting} onClick={onButtonClick}>
             {minting ? <CircularProgress /> : buttonContent}
           </Button>
         </Grid>
