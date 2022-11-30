@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react';
 import Savings from 'contracts/Savings';
 import { UnitFormats } from 'contracts/math';
 import { useChainLog } from 'pages/ethereum/ContractHooks';
+import getTranslationProps from 'pages/getTranslationProps';
 import usePromiseFactory from 'pages/usePromiseFactory';
 import BalanceStatusCard from 'pages/vaults/[id]/BalanceStatusCard';
 
@@ -146,5 +147,7 @@ const Earn: NextPageWithEthereum = ({ provider }) => {
     </Card>
   );
 };
+
+export const getStaticProps = getTranslationProps;
 
 export default Earn;
