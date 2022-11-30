@@ -31,14 +31,14 @@
   },
   "forms": {
     "burn": {
-      "redeemAmount": "Amount of $t(terms.stableToken) to redeem",
+      "redeemAmount": "Amount of $t(units.stableToken) to redeem",
       "freeAmount": "Amount of {{gem}} to free"
     },
     "mint": {
       "colRatio": "$t(terms.colRatio)",
       "lockAmount": "Amount of {{gem}} to lock",
-      "mintAmountLabel": "Amount of $t(terms.stableToken)s to be minted.",
-      "mintAmountTooltipText": "Amount of $t(terms.stableToken)s to be minted."
+      "mintAmountLabel": "Amount of $t(units.stableToken)s to be minted.",
+      "mintAmountTooltipText": "Amount of $t(units.stableToken)s to be minted."
     }
   },
   "metamask": {
@@ -79,9 +79,11 @@
   "terms": {
     "collateral": "collateral",
     "colRatio": "Collateralization Ratio",
-    "stableToken": "DAI",
-    "jpy": "JPY",
     "vault_one": "vault",
     "vault_other": "vaults"
+  },
+  "units": {
+    "stableToken": "DAI",
+    "jpy": "JPY"
   }
 }

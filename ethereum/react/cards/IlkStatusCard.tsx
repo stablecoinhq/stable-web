@@ -42,7 +42,7 @@ export const useIlkStatusCardProps = (chainLog: ChainLogHelper, type: IlkType): 
 
 const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidationRatio, stabilityFee }) => {
   const { t } = useTranslation('common', { keyPrefix: 'cards.ilk' });
-  const { t: terms } = useTranslation('common', { keyPrefix: 'terms' });
+  const { t: units } = useTranslation('common', { keyPrefix: 'units' });
 
   const totalIssue = useMemo(
     () => ilkStatus.normalizedDebt.toFormat(UnitFormats.RAY).mulUnsafe(ilkStatus.debtMultiplier),
@@ -53,28 +53,38 @@ const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidation
     () =>
       pow(stabilityFee, YEAR_IN_SECONDS)
         .subUnsafe(FixedNumber.fromString('1', INT_FORMAT).toFormat(UnitFormats.RAY))
-        .mulUnsafe(CENT),
+        .mulUnsafe(CENT.toFormat(UnitFormats.RAY)),
     [stabilityFee],
   );
 
-  const liquidationRatioPercent = useMemo(() => liquidationRatio.mulUnsafe(CENT), [liquidationRatio]);
+  const liquidationRatioPercent = useMemo(() => liquidationRatio.mulUnsafe(CENT.toFormat(UnitFormats.RAY)), [liquidationRatio]);
 
   return (
     <Card>
       <CardHeader title={t('title', { ilk: ilkInfo.type.inString })} subheader={ilkInfo.name} />
       <CardContent>
         <Grid container padding={2} spacing={2}>
-          <BNText label={t('totalIssue')} value={totalIssue} tooltipText={t('totalIssueDesc')} unit="DAI" />
+          <BNText label={t('totalIssue')} value={totalIssue} tooltipText={t('totalIssueDesc')} unit={units('stableToken')} />
           <BNText
             label={t('currentPrice')}
             value={curPrice}
             tooltipText={t('currentPriceDesc', { collateral: ilkInfo.name })}
-            unit={terms('jpy')}
+            unit={units('jpy')}
           />
           <BNText label={t('liqRatio')} value={liquidationRatioPercent} tooltipText={t('liqRatioDesc')} unit="%" />
           <BNText label={t('annualFee')} value={annualFee} tooltipText={t('annualFeeDesc')} unit="%" />
-          <BNText label={t('maxLiquidity')} value={ilkStatus.debtCeiling} tooltipText={t('maxLiquidityDesc')} unit="DAI" />
-          <BNText label={t('debtFloor')} value={ilkStatus.debtFloor} tooltipText={t('debtFloorDesc')} unit="DAI" />
+          <BNText
+            label={t('maxLiquidity')}
+            value={ilkStatus.debtCeiling}
+            tooltipText={t('maxLiquidityDesc')}
+            unit={units('stableToken')}
+          />
+          <BNText
+            label={t('debtFloor')}
+            value={ilkStatus.debtFloor}
+            tooltipText={t('debtFloorDesc')}
+            unit={units('stableToken')}
+          />
         </Grid>
       </CardContent>
     </Card>

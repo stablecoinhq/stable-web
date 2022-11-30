@@ -17,7 +17,7 @@ export const UnitFormats = {
 };
 
 export const COL_RATIO_FORMAT = FixedFormat.from(2);
-export const CENT = FixedNumber.fromString('100', COL_RATIO_FORMAT).toFormat(UnitFormats.RAY);
+export const CENT = FixedNumber.fromString('100', COL_RATIO_FORMAT);
 
 export const YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
 export const INT_FORMAT = FixedFormat.from(0);
