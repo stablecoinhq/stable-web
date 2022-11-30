@@ -3,8 +3,7 @@ import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo } from 'react';
 
-import { pow, UnitFormats, INT_FORMAT } from 'ethereum/helpers/math';
-import { COL_RATIO_FORMAT } from 'ethereum/Vault';
+import { pow, UnitFormats, INT_FORMAT, YEAR_IN_SECONDS, CENT } from 'ethereum/helpers/math';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
 import BNText from './BNText';
@@ -14,8 +13,6 @@ import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
 import type { FC } from 'react';
-
-export const YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
 
 export type IlkStatusCardProps = {
   ilkInfo: IlkInfo;
@@ -50,16 +47,15 @@ const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidation
     [ilkStatus.debtMultiplier, ilkStatus.normalizedDebt],
   );
   const curPrice = useMemo(() => ilkStatus.price.mulUnsafe(liquidationRatio), [ilkStatus.price, liquidationRatio]);
-  const CENT = FixedNumber.fromString('100', COL_RATIO_FORMAT).toFormat(UnitFormats.RAY);
   const annualFee = useMemo(
     () =>
       pow(stabilityFee, YEAR_IN_SECONDS)
         .subUnsafe(FixedNumber.fromString('1', INT_FORMAT).toFormat(UnitFormats.RAY))
         .mulUnsafe(CENT),
-    [stabilityFee, CENT],
+    [stabilityFee],
   );
 
-  const liquidationRatioPercent = useMemo(() => liquidationRatio.mulUnsafe(CENT), [liquidationRatio, CENT]);
+  const liquidationRatioPercent = useMemo(() => liquidationRatio.mulUnsafe(CENT), [liquidationRatio]);
 
   return (
     <Card>

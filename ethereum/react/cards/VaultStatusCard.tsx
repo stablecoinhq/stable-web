@@ -46,7 +46,12 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
       <CardContent>
         <Grid container padding={2} spacing={2}>
           <BNText label={t('freeCollateral')} value={freeBalance} tooltipText={t('freeCollateralDesc')} unit={ilkInfo.symbol} />
-          <BNText label={t('lockedCollateral')} value={lockedBalance} tooltipText={t('lockedCollateralDesc')} unit={ilkInfo.symbol} />
+          <BNText
+            label={t('lockedCollateral')}
+            value={lockedBalance}
+            tooltipText={t('lockedCollateralDesc')}
+            unit={ilkInfo.symbol}
+          />
           <BNText label={t('debt')} value={debt} tooltipText={t('debtDesc')} unit="DAI" />
           <BNText label={t('colRatio')} value={collateralizationRatio} unit="%" />
         </Grid>
