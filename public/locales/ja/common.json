@@ -40,6 +40,7 @@
   },
   "terms": {
     "collateral": "担保",
+    "jpy": "円",
     "vault_one": "Vault",
     "vault_other": "Vault"
   }

@@ -42,6 +42,8 @@ export const useIlkStatusCardProps = (chainLog: ChainLogHelper, type: IlkType): 
 
 const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidationRatio, stabilityFee }) => {
   const { t } = useTranslation('common', { keyPrefix: 'cards.ilk' });
+  const { t: terms } = useTranslation('common', { keyPrefix: 'terms' });
+
   const totalIssue = useMemo(
     () => ilkStatus.normalizedDebt.toFormat(UnitFormats.RAY).mulUnsafe(ilkStatus.debtMultiplier),
     [ilkStatus.debtMultiplier, ilkStatus.normalizedDebt],
@@ -67,7 +69,7 @@ const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidation
             label={t('currentPrice')}
             value={curPrice}
             tooltipText={t('currentPriceDesc', { collateral: ilkInfo.name })}
-            unit="DAI"
+            unit={terms('jpy')}
           />
           <BNText label={t('liqRatio')} value={liquidationRatioPercent} tooltipText={t('liqRatioDesc')} unit="%" />
           <BNText label={t('annualFee')} value={annualFee} tooltipText={t('annualFeeDesc')} unit="%" />

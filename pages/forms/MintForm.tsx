@@ -22,6 +22,7 @@ export type MintFormProps = {
 
 const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidationRatio, price }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms.mint' });
+
   const [amountText, setAmountText] = useState('');
   const collateralAmount = useMemo(
     () => toFixedNumberOrUndefined(amountText, ilkInfo.gem.format),
@@ -90,7 +91,7 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidati
             InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
           />
         </Grid>
-        <BNText label="Amount of DAIs to be minted." value={daiAmount} tooltipText="Amount of DAIs to be minted." unit="DAI" />
+        <BNText label={t('mintAmountLabel')} value={daiAmount} tooltipText={t('mintAmountTooltipText')} unit="DAI" />
         <Grid item xs={12}>
           <Button variant="contained" fullWidth disabled={!collateralAmount || !ratio || minting} onClick={onButtonClick}>
             {minting ? <CircularProgress /> : buttonContent}

@@ -36,7 +36,9 @@
     },
     "mint": {
       "colRatio": "$t(terms.colRatio)",
-      "lockAmount": "Amount of {{gem}} to lock"
+      "lockAmount": "Amount of {{gem}} to lock",
+      "mintAmountLabel": "Amount of $t(terms.stableToken)s to be minted.",
+      "mintAmountTooltipText": "Amount of $t(terms.stableToken)s to be minted."
     }
   },
   "metamask": {
@@ -78,6 +80,7 @@
     "collateral": "collateral",
     "colRatio": "Collateralization Ratio",
     "stableToken": "DAI",
+    "jpy": "JPY",
     "vault_one": "vault",
     "vault_other": "vaults"
   }
