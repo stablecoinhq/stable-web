@@ -1,6 +1,9 @@
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Button, Card, CardActions, CardContent, Grid, Typography } from '@mui/material';
+import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
+
+import getTranslationProps from './getTranslationProps';
 
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
@@ -30,15 +33,15 @@ const Item: FC<ItemProps> = ({ cardTitle, cardBody, buttonTitle, href }) => (
   </Grid>
 );
 
-const Home: NextPageWithEthereum = () => (
-  <Grid container spacing={4}>
-    <Item
-      cardTitle="Manage Vaults"
-      cardBody="Create a new vault or manage your existing vaults."
-      buttonTitle="Vaults"
-      href="/vaults"
-    />
-  </Grid>
-);
+const Home: NextPageWithEthereum = () => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages' });
 
+  return (
+    <Grid container spacing={4}>
+      <Item cardTitle={t('vault.cardTitle')} cardBody={t('vault.cardDesc')} buttonTitle={t('vault.listTitle')} href="/vaults" />
+    </Grid>
+  );
+};
+
+export const getStaticProps = getTranslationProps;
 export default Home;

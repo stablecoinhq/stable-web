@@ -1,4 +1,5 @@
 import { Button, SvgIcon } from '@mui/material';
+import { useTranslation } from 'next-i18next';
 import { useCallback } from 'react';
 
 import MetaMaskIcon from 'images/metamask.svg';
@@ -9,13 +10,14 @@ import type { FC } from 'react';
 import type { WithNullableEthereum } from 'types/next';
 
 const MetaMaskButton: FC<WithNullableEthereum> = ({ externalProvider, provider }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'metamask.buttons' });
   const text = (() => {
     if (!externalProvider || !isMetaMaskInPageProvider(externalProvider)) {
-      return 'Install MetaMask';
+      return t('connect');
     }
 
     if (!provider) {
-      return 'Connect MetaMask';
+      return t('connect');
     }
 
     return `${provider.address.substring(0, 16)}... (${provider.chainId})`;

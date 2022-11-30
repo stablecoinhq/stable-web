@@ -1,4 +1,5 @@
 import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from '@mui/material';
+import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
 import { UnitFormats } from 'contracts/math';
@@ -16,6 +17,7 @@ export type BurnFormProps = {
 };
 
 const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn, buttonContent }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'forms.burn' });
   const [daiText, setDaiText] = useState('');
   const daiAmount = useMemo(() => toFixedNumberOrUndefined(daiText, UnitFormats.WAD), [daiText]);
   const [colText, setColText] = useState('');
@@ -48,7 +50,7 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn, buttonContent }) => {
         <Grid item xs={6}>
           <TextField
             fullWidth
-            label="Amount of DAI to redeem"
+            label={t('redeemAmount')}
             value={daiText}
             onChange={onDaiChange}
             InputProps={{
@@ -59,7 +61,7 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn, buttonContent }) => {
         <Grid item xs={6}>
           <TextField
             fullWidth
-            label={`Amount of ${ilkInfo.name} to free`}
+            label={t('freeAmount', { gem: ilkInfo.name })}
             value={colText}
             onChange={onColChange}
             InputProps={{

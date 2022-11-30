@@ -9,7 +9,8 @@ const nextConfig = {
       use: ["@svgr/webpack"],
     });
     return config;
-  }
+  },
+  i18n: require('./next-i18next.config.js').i18n,
 }
 
 module.exports = nextConfig
