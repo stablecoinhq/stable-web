@@ -1,5 +1,5 @@
 import { FixedFormat } from '@ethersproject/bignumber';
-import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from '@mui/material';
+import { Button, Card, Grid, InputAdornment, TextField, CircularProgress, FormHelperText } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
@@ -10,17 +10,40 @@ import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/hel
 import BNText from 'ethereum/react/cards/BNText';
 
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
+import type { IlkStatus } from 'ethereum/contracts/VatHelper';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
 export type MintFormProps = {
   ilkInfo: IlkInfo;
+  ilkStatus: IlkStatus;
   buttonContent: ReactNode;
-  price: FixedNumber;
   liquidationRatio: FixedNumber;
+  collateralBalance: FixedNumber;
+  debt: FixedNumber;
   onMint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
 };
 
-const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidationRatio, price }) => {
+enum FormError {
+  // 残高不足
+  insufficientBalance,
+  // 担保率が最低担保率を下回っている
+  collateralTooLow,
+  // Vaultの負債が小さすぎる
+  debtTooLow,
+  // 発行上限を超えている
+  issuingTooMuchCoins,
+}
+
+const MintForm: FC<MintFormProps> = ({
+  ilkInfo,
+  ilkStatus,
+  onMint,
+  buttonContent,
+  liquidationRatio,
+  collateralBalance,
+  debt,
+}) => {
+  const { price } = ilkStatus;
   const { t } = useTranslation('common', { keyPrefix: 'forms.mint' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
 
@@ -69,6 +92,48 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidati
     });
   }, [collateralAmount, onMint, ratio]);
 
+  const formErrors: FormError[] = useMemo(() => {
+    const { debtMultiplier, normalizedDebt, debtCeiling, debtFloor } = ilkStatus;
+    const errors = [];
+    if (collateralAmount && collateralBalance.subUnsafe(collateralAmount).isNegative()) {
+      errors.push(FormError.insufficientBalance);
+    }
+    if (ratio && ratio.subUnsafe(liquidationRatio.toFormat(COL_RATIO_FORMAT)).isNegative()) {
+      errors.push(FormError.collateralTooLow);
+    }
+
+    // Vat.ilk.rate * (urn.art + daiAmount) - Vat.ilk.dust < 0
+    if (
+      !daiAmount.isZero() &&
+      debtMultiplier
+        .toFormat(UnitFormats.RAD)
+        .mulUnsafe(debt.toFormat(UnitFormats.RAD).addUnsafe(daiAmount.toFormat(UnitFormats.RAD)))
+        .subUnsafe(debtFloor.toFormat(UnitFormats.RAD))
+        .isNegative()
+    ) {
+      errors.push(FormError.debtTooLow);
+    }
+
+    const totalIssued = normalizedDebt.toFormat(UnitFormats.RAD).mulUnsafe(debtMultiplier.toFormat(UnitFormats.RAD));
+    if (debtCeiling.subUnsafe(totalIssued.addUnsafe(daiAmount.toFormat(UnitFormats.RAD))).isNegative()) {
+      errors.push(FormError.issuingTooMuchCoins);
+    }
+    return errors;
+  }, [collateralBalance, collateralAmount, liquidationRatio, ratio, daiAmount, ilkStatus, debt]);
+
+  const showErrorMessage = (e: FormError) => {
+    switch (e) {
+      case FormError.insufficientBalance:
+        return t('error.insufficentAmount');
+      case FormError.collateralTooLow:
+        return t('error.collateralTooLow');
+      case FormError.debtTooLow:
+        return t('error.debtTooLow');
+      case FormError.issuingTooMuchCoins:
+        return t('error.issuingTooMuchCoins');
+    }
+  };
+
   return (
     <Card component="form" elevation={0}>
       <Grid container padding={2} spacing={2}>
@@ -99,9 +164,20 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidati
           unit={units('stableToken')}
         />
         <Grid item xs={12}>
-          <Button variant="contained" fullWidth disabled={!collateralAmount || !ratio || minting} onClick={onButtonClick}>
+          <Button
+            variant="contained"
+            fullWidth
+            disabled={!collateralAmount || daiAmount.isZero() || !ratio || minting || formErrors.length !== 0}
+            onClick={onButtonClick}
+          >
             {minting ? <CircularProgress /> : buttonContent}
           </Button>
+          {formErrors.length !== 0 &&
+            formErrors.map((e) => (
+              <FormHelperText key={e} error>
+                {showErrorMessage(e)}
+              </FormHelperText>
+            ))}
         </Grid>
       </Grid>
     </Card>

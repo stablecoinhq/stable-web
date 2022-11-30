@@ -1,5 +1,6 @@
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Card, CardContent, CardHeader, CircularProgress, Stack, SvgIcon, Typography } from '@mui/material';
+import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -10,6 +11,7 @@ import Vault from 'ethereum/Vault';
 import { useChainLog } from 'ethereum/react/ContractHooks';
 import IlkStatusCard, { useIlkStatusCardProps } from 'ethereum/react/cards/IlkStatusCard';
 import WalletStatusCard from 'ethereum/react/cards/WalletStatusCard';
+import { UnitFormats } from 'ethereum/helpers/math';
 import MintForm from 'pages/forms/MintForm';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
@@ -20,7 +22,6 @@ import type EthereumProvider from 'ethereum/EthereumProvider';
 import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
-import type { FixedNumber } from 'ethers';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
@@ -47,9 +48,10 @@ type OpenVaultProps = {
   ilkInfo: IlkInfo;
   ilkStatus: IlkStatus;
   liquidationRatio: FixedNumber;
+  balance: FixedNumber;
 };
 
-const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidationRatio }) => {
+const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidationRatio, balance }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
 
   const router = useRouter();
@@ -67,7 +69,9 @@ const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidati
       buttonContent={t('openLabel')}
       onMint={openVault}
       liquidationRatio={liquidationRatio}
-      price={ilkStatus.price}
+      ilkStatus={ilkStatus}
+      collateralBalance={balance}
+      debt={FixedNumber.fromString('0', UnitFormats.WAD)}
     />
   );
 };
@@ -114,6 +118,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
         ilkInfo={ilkCard.ilkInfo}
         ilkStatus={ilkCard.ilkStatus}
         liquidationRatio={ilkCard.liquidationRatio}
+        balance={balance}
       />
     </Stack>
   );
