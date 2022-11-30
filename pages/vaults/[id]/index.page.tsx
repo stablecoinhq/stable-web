@@ -118,7 +118,7 @@ const Controller: FC<ControllerProps> = ({
             buttonContent="Mint"
             onMint={mint}
             liquidationRatio={liquidationRatio}
-            ilkStatus={ilkStatus}
+            price={ilkStatus.price}
           />
         );
       case 'burn':

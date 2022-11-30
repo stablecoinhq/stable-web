@@ -11,7 +11,6 @@ import BNText from 'pages/ilks/[ilk]/BNText';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from './stringNumber';
 
 import type { IlkInfo } from 'contracts/IlkRegistryHelper';
-import type { IlkStatus } from 'contracts/VatHelper';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
 const CENT = FixedNumber.fromString('100', COL_RATIO_FORMAT);
@@ -19,12 +18,12 @@ const CENT = FixedNumber.fromString('100', COL_RATIO_FORMAT);
 export type MintFormProps = {
   ilkInfo: IlkInfo;
   buttonContent: ReactNode;
-  ilkStatus: IlkStatus;
+  price: FixedNumber;
   liquidationRatio: FixedNumber;
   onMint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
 };
 
-const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidationRatio, ilkStatus }) => {
+const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidationRatio, price }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms.mint' });
   const [amountText, setAmountText] = useState('');
   const collateralAmount = useMemo(
@@ -38,12 +37,11 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidati
   });
   const ratio = useMemo(() => toFixedNumberOrUndefined(ratioText, COL_RATIO_FORMAT)?.divUnsafe(CENT), [ratioText]);
   const daiAmount = useMemo(() => {
-    const { price, debtMultiplier } = ilkStatus;
     if (collateralAmount && ratio) {
-      return Vault.getDaiAmount(collateralAmount, ratio, liquidationRatio, price, debtMultiplier);
+      return Vault.getDaiAmount(collateralAmount, ratio, liquidationRatio, price);
     }
     return FixedNumber.fromString('0', UnitFormats.WAD);
-  }, [collateralAmount, ratio, liquidationRatio, ilkStatus]);
+  }, [collateralAmount, ratio, liquidationRatio, price]);
   const [minting, setMinting] = useState(false);
 
   const onAmountChange: ChangeEventHandler<HTMLInputElement> = useCallback(

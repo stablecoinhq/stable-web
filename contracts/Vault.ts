@@ -43,7 +43,7 @@ export default class Vault {
       chainLog.daiJoin(),
     ]);
 
-    const daiAmount = Vault.getDaiAmount(colAmount, colRatio, liquidationRatio, ilkStatus.price, ilkStatus.debtMultiplier);
+    const daiAmount = Vault.getDaiAmount(colAmount, colRatio, liquidationRatio, ilkStatus.price);
     await actions
       .lockGemAndDraw(cdpManager, jug, daiJoin, this.ilkInfo, this.cdpId, colAmount, daiAmount)
       .then((tx) => tx.wait());
@@ -81,18 +81,12 @@ export default class Vault {
       chainLog.daiJoin(),
     ]);
 
-    const daiAmount = Vault.getDaiAmount(colAmount, colRatio, liquidationRatio, ilkStatus.price, ilkStatus.debtMultiplier);
+    const daiAmount = Vault.getDaiAmount(colAmount, colRatio, liquidationRatio, ilkStatus.price);
     await actions.openLockGemAndDraw(cdpManager, jug, daiJoin, ilkInfo, colAmount, daiAmount).then((tx) => tx.wait());
   }
 
-  static getDaiAmount(
-    colAmount: FixedNumber,
-    colRatio: FixedNumber,
-    liqRatio: FixedNumber,
-    price: FixedNumber,
-    debtMultiplier: FixedNumber,
-  ): FixedNumber {
-    if (colRatio.isZero() || debtMultiplier.isZero()) {
+  static getDaiAmount(colAmount: FixedNumber, colRatio: FixedNumber, liqRatio: FixedNumber, price: FixedNumber): FixedNumber {
+    if (colRatio.isZero()) {
       return FixedNumber.fromString('0', UnitFormats.WAD);
     }
     const calcFormat = getBiggestDecimalsFormat(colAmount.format, UnitFormats.RAY, COL_RATIO_FORMAT, UnitFormats.WAD);
@@ -100,9 +94,7 @@ export default class Vault {
       .toFormat(calcFormat)
       .mulUnsafe(assertFixedFormat(price, UnitFormats.RAY).toFormat(calcFormat))
       .mulUnsafe(assertFixedFormat(liqRatio, UnitFormats.RAY).toFormat(calcFormat))
-      .divUnsafe(
-        assertFixedFormat(colRatio, COL_RATIO_FORMAT).toFormat(calcFormat).mulUnsafe(debtMultiplier).toFormat(calcFormat),
-      );
+      .divUnsafe(assertFixedFormat(colRatio, COL_RATIO_FORMAT).toFormat(calcFormat).toFormat(calcFormat));
     return result.round(UnitFormats.WAD.decimals).toFormat(UnitFormats.WAD);
   }
 }

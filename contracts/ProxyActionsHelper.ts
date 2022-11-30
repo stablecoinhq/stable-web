@@ -23,7 +23,9 @@ export default class ProxyActionsHelper {
   }
 
   private async execute(data: string, overrides: PayableOverrides | undefined = undefined) {
-    const estimatedGasLimit = await this.proxy.estimateGas['execute(address,bytes)'](this.actions.address, data, overrides);
+    const estimatedGasLimit = overrides
+      ? await this.proxy.estimateGas['execute(address,bytes)'](this.actions.address, data, overrides)
+      : await this.proxy.estimateGas['execute(address,bytes)'](this.actions.address, data);
     const mulipliedGasLimit = multiplyGasLimit(estimatedGasLimit);
     if (overrides) {
       return this.proxy['execute(address,bytes)'](this.actions.address, data, { ...overrides, gasLimit: mulipliedGasLimit });
