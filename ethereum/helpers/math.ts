@@ -19,7 +19,7 @@ export const UnitFormats = {
 };
 /* eslint-enable @typescript-eslint/naming-convention */
 
-const InvalidFixedFormatError = new Error('Invalid FixedFormat passed');
+export const InvalidFixedFormatError = new Error('Invalid FixedFormat passed');
 
 export const assertFixedFormat = (value: FixedNumber, format: FixedFormat) => {
   if (value.format.name !== format.name) {
