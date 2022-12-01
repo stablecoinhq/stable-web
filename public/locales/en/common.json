@@ -3,7 +3,7 @@
     "ilk": {
       "annualFee": "Annual Fee",
       "annualFeeDesc": "The Maker Protocol collects a Stability Fee on Dai that is generated from Maker Vaults. It is a variable-rate fee that changes when Maker’s governing body votes on proposals put forth by Risk Teams.",
-      "currentPrice": "Current Price",
+      "currentPrice": "Current Price per {{collateral}}",
       "currentPriceDesc": "Current price of collateral {{collateral}} in DAI",
       "debtFloor": "Debt Floor",
       "debtFloorDesc": "The minimum amount of DAI that can be minted for this type of Vault. This value is also called the \"Dust Limit\".",
@@ -17,6 +17,7 @@
     },
     "vault": {
       "colRatio": "$t(terms.colRatio)",
+      "colRatioDesc": "The collateralization ratio is the ratio between the value of the tokens given as collateral and the value of the Dai debt outstanding, and defined as a percentage.",
       "debt": "Debt",
       "debtDesc": "Total amount of debt that this $t(terms.vault) owes",
       "freeCollateral": "Free Collateral",
@@ -26,7 +27,8 @@
       "title": "Vault status"
     },
     "wallet": {
-      "title": "Wallet status"
+      "title": "Wallet status",
+      "balance": "Balance of {{gem}}"
     }
   },
   "forms": {
@@ -97,8 +99,10 @@
   "terms": {
     "collateral": "collateral",
     "colRatio": "Collateralization Ratio",
-    "vault_one": "vault",
-    "vault_other": "vaults"
+    "vault_one": "Vault",
+    "vault_other": "Vaults",
+    "mint": "Mint",
+    "burn": "Burn"
   },
   "units": {
     "stableToken": "DAI",
