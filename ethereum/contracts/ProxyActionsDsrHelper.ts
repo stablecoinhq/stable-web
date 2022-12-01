@@ -30,12 +30,14 @@ export default class ProxyActionsDsrHelper {
 
     const GAS_LIMIT_MULTIPLIER = 130;
 
+    const multipliedGas = estimatedGas.mul(GAS_LIMIT_MULTIPLIER).div(100);
+
     if (overrides) {
-      return this.proxy['execute(address,bytes)'](this.actions.address, data, overrides);
+      return this.proxy['execute(address,bytes)'](this.actions.address, data, { ...overrides, gasLimit: multipliedGas });
     }
 
     return this.proxy['execute(address,bytes)'](this.actions.address, data, {
-      gasLimit: estimatedGas.mul(GAS_LIMIT_MULTIPLIER).div(100),
+      gasLimit: multipliedGas,
     });
   }
 

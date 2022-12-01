@@ -64,23 +64,25 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
   };
 
   const onButtonClick: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
-    if (withdrawState === 'withdrawAll') {
-      setWithdrawing(true);
-      onWithdrawAll().finally(() => {
-        setWithdrawing(false);
-        setWithdrawState('neutral');
-        setAmountText('');
-      });
+    switch (withdrawState) {
+      case 'withdrawAll':
+        setWithdrawing(true);
+        onWithdrawAll().finally(() => {
+          setWithdrawing(false);
+        });
+        break;
+      case 'withdraw':
+        if (!amount || isInvalidWithdrawAmount) {
+          break;
+        }
+        setWithdrawing(true);
+        onWithdraw(amount).finally(() => {
+          setWithdrawing(false);
+        });
+        break;
+      case 'neutral':
+        break;
     }
-
-    if (!amount || isInvalidWithdrawAmount) {
-      return;
-    }
-
-    setWithdrawing(true);
-    onWithdraw(amount).finally(() => {
-      setWithdrawing(false);
-    });
   }, [amount, onWithdraw, onWithdrawAll, withdrawState, isInvalidWithdrawAmount]);
 
   return (
