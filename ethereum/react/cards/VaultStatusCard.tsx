@@ -60,7 +60,7 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
             tooltipText={t('debtDesc')}
             unit={units('stableToken')}
           />
-          <BNText label={t('colRatio')} value={collateralizationRatio} unit="%" />
+          <BNText label={t('colRatio')} value={collateralizationRatio} unit="%" tooltipText={t('colRatioDesc')} />
         </Grid>
       </CardContent>
     </Card>
