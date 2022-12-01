@@ -9,6 +9,10 @@ module.exports = {
       forking: {
         url: `https://goerli.infura.io/v3/${process.env.INFURA_API_KEY}`,
       },
+      mining: {
+        auto: false,
+        interval: 1000
+      }
     },
   },
 };
