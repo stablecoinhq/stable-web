@@ -18,7 +18,7 @@ export type MintFormProps = {
   ilkStatus: IlkStatus;
   buttonContent: ReactNode;
   liquidationRatio: FixedNumber;
-  collateralBalance: FixedNumber;
+  balance: FixedNumber;
   lockedBalance: FixedNumber;
   debt: FixedNumber;
   onMint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
@@ -41,7 +41,7 @@ const MintForm: FC<MintFormProps> = ({
   onMint,
   buttonContent,
   liquidationRatio,
-  collateralBalance,
+  balance,
   lockedBalance,
   debt,
 }) => {
@@ -97,11 +97,15 @@ const MintForm: FC<MintFormProps> = ({
   const formErrors: FormError[] = useMemo(() => {
     const { debtMultiplier, normalizedDebt, debtCeiling, debtFloor } = ilkStatus;
     const errors = [];
-    if (collateralAmount && collateralBalance.subUnsafe(collateralAmount).isNegative()) {
+    // Insufficient balance
+    // (Amount to use as collateral) - (Amount available) < 0
+    if (collateralAmount && balance.subUnsafe(collateralAmount).isNegative()) {
       errors.push(FormError.insufficientBalance);
     }
     const formats = UnitFormats.RAD;
 
+    // CollateralizationRatio is below liquidation ratio
+    // collateralizationRatio - liquidationRatio < 0
     if (collateralAmount && !(debt.isZero() && daiAmount.isZero())) {
       const collateralizationRatio = lockedBalance
         .toFormat(formats)
@@ -115,6 +119,7 @@ const MintForm: FC<MintFormProps> = ({
       }
     }
 
+    // Amount of debt is below debt floor
     // Vat.ilk.rate * (urn.art + daiAmount) - Vat.ilk.dust < 0
     if (
       !daiAmount.isZero() &&
@@ -127,12 +132,17 @@ const MintForm: FC<MintFormProps> = ({
       errors.push(FormError.debtTooLow);
     }
 
-    const totalIssued = normalizedDebt.toFormat(formats).mulUnsafe(debtMultiplier.toFormat(formats));
-    if (debtCeiling.subUnsafe(totalIssued.addUnsafe(daiAmount.toFormat(formats))).isNegative()) {
+    // Amount of debt is above debt ceiling
+    // ilk.line - (Vat.ilk.Art + daiAmount) * Vat.ilk.rate < 0
+    const totalIssued = normalizedDebt
+      .toFormat(formats)
+      .addUnsafe(daiAmount.toFormat(formats))
+      .mulUnsafe(debtMultiplier.toFormat(formats));
+    if (debtCeiling.subUnsafe(totalIssued).isNegative()) {
       errors.push(FormError.issuingTooMuchCoins);
     }
     return errors;
-  }, [collateralBalance, collateralAmount, liquidationRatio, daiAmount, ilkStatus, debt, lockedBalance, price]);
+  }, [balance, collateralAmount, liquidationRatio, daiAmount, ilkStatus, debt, lockedBalance, price]);
 
   const showErrorMessage = (e: FormError) => {
     switch (e) {

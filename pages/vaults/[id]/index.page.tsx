@@ -122,7 +122,7 @@ const Controller: FC<ControllerProps> = ({
             buttonContent="Mint"
             onMint={mint}
             liquidationRatio={liquidationRatio}
-            collateralBalance={tokenBalance}
+            balance={tokenBalance}
             lockedBalance={lockedBalance}
             debt={debt}
           />

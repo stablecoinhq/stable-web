@@ -8,10 +8,10 @@ import { useCallback, useMemo } from 'react';
 
 import IlkType from 'ethereum/IlkType';
 import Vault from 'ethereum/Vault';
+import { UnitFormats } from 'ethereum/helpers/math';
 import { useChainLog } from 'ethereum/react/ContractHooks';
 import IlkStatusCard, { useIlkStatusCardProps } from 'ethereum/react/cards/IlkStatusCard';
 import WalletStatusCard from 'ethereum/react/cards/WalletStatusCard';
-import { UnitFormats } from 'ethereum/helpers/math';
 import MintForm from 'pages/forms/MintForm';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
@@ -70,7 +70,7 @@ const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidati
       onMint={openVault}
       liquidationRatio={liquidationRatio}
       ilkStatus={ilkStatus}
-      collateralBalance={balance}
+      balance={balance}
       debt={FixedNumber.fromString('0', UnitFormats.WAD)}
       lockedBalance={FixedNumber.fromString('0', UnitFormats.WAD)}
     />
