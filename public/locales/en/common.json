@@ -28,7 +28,13 @@
     },
     "wallet": {
       "title": "Wallet status",
-      "balance": "Balance of {{gem}}"
+      "balance": "Balance of {{gem}}",
+      "description": "Amount of token that wallet currently holds"
+    },
+    "savings": {
+      "title": "Saving Rate",
+      "annualSavingRate": "Annual saving rate",
+      "annualSavingRateDesc": "Annual saving rate of the DSR"
     }
   },
   "forms": {
@@ -96,7 +102,25 @@
     },
     "earn": {
       "cardTitle": "Earn Savings",
-      "cardDesc": "Deposit your $t(terms.stableToken) to DSR and earn savings."
+      "cardDesc": "Deposit your $t(terms.stableToken) to DSR and earn savings.",
+      "depositTab": "Deposit",
+      "withdrawTab": "Withdraw",
+      "deposit": {
+        "title": "Deposit Status",
+        "label": "Deposit Balance",
+        "description": "Amount of DAI currently being deposited at DSR",
+        "form": {
+          "label": "Amount of DAI to deposit",
+          "submit": "Deposit"
+        }
+      },
+      "withdraw": {
+        "form": {
+          "label": "Amount of DAI to withdraw",
+          "withdrawAll": "Withdraw all",
+          "submit": "Withdraw"
+        }
+      }
     }
   },
   "site": {

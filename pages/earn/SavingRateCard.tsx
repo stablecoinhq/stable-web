@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 import BNText from 'ethereum/react/cards/BNText';
 
@@ -9,15 +10,18 @@ export type SavingRateCardProps = {
   annualRate: FixedNumber;
 };
 
-const SavingRateCard: FC<SavingRateCardProps> = ({ annualRate }) => (
-  <Card>
-    <CardHeader title="Saving Rate" />
-    <CardContent>
-      <Grid container padding={2} spacing={2}>
-        <BNText label="Annual saving rate" value={annualRate} tooltipText="Annual saving rate of the DSR" unit="%" />
-      </Grid>
-    </CardContent>
-  </Card>
-);
+const SavingRateCard: FC<SavingRateCardProps> = ({ annualRate }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'cards.savings' });
+  return (
+    <Card>
+      <CardHeader title={t('title')} />
+      <CardContent>
+        <Grid container padding={2} spacing={2}>
+          <BNText label={t('annualSavingRate')} value={annualRate} tooltipText={t('annualSavingRateDesc')} unit="%" />
+        </Grid>
+      </CardContent>
+    </Card>
+  );
+};
 
 export default SavingRateCard;

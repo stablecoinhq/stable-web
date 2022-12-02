@@ -1,6 +1,7 @@
 import { Box, Card, CardContent, CircularProgress, Stack, Tab, Tabs } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import Savings from 'ethereum/Savings';
 import { UnitFormats } from 'ethereum/helpers/math';
@@ -30,6 +31,7 @@ type ControllerProps = {
 type TabValue = 'deposit' | 'withdraw';
 
 const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, depositAmount, balance }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.earn' });
   const [selectedTab, setSelectedTab] = useState<TabValue>('deposit');
 
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {
@@ -52,24 +54,24 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, deposit
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
       case 'deposit':
-        return <DepositForm buttonContent="Deposit" onDeposit={deposit} balance={balance} />;
+        return <DepositForm buttonContent={t('deposit.form.submit')} onDeposit={deposit} balance={balance} />;
       case 'withdraw':
         return (
           <WithdrawForm
-            buttonContent="Withdraw"
+            buttonContent={t('withdraw.form.submit')}
             onWithdraw={withdraw}
             onWithdrawAll={withdrawAll}
             depositAmount={depositAmount || FixedNumber.from(0, UnitFormats.WAD)}
           />
         );
     }
-  }, [deposit, withdraw, selectedTab, withdrawAll, depositAmount, balance]);
+  }, [deposit, withdraw, selectedTab, withdrawAll, depositAmount, balance, t]);
 
   return (
     <>
       <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
-        <Tab label="Deposit" value="deposit" />
-        <Tab label="Withdraw" value="withdraw" disabled={!depositAmount || depositAmount?.isZero()} />
+        <Tab label={t('depositTab')} value="deposit" />
+        <Tab label={t('withdrawTab')} value="withdraw" disabled={!depositAmount || depositAmount?.isZero()} />
       </Tabs>
       <TabContent />
     </>
@@ -82,6 +84,9 @@ type ContentProps = {
 };
 
 const Content: FC<ContentProps> = ({ chainLog, provider }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.earn' });
+  const { t: wallet } = useTranslation('common', { keyPrefix: 'cards.wallet' });
+
   const [savingRate] = usePromiseFactory(useCallback(() => Savings.fromChainlog(chainLog), [chainLog]));
   const [annualRate] = usePromiseFactory(useCallback(async () => savingRate && savingRate.getAnnualRate(), [savingRate]));
   const [balance, updateBalance] = usePromiseFactory(
@@ -112,20 +117,20 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
       <SavingRateCard annualRate={annualRate} />
       {deposit && (
         <BalanceStatusCard
-          title="Deposit Status"
+          title={t('deposit.title')}
           address={deposit.address}
           balance={deposit.amount}
-          label="Deposit"
-          tooltipText="Amount of DAI currently being deposited at DSR"
+          label={t('deposit.label')}
+          tooltipText={t('deposit.description')!}
           unit="DAI"
         />
       )}
       <BalanceStatusCard
-        title="Wallet Status"
+        title={wallet('title')}
         address={provider.address}
         balance={balance}
-        label="DAI Balance"
-        tooltipText="Amount of token that wallet currently holds"
+        label={wallet('balance', { gem: 'DAI' })}
+        tooltipText={wallet('description')!}
         unit="DAI"
       />
       <Controller

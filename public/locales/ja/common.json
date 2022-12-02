@@ -28,20 +28,27 @@
     },
     "wallet": {
       "title": "ウォレットの状態",
-      "balance": "{{gem}}の保有残高"
+      "balance": "{{gem}}の保有残高",
+      "description": "ウォレットが現在保有しているDAIの残高"
+    },
+    "savings": {
+      "title": "金利",
+      "annualSavingRate": "預金金利率",
+      "annualSavingRateDesc": "DSRにおける年間預金金利率"
     }
   },
   "forms": {
     "burn": {
       "redeemAmount": "返済する$t(units.stableToken)の数量",
       "freeAmount": "引き出す{{gem}}の数量",
+      "submit": "返済する",
       "error": {
         "insufficientBalance": "残高不足です",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
         "debtTooLow": "$t(terms.vault_one)の負債額が下限値を下回っています。",
         "invalidCollateralFreeAmount": "解放する担保の額が、ロックされた担保の額を超過しています。",
         "invalidRepayAmount": "返済する$t(units.stableToken)の数量が$t(terms.vault_one)の負債額を上回っています。"
-      }
+      },
     },
     "mint": {
       "colRatio": "$t(terms.colRatio)",
@@ -52,6 +59,11 @@
         "insufficientBalance": "残高不足です",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
         "debtTooLow": "$t(terms.vault_one)の負債額が下限値を下回っています。",
+      "submit": "発行する",
+      "error": {
+        "insufficientBalance": "残高不足です",
+        "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
+        "debtTooLow": "負債額が下限値を下回っています。",
         "issuingTooMuchCoins": "負債額が上限値を上回っています。"
       }
     }
@@ -84,7 +96,7 @@
       "cardDesc": "$t(terms.vault_one)の新規作成や既存の$t(terms.vault_other)の操作",
       "cardTitle": "$t(terms.vault_other)管理",
       "listTitle": "$t(terms.vault_one)一覧",
-      "new": "新規$t(terms.vault_one)",
+      "new": "新規作成",
       "noVaults": "$t(terms.vault_other)がありません",
       "notFound": "指定された$t(terms.vault_one)が見つかりませんでした",
       "title": "{{ilk}} $t(terms.vault_one) ({{id}})",
@@ -96,7 +108,25 @@
     },
     "earn": {
       "cardTitle": "利息を得る",
-      "cardDesc": "DSRに$t(terms.stableToken)を預け入れて利息を得る"
+      "cardDesc": "DSRに$t(units.stableToken)を預け入れて利息を得る",
+      "depositTab": "預け入れ",
+      "withdrawTab": "引き出し",
+      "deposit": {
+        "title": "預金状態",
+        "label": "預金残高",
+        "description": "DSRにて現在預けられている$t(unit.stableToken)の残高",
+        "form": {
+          "label": "預け入れるDAIの数量",
+          "submit": "預け入れる"
+        }
+      },
+      "withdraw": {
+        "form": {
+          "label": "引き出すDAIの数量",
+          "withdrawAll": "全額引き出し",
+          "submit": "引き出す"
+        }
+      }
     }
   },
   "terms": {

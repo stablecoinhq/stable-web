@@ -10,6 +10,7 @@ import {
   FormGroup,
 } from '@mui/material';
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
@@ -27,6 +28,9 @@ export type WithdrawFormProps = {
 type WithdrawState = 'withdraw' | 'withdrawAll' | 'neutral';
 
 const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onWithdraw, onWithdrawAll }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.earn.withdraw.form' });
+  const { t: error } = useTranslation('common', { keyPrefix: 'forms.mint.error' });
+
   const [amountText, setAmountText] = useState('');
 
   const [withdrawState, setWithdrawState] = useState<WithdrawState>('neutral');
@@ -92,14 +96,14 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
             <FormControlLabel
               disabled={withdrawState === 'withdraw' || withdrawing}
               control={<Checkbox checked={withdrawState === 'withdrawAll'} onChange={onWithdrawAllChange} />}
-              label="Withdraw all"
+              label={t('withdrawAll')}
             />
           </FormGroup>
           <TextField
             fullWidth
-            label="Amount of DAI to withdraw"
+            label={t('label')}
             error={isInvalidWithdrawAmount}
-            helperText={isInvalidWithdrawAmount && 'Insufficient deposit amount'}
+            helperText={isInvalidWithdrawAmount && error('insufficientBalance')}
             value={amountText}
             disabled={withdrawState === 'withdrawAll' || withdrawing}
             onChange={onAmountChange}
