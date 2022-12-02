@@ -20,6 +20,7 @@
     "project": ["./tsconfig.json"]
   },
   "rules": {
+    "react/jsx-no-duplicate-props": [1, { "ignoreCase": false }],
     "@typescript-eslint/consistent-type-imports": "error",
     "comma-dangle": ["error", "always-multiline"],
     "curly": ["error", "all"],

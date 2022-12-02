@@ -4,8 +4,6 @@ import { FixedNumber } from 'ethers';
 
 import type { BigNumber } from 'ethers';
 
-export const INT_FORMAT = FixedFormat.from(0);
-
 /* eslint-disable @typescript-eslint/naming-convention */
 /**
  * Number formats of Maker Protocol
@@ -17,6 +15,13 @@ export const UnitFormats = {
   RAY: FixedFormat.from(27),
   RAD: FixedFormat.from(45),
 };
+
+export const COL_RATIO_FORMAT = FixedFormat.from(2);
+export const CENT = FixedNumber.fromString('100', COL_RATIO_FORMAT);
+
+export const YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
+export const INT_FORMAT = FixedFormat.from(0);
+
 /* eslint-enable @typescript-eslint/naming-convention */
 
 export const InvalidFixedFormatError = new Error('Invalid FixedFormat passed');

@@ -7,17 +7,21 @@ import { UnitFormats } from 'ethereum/helpers/math';
 
 import BNText from './BNText';
 
+import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { FC } from 'react';
 
 export type VaultStatusCardProps = {
   urnStatus: UrnStatus;
   ilkStatus: IlkStatus;
+  ilkInfo: IlkInfo;
   liquidationRatio: FixedNumber;
 };
 
-const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liquidationRatio }) => {
+const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liquidationRatio, ilkInfo }) => {
   const { t } = useTranslation('common', { keyPrefix: 'cards.vault' });
+  const { t: units } = useTranslation('common', { keyPrefix: 'units' });
+
   const debt = useMemo(
     () => urnStatus.debt.toFormat(UnitFormats.RAY).mulUnsafe(ilkStatus.debtMultiplier),
     [urnStatus.debt, ilkStatus.debtMultiplier],
@@ -43,10 +47,15 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
       <CardHeader title={t('title')} subheader={urn} />
       <CardContent>
         <Grid container padding={2} spacing={2}>
-          <BNText label={t('freeCollateral')} value={freeBalance} tooltipText={t('freeCollateralDesc')} />
-          <BNText label={t('lockedCollateral')} value={lockedBalance} tooltipText={t('lockedCollateralDesc')} />
-          <BNText label={t('debt')} value={debt} tooltipText={t('debtDesc')} />
-          <BNText label={t('colRatio')} value={collateralizationRatio} />
+          <BNText label={t('freeCollateral')} value={freeBalance} tooltipText={t('freeCollateralDesc')} unit={ilkInfo.symbol} />
+          <BNText
+            label={t('lockedCollateral')}
+            value={lockedBalance}
+            tooltipText={t('lockedCollateralDesc')}
+            unit={ilkInfo.symbol}
+          />
+          <BNText label={t('debt')} value={debt} tooltipText={t('debtDesc')} unit={units('stableToken')} />
+          <BNText label={t('colRatio')} value={collateralizationRatio} unit="%" />
         </Grid>
       </CardContent>
     </Card>

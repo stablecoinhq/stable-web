@@ -130,6 +130,7 @@ const Controller: FC<ControllerProps> = ({
       <WalletStatusCard
         label={selectedTab === 'mint' ? 'Balance' : 'DAI balance'}
         balance={selectedTab === 'mint' ? tokenBalance : daiBalance}
+        unit={selectedTab === 'mint' ? vault.ilkInfo.symbol : 'DAI'}
         address={address}
       />
       <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
@@ -192,7 +193,12 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
         liquidationRatio={ilkCard.liquidationRatio}
         stabilityFee={ilkCard.stabilityFee}
       />
-      <VaultStatusCard urnStatus={urnStatus} ilkStatus={ilkCard.ilkStatus} liquidationRatio={ilkCard.liquidationRatio} />
+      <VaultStatusCard
+        urnStatus={urnStatus}
+        ilkStatus={ilkCard.ilkStatus}
+        liquidationRatio={ilkCard.liquidationRatio}
+        ilkInfo={ilkCard.ilkInfo}
+      />
       <Controller
         chainLog={chainLog}
         vault={vault}

@@ -4,15 +4,13 @@ import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
-import Vault, { COL_RATIO_FORMAT } from 'ethereum/Vault';
-import { UnitFormats } from 'ethereum/helpers/math';
+import Vault from 'ethereum/Vault';
+import { UnitFormats, CENT, COL_RATIO_FORMAT } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import BNText from 'ethereum/react/cards/BNText';
 
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
-
-const CENT = FixedNumber.fromString('100', COL_RATIO_FORMAT);
 
 export type MintFormProps = {
   ilkInfo: IlkInfo;
@@ -24,6 +22,8 @@ export type MintFormProps = {
 
 const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidationRatio, price }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms.mint' });
+  const { t: units } = useTranslation('common', { keyPrefix: 'units' });
+
   const [amountText, setAmountText] = useState('');
   const collateralAmount = useMemo(
     () => toFixedNumberOrUndefined(amountText, ilkInfo.gem.format),
@@ -31,10 +31,16 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidati
   );
   // input as percentage, return as ratio
   const [ratioText, setRatioText] = useState(() => {
-    const initialRatio = liquidationRatio.toFormat(COL_RATIO_FORMAT).mulUnsafe(CENT).toFormat(FixedFormat.from(0));
+    const initialRatio = liquidationRatio
+      .toFormat(COL_RATIO_FORMAT)
+      .mulUnsafe(CENT.toFormat(COL_RATIO_FORMAT))
+      .toFormat(FixedFormat.from(0));
     return initialRatio.toString();
   });
-  const ratio = useMemo(() => toFixedNumberOrUndefined(ratioText, COL_RATIO_FORMAT)?.divUnsafe(CENT), [ratioText]);
+  const ratio = useMemo(
+    () => toFixedNumberOrUndefined(ratioText, COL_RATIO_FORMAT)?.divUnsafe(CENT.toFormat(COL_RATIO_FORMAT)),
+    [ratioText],
+  );
   const daiAmount = useMemo(() => {
     if (collateralAmount && ratio) {
       return Vault.getDaiAmount(collateralAmount, ratio, liquidationRatio, price);
@@ -86,7 +92,12 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidati
             InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
           />
         </Grid>
-        <BNText label="Amount of DAIs to be minted." value={daiAmount} tooltipText="Amount of DAIs to be minted." />
+        <BNText
+          label={t('mintAmountLabel')}
+          value={daiAmount}
+          tooltipText={t('mintAmountTooltipText')}
+          unit={units('stableToken')}
+        />
         <Grid item xs={12}>
           <Button variant="contained" fullWidth disabled={!collateralAmount || !ratio || minting} onClick={onButtonClick}>
             {minting ? <CircularProgress /> : buttonContent}

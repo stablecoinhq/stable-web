@@ -42,5 +42,9 @@
     "collateral": "担保",
     "vault_one": "Vault",
     "vault_other": "Vault"
+  },
+  "units": {
+    "stableToken": "DAI",
+    "jpy": "円"
   }
 }

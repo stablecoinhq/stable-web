@@ -12,7 +12,7 @@
       "maxLiquidity": "Maximum Liquidity",
       "maxLiquidityDesc": "The Maximum Liquidity specified, the amount of DAI that the users can be issued for this type of Vault.",
       "title": "{{ilk}} $t(terms.collateral) status",
-      "totalIssue": "Total Issue",
+      "totalIssue": "Total Issued",
       "totalIssueDesc": "Total amount of DAI issued by collateral"
     },
     "vault": {
@@ -31,12 +31,14 @@
   },
   "forms": {
     "burn": {
-      "redeemAmount": "Amount of $t(terms.stableToken) to redeem",
+      "redeemAmount": "Amount of $t(units.stableToken) to redeem",
       "freeAmount": "Amount of {{gem}} to free"
     },
     "mint": {
       "colRatio": "$t(terms.colRatio)",
-      "lockAmount": "Amount of {{gem}} to lock"
+      "lockAmount": "Amount of {{gem}} to lock",
+      "mintAmountLabel": "Amount of $t(units.stableToken)s to be minted.",
+      "mintAmountTooltipText": "Amount of $t(units.stableToken)s to be minted."
     }
   },
   "metamask": {
@@ -77,8 +79,11 @@
   "terms": {
     "collateral": "collateral",
     "colRatio": "Collateralization Ratio",
-    "stableToken": "DAI",
     "vault_one": "vault",
     "vault_other": "vaults"
+  },
+  "units": {
+    "stableToken": "DAI",
+    "jpy": "JPY"
   }
 }

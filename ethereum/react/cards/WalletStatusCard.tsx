@@ -10,10 +10,11 @@ export type WalletStatusCardProps = {
   label: string;
   balance: FixedNumber;
   address: string;
+  unit: string;
 };
 
 // 共通コンポーネントなので移動させた方がいいかも？
-const WalletStatusCard: FC<WalletStatusCardProps> = ({ label, balance, address }) => {
+const WalletStatusCard: FC<WalletStatusCardProps> = ({ label, balance, address, unit }) => {
   const { t } = useTranslation('common', { keyPrefix: 'cards.wallet' });
 
   return (
@@ -21,7 +22,7 @@ const WalletStatusCard: FC<WalletStatusCardProps> = ({ label, balance, address }
       <CardHeader title={t('title')} subheader={address} />
       <CardContent>
         <Grid container padding={2} spacing={2}>
-          <BNText label={label} value={balance} />
+          <BNText label={label} value={balance} unit={unit} />
         </Grid>
       </CardContent>
     </Card>

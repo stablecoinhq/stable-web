@@ -108,7 +108,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
         liquidationRatio={ilkCard.liquidationRatio}
         stabilityFee={ilkCard.stabilityFee}
       />
-      <WalletStatusCard address={provider.address} balance={balance} label="Balance" />
+      <WalletStatusCard address={provider.address} balance={balance} label="Balance" unit={ilkCard.ilkInfo.symbol} />
       <OpenVault
         chainLog={chainLog}
         ilkInfo={ilkCard.ilkInfo}
