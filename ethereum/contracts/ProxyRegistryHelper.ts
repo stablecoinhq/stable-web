@@ -3,7 +3,7 @@ import { AddressZero } from '@ethersproject/constants';
 
 import { DSProxy__factory, ProxyRegistry__factory } from 'generated/types';
 
-import type EthereumProvider from './EthereumProvider';
+import type EthereumProvider from '../EthereumProvider';
 import type { ProxyRegistry } from 'generated/types';
 
 export default class ProxyRegistryHelper {

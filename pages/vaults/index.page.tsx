@@ -18,13 +18,13 @@ import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import { useCallback } from 'react';
 
-import { useChainLog, useGetCDPs, useProxyRegistry } from 'pages/ethereum/ContractHooks';
+import { useChainLog, useGetCDPs, useProxyRegistry } from 'ethereum/react/ContractHooks';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
 import getTranslationProps from '../getTranslationProps';
 
-import type EthereumProvider from 'contracts/EthereumProvider';
-import type { CDP } from 'contracts/GetCDPsHelper';
+import type EthereumProvider from 'ethereum/EthereumProvider';
+import type { CDP } from 'ethereum/contracts/GetCDPsHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 

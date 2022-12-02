@@ -4,13 +4,12 @@ import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
-import Vault, { COL_RATIO_FORMAT } from 'contracts/Vault';
-import { UnitFormats } from 'contracts/math';
-import BNText from 'pages/ilks/[ilk]/BNText';
+import Vault, { COL_RATIO_FORMAT } from 'ethereum/Vault';
+import { UnitFormats } from 'ethereum/helpers/math';
+import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
+import BNText from 'ethereum/react/cards/BNText';
 
-import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from './stringNumber';
-
-import type { IlkInfo } from 'contracts/IlkRegistryHelper';
+import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
 const CENT = FixedNumber.fromString('100', COL_RATIO_FORMAT);

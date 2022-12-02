@@ -1,9 +1,9 @@
 import { DssProxyActions__factory } from 'generated/types';
 
-import { INT_FORMAT, multiplyGasLimit, toBigNumber, UnitFormats } from './math';
+import { INT_FORMAT, multiplyGasLimit, toBigNumber, UnitFormats } from '../helpers/math';
 
+import type EthereumProvider from '../EthereumProvider';
 import type CDPManagerHelper from './CDPManagerHelper';
-import type EthereumProvider from './EthereumProvider';
 import type { IlkInfo } from './IlkRegistryHelper';
 import type JugHelper from './JugHelper';
 import type { FixedNumber, PayableOverrides } from 'ethers';

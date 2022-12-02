@@ -9,9 +9,13 @@
   "plugins": [
     "@typescript-eslint",
     "filenames",
+    "jest",
     "prefer-arrow",
     "unused-imports"
   ],
+  "env": {
+    "jest": true
+  },
   "parserOptions": {
     "project": ["./tsconfig.json"]
   },

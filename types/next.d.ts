@@ -1,5 +1,5 @@
 import type { ExternalProvider } from '@ethersproject/providers';
-import type EthereumProvider from 'contracts/EthereumProvider';
+import type EthereumProvider from 'ethereum/EthereumProvider';
 import type { NextPage } from 'next';
 
 export type WithEthereum = {

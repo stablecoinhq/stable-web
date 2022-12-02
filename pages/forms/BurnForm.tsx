@@ -2,11 +2,10 @@ import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from 
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
-import { UnitFormats } from 'contracts/math';
+import { UnitFormats } from 'ethereum/helpers/math';
+import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 
-import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from './stringNumber';
-
-import type { IlkInfo } from 'contracts/IlkRegistryHelper';
+import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { FixedNumber } from 'ethers';
 import type { FC, ChangeEventHandler, MouseEventHandler, ReactNode } from 'react';
 

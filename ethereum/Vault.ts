@@ -1,11 +1,11 @@
 import { FixedFormat } from '@ethersproject/bignumber';
 import { FixedNumber } from 'ethers';
 
-import { assertFixedFormat, getBiggestDecimalsFormat, UnitFormats } from './math';
+import { assertFixedFormat, getBiggestDecimalsFormat, UnitFormats } from './helpers/math';
 
-import type ChainLogHelper from './ChainLogHelper';
-import type { IlkInfo } from './IlkRegistryHelper';
-import type { IlkStatus } from './VatHelper';
+import type ChainLogHelper from './contracts/ChainLogHelper';
+import type { IlkInfo } from './contracts/IlkRegistryHelper';
+import type { IlkStatus } from './contracts/VatHelper';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 

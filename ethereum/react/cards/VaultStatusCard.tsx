@@ -3,10 +3,11 @@ import { BigNumber, FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useMemo } from 'react';
 
-import { UnitFormats } from 'contracts/math';
-import BNText from 'pages/ilks/[ilk]/BNText';
+import { UnitFormats } from 'ethereum/helpers/math';
 
-import type { IlkStatus, UrnStatus } from 'contracts/VatHelper';
+import BNText from './BNText';
+
+import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { FC } from 'react';
 
 export type VaultStatusCardProps = {

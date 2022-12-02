@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
 import { useTranslation } from 'next-i18next';
 
-import BNText from 'pages/ilks/[ilk]/BNText';
+import BNText from './BNText';
 
 import type { FixedNumber } from 'ethers';
 import type { FC } from 'react';

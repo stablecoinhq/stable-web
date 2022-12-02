@@ -4,6 +4,7 @@ import { appWithTranslation } from 'next-i18next';
 import { useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
+import useEthereumProvider from 'ethereum/react/useEthereumProvider';
 import 'styles/globals.scss';
 
 import nextI18NextConfig from '../next-i18next.config';
@@ -11,7 +12,6 @@ import nextI18NextConfig from '../next-i18next.config';
 import Header from './Header';
 import UnsupportedNetwork, { propagateError } from './UnsupportedNetwork';
 import WithoutEthereum from './WithoutEthereum';
-import useEthereumProvider from './ethereum/useEthereumProvider';
 
 import type { AppProps } from 'next/app';
 import type { FC } from 'react';

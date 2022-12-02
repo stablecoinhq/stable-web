@@ -1,11 +1,11 @@
 import { FixedFormat } from '@ethersproject/bignumber';
 
-import IlkType from 'contracts/IlkType';
+import IlkType from 'ethereum/IlkType';
 import { GemJoin__factory, IlkRegistry__factory } from 'generated/types';
 
 import ERC20Helper from './ERC20Helper';
 
-import type EthereumProvider from './EthereumProvider';
+import type EthereumProvider from '../EthereumProvider';
 import type { GemJoin, IlkRegistry } from 'generated/types';
 
 export type IlkInfo = {
