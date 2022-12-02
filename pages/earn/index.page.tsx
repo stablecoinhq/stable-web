@@ -2,9 +2,9 @@ import { Box, Card, CardContent, CircularProgress, Stack, Tab, Tabs } from '@mui
 import { FixedNumber } from 'ethers';
 import { useCallback, useState } from 'react';
 
-import Savings from 'contracts/Savings';
-import { UnitFormats } from 'contracts/math';
-import { useChainLog } from 'pages/ethereum/ContractHooks';
+import Savings from 'ethereum/Savings';
+import { UnitFormats } from 'ethereum/helpers/math';
+import { useChainLog } from 'ethereum/react/ContractHooks';
 import getTranslationProps from 'pages/getTranslationProps';
 import usePromiseFactory from 'pages/usePromiseFactory';
 import BalanceStatusCard from 'pages/vaults/[id]/BalanceStatusCard';
@@ -15,8 +15,8 @@ import WithdrawForm from './forms/WithdrawForm';
 
 import type { DepositFormProps } from './forms/DepositForm';
 import type { WithdrawFormProps } from './forms/WithdrawForm';
-import type ChainLogHelper from 'contracts/ChainLogHelper';
-import type EthereumProvider from 'contracts/EthereumProvider';
+import type EthereumProvider from 'ethereum/EthereumProvider';
+import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
@@ -117,6 +117,7 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
           balance={deposit.amount}
           label="Deposit"
           tooltipText="Amount of DAI currently being deposited at DSR"
+          unit="DAI"
         />
       )}
       <BalanceStatusCard
@@ -125,6 +126,7 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
         balance={balance}
         label="DAI Balance"
         tooltipText="Amount of token that wallet currently holds"
+        unit="DAI"
       />
       <Controller
         savingRate={savingRate}

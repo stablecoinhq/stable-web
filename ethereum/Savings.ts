@@ -1,10 +1,10 @@
 import { BigNumber } from 'ethers';
 
-import { INT_FORMAT, pow, toFixedNumber, UnitFormats, YEAR_IN_SECONDS } from './math';
+import { INT_FORMAT, pow, toFixedNumber, UnitFormats, YEAR_IN_SECONDS } from 'ethereum/helpers/math';
 
-import type ChainLogHelper from './ChainLogHelper';
-import type ERC20Helper from './ERC20Helper';
-import type ProxyRegistryHelper from './ProxyRegistryHelper';
+import type ChainLogHelper from './contracts/ChainLogHelper';
+import type ERC20Helper from './contracts/ERC20Helper';
+import type ProxyRegistryHelper from './contracts/ProxyRegistryHelper';
 import type { FixedNumber } from 'ethers';
 import type { DaiJoin, Pot } from 'generated/types';
 

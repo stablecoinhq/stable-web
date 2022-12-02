@@ -1,8 +1,7 @@
+import { toBigNumber, UnitFormats } from 'ethereum/helpers/math';
 import { DssProxyActionsDsr__factory } from 'generated/types';
 
-import { toBigNumber, UnitFormats } from './math';
-
-import type EthereumProvider from './EthereumProvider';
+import type EthereumProvider from '../EthereumProvider';
 import type { FixedNumber, PayableOverrides } from 'ethers';
 import type { DssProxyActionsDsr, DaiJoin, DSProxy, Pot } from 'generated/types';
 

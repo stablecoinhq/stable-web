@@ -1,4 +1,4 @@
-import { toFixedNumber, UnitFormats } from './math';
+import { toFixedNumber, UnitFormats } from '../helpers/math';
 
 import type ChainLogHelper from './ChainLogHelper';
 import type { FixedNumber } from 'ethers';

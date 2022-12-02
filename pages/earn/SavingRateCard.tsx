@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
 
-import BNText from 'pages/ilks/[ilk]/BNText';
+import BNText from 'ethereum/react/cards/BNText';
 
 import type { FixedNumber } from 'ethers';
 import type { FC } from 'react';
@@ -14,7 +14,7 @@ const SavingRateCard: FC<SavingRateCardProps> = ({ annualRate }) => (
     <CardHeader title="Saving Rate" />
     <CardContent>
       <Grid container padding={2} spacing={2}>
-        <BNText label="Annual saving rate" value={annualRate} tooltipText="Annual saving rate of the DSR" />
+        <BNText label="Annual saving rate" value={annualRate} tooltipText="Annual saving rate of the DSR" unit="%" />
       </Grid>
     </CardContent>
   </Card>
