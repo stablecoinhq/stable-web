@@ -135,7 +135,7 @@ const Controller: FC<ControllerProps> = ({
         return (
           <BurnForm
             ilkInfo={vault.ilkInfo}
-            buttonContent="Burn"
+            buttonContent={forms('burn.submit')}
             onBurn={burn}
             daiBalance={daiBalance}
             lockedBalance={lockedBalance}

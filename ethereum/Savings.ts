@@ -1,11 +1,10 @@
-import { BigNumber } from 'ethers';
+import { BigNumber, FixedNumber } from 'ethers';
 
 import { INT_FORMAT, pow, toFixedNumber, UnitFormats, YEAR_IN_SECONDS } from 'ethereum/helpers/math';
 
 import type ChainLogHelper from './contracts/ChainLogHelper';
 import type ERC20Helper from './contracts/ERC20Helper';
 import type ProxyRegistryHelper from './contracts/ProxyRegistryHelper';
-import type { FixedNumber } from 'ethers';
 import type { DaiJoin, Pot } from 'generated/types';
 
 export default class Savings {
@@ -82,9 +81,9 @@ export default class Savings {
 
   async getAnnualRate() {
     const dsr = await this.pot.dsr();
-    return pow(toFixedNumber(dsr, UnitFormats.RAY), YEAR_IN_SECONDS).subUnsafe(
-      toFixedNumber(BigNumber.from(1), INT_FORMAT).toFormat(UnitFormats.RAY),
-    );
+    return pow(toFixedNumber(dsr, UnitFormats.RAY), YEAR_IN_SECONDS)
+      .subUnsafe(toFixedNumber(BigNumber.from(1), INT_FORMAT).toFormat(UnitFormats.RAY))
+      .mulUnsafe(FixedNumber.fromString('100').toFormat(UnitFormats.RAY));
   }
 
   static async fromChainlog(chainLog: ChainLogHelper): Promise<Savings> {

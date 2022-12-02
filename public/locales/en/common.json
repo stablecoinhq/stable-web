@@ -102,21 +102,21 @@
     },
     "earn": {
       "cardTitle": "Earn Savings",
-      "cardDesc": "Deposit your $t(terms.stableToken) to DSR and earn savings.",
+      "cardDesc": "Deposit your $t(terms.stableToken) to $t(terms.savings) and earn savings.",
       "depositTab": "Deposit",
       "withdrawTab": "Withdraw",
       "deposit": {
         "title": "Deposit Status",
         "label": "Deposit Balance",
-        "description": "Amount of DAI currently being deposited at DSR",
+        "description": "Amount of $t(terms.stableToken) currently being deposited at $t(terms.savings)",
         "form": {
-          "label": "Amount of DAI to deposit",
+          "label": "Amount of $t(terms.stableToken) to deposit",
           "submit": "Deposit"
         }
       },
       "withdraw": {
         "form": {
-          "label": "Amount of DAI to withdraw",
+          "label": "Amount of $t(terms.stableToken) to withdraw",
           "withdrawAll": "Withdraw all",
           "submit": "Withdraw"
         }
@@ -137,7 +137,8 @@
     "debtFloor": "Debt Floor",
     "totalIssued": "Total Issued",
     "maxLiquidity": "Maximum Liquidity",
-    "liqRatio": "Liquidation Ratio"
+    "liqRatio": "Liquidation Ratio",
+    "savings": "JSR"
   },
   "units": {
     "stableToken": "DAI",
