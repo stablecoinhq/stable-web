@@ -9,6 +9,8 @@ import { UnitFormats, CENT, COL_RATIO_FORMAT } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import BNText from 'ethereum/react/cards/BNText';
 
+import { canMint, MintError } from './canMint';
+
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
@@ -23,17 +25,6 @@ export type MintFormProps = {
   debt: FixedNumber;
   onMint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
 };
-
-enum FormError {
-  // 残高不足
-  insufficientBalance,
-  // 担保率が最低担保率を下回っている
-  collateralTooLow,
-  // 発行下限を下回っている
-  debtTooLow,
-  // 発行上限を上回っている
-  issuingTooMuchCoins,
-}
 
 const MintForm: FC<MintFormProps> = ({
   ilkInfo,
@@ -94,65 +85,23 @@ const MintForm: FC<MintFormProps> = ({
     });
   }, [collateralAmount, onMint, ratio]);
 
-  const formErrors: FormError[] = useMemo(() => {
-    const { debtMultiplier, normalizedDebt, debtCeiling, debtFloor } = ilkStatus;
-    const errors = [];
-    // Insufficient balance
-    // (Amount to use as collateral) - (Amount available) < 0
-    if (collateralAmount && balance.subUnsafe(collateralAmount).isNegative()) {
-      errors.push(FormError.insufficientBalance);
-    }
-    const formats = UnitFormats.RAD;
+  const formErrors: MintError[] = useMemo(
+    () =>
+      collateralAmount && ratio
+        ? canMint(balance, lockedBalance, debt, collateralAmount, ratio, liquidationRatio, ilkStatus)
+        : [],
+    [balance, collateralAmount, ilkStatus, debt, lockedBalance, liquidationRatio, ratio],
+  );
 
-    // CollateralizationRatio is below liquidation ratio
-    // Vat.ilk.rate * (Vat.urn.art + daiAmount) < Vat.urn.spot * (Vat.urn.ink + collateralAmount)
-    if (collateralAmount && !(debt.isZero() && daiAmount.isZero())) {
-      const currentDebt = debtMultiplier
-        .toFormat(formats)
-        .mulUnsafe(debt.toFormat(formats).addUnsafe(daiAmount.toFormat(formats)));
-      const currentSurplus = price
-        .toFormat(formats)
-        .mulUnsafe(lockedBalance.toFormat(formats).addUnsafe(collateralAmount.toFormat(formats)));
-
-      if (currentSurplus.subUnsafe(currentDebt).isNegative()) {
-        errors.push(FormError.collateralTooLow);
-      }
-    }
-
-    // Amount of debt is below debt floor
-    // Vat.ilk.rate * (urn.art + daiAmount) - Vat.ilk.dust < 0
-    if (
-      !daiAmount.isZero() &&
-      debtMultiplier
-        .toFormat(formats)
-        .mulUnsafe(debt.toFormat(formats).addUnsafe(daiAmount.toFormat(formats)))
-        .subUnsafe(debtFloor.toFormat(formats))
-        .isNegative()
-    ) {
-      errors.push(FormError.debtTooLow);
-    }
-
-    // Amount of debt is above debt ceiling
-    // Vat.ilk.line - (Vat.ilk.Art + daiAmount) * Vat.ilk.rate < 0
-    const totalIssued = normalizedDebt
-      .toFormat(formats)
-      .addUnsafe(daiAmount.toFormat(formats))
-      .mulUnsafe(debtMultiplier.toFormat(formats));
-    if (debtCeiling.subUnsafe(totalIssued).isNegative()) {
-      errors.push(FormError.issuingTooMuchCoins);
-    }
-    return errors;
-  }, [balance, collateralAmount, daiAmount, ilkStatus, debt, lockedBalance, price]);
-
-  const showErrorMessage = (e: FormError) => {
+  const showErrorMessage = (e: MintError) => {
     switch (e) {
-      case FormError.insufficientBalance:
+      case MintError.insufficientBalance:
         return t('error.insufficientBalance');
-      case FormError.collateralTooLow:
+      case MintError.collateralTooLow:
         return t('error.collateralTooLow');
-      case FormError.debtTooLow:
+      case MintError.debtTooLow:
         return t('error.debtTooLow');
-      case FormError.issuingTooMuchCoins:
+      case MintError.issuingTooMuchCoins:
         return t('error.issuingTooMuchCoins');
     }
   };
