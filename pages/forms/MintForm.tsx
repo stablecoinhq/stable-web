@@ -29,9 +29,9 @@ enum FormError {
   insufficientBalance,
   // 担保率が最低担保率を下回っている
   collateralTooLow,
-  // Vaultの負債が小さすぎる
+  // 発行下限を下回っている
   debtTooLow,
-  // 発行上限を超えている
+  // 発行上限を上回っている
   issuingTooMuchCoins,
 }
 
@@ -105,16 +105,16 @@ const MintForm: FC<MintFormProps> = ({
     const formats = UnitFormats.RAD;
 
     // CollateralizationRatio is below liquidation ratio
-    // collateralizationRatio - liquidationRatio < 0
+    // Vat.ilk.rate * (Vat.urn.art + daiAmount) < Vat.urn.spot * (Vat.urn.ink + collateralAmount)
     if (collateralAmount && !(debt.isZero() && daiAmount.isZero())) {
-      const collateralizationRatio = lockedBalance
+      const currentDebt = debtMultiplier
         .toFormat(formats)
-        .addUnsafe(collateralAmount.toFormat(formats))
-        .mulUnsafe(liquidationRatio.toFormat(formats))
-        .mulUnsafe(price.toFormat(formats))
-        .divUnsafe(debt.toFormat(formats).addUnsafe(daiAmount.toFormat(formats)).mulUnsafe(debtMultiplier.toFormat(formats)));
+        .mulUnsafe(debt.toFormat(formats).addUnsafe(daiAmount.toFormat(formats)));
+      const currentSurplus = price
+        .toFormat(formats)
+        .mulUnsafe(lockedBalance.toFormat(formats).addUnsafe(collateralAmount.toFormat(formats)));
 
-      if (collateralizationRatio.subUnsafe(liquidationRatio.toFormat(formats)).isNegative()) {
+      if (currentSurplus.subUnsafe(currentDebt).isNegative()) {
         errors.push(FormError.collateralTooLow);
       }
     }
@@ -133,7 +133,7 @@ const MintForm: FC<MintFormProps> = ({
     }
 
     // Amount of debt is above debt ceiling
-    // ilk.line - (Vat.ilk.Art + daiAmount) * Vat.ilk.rate < 0
+    // Vat.ilk.line - (Vat.ilk.Art + daiAmount) * Vat.ilk.rate < 0
     const totalIssued = normalizedDebt
       .toFormat(formats)
       .addUnsafe(daiAmount.toFormat(formats))
@@ -142,7 +142,7 @@ const MintForm: FC<MintFormProps> = ({
       errors.push(FormError.issuingTooMuchCoins);
     }
     return errors;
-  }, [balance, collateralAmount, liquidationRatio, daiAmount, ilkStatus, debt, lockedBalance, price]);
+  }, [balance, collateralAmount, daiAmount, ilkStatus, debt, lockedBalance, price]);
 
   const showErrorMessage = (e: FormError) => {
     switch (e) {
