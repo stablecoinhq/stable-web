@@ -58,6 +58,27 @@ const MyApp = (appProps: AppProps) => {
           },
         },
       },
+      MuiInputBase: {
+        styleOverrides: {
+          root: {
+            color: 'inherit',
+          },
+        },
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          notchedOutline: {
+            borderColor: 'inherit !important',
+          },
+        },
+      },
+      MuiSelect: {
+        styleOverrides: {
+          icon: {
+            color: 'inherit',
+          },
+        },
+      },
     },
   });
 
