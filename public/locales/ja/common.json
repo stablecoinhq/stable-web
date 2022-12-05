@@ -34,7 +34,14 @@
   "forms": {
     "burn": {
       "redeemAmount": "返済する$t(units.stableToken)の数量",
-      "freeAmount": "引き出す{{gem}}の数量"
+      "freeAmount": "引き出す{{gem}}の数量",
+      "error": {
+        "insufficientBalance": "残高不足です",
+        "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
+        "debtTooLow": "$t(terms.vault_one)の負債額が下限値を下回っています。",
+        "invalidCollateralFreeAmount": "解放する担保の額が、ロックされた担保の額を超過しています。",
+        "invalidRepayAmount": "返済する$t(units.stableToken)の数量が$t(terms.vault_one)の負債額を上回っています。"
+      }
     },
     "mint": {
       "colRatio": "$t(terms.colRatio)",
@@ -44,7 +51,7 @@
       "error": {
         "insufficientBalance": "残高不足です",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
-        "debtTooLow": "負債額が下限値を下回っています。",
+        "debtTooLow": "$t(terms.vault_one)の負債額が下限値を下回っています。",
         "issuingTooMuchCoins": "負債額が上限値を上回っています。"
       }
     }
