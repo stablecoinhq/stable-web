@@ -65,9 +65,9 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn, buttonContent, daiBalanc
       case BurnError.debtTooLow:
         return t('error.debtTooLow');
       case BurnError.invalidCollateralFreeAmount:
-        return t('error.issuingTooMuchCoins');
+        return t('error.invalidCollateralFreeAmount');
       case BurnError.invalidRepayAmount:
-        return t('error.issuingTooMuchCoins');
+        return t('error.invalidRepayAmount');
     }
   };
   return (
@@ -97,7 +97,12 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn, buttonContent, daiBalanc
         </Grid>
 
         <Grid item xs={12}>
-          <Button variant="contained" fullWidth disabled={!daiAmount || !colAmount || burning} onClick={onButtonClick}>
+          <Button
+            variant="contained"
+            fullWidth
+            disabled={!daiAmount || !colAmount || burning || formErrors.length !== 0}
+            onClick={onButtonClick}
+          >
             {burning ? <CircularProgress /> : buttonContent}
           </Button>
           {formErrors.map((e) => (

@@ -113,6 +113,7 @@ export default class Vault {
   }
 
   // Urn debt = Vat.urn.art * Vat.ilk.rate
+  // 有効小数点をトークンに合わせているため、厳密な値ではない。あくまで表示用
   static getDebt(urnDebt: FixedNumber, debtMultiplier: FixedNumber) {
     const calcFormat = getBiggestDecimalsFormat(urnDebt.format, debtMultiplier.format);
     return urnDebt

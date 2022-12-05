@@ -32,7 +32,14 @@
   "forms": {
     "burn": {
       "redeemAmount": "Amount of $t(units.stableToken) to redeem",
-      "freeAmount": "Amount of {{gem}} to free"
+      "freeAmount": "Amount of {{gem}} to free",
+      "error": {
+        "insufficientBalance": "Insufficient amount of $t(units.stableToken).",
+        "collateralTooLow": "The vault's collateralization ratio is too low.",
+        "debtTooLow": "Amount of bebt the vault owes is below the debt floor.",
+        "invalidCollateralFreeAmount": "The amount of collateral trying to free exceeds the locked collateral amount.",
+        "invalidRepayAmount": "The amount of $t(units.stableToken) being repayed is exceeding the debt."
+      }
     },
     "mint": {
       "colRatio": "$t(terms.colRatio)",
