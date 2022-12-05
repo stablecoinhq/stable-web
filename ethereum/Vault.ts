@@ -101,6 +101,9 @@ export default class Vault {
   ) {
     const calcFormat = UnitFormats.RAD;
     const { price, debtMultiplier } = ilkStatus;
+    if (urnDebt.isZero() || debtMultiplier.isZero()) {
+      return FixedNumber.fromString('0', calcFormat);
+    }
     return lockedBalance
       .toFormat(calcFormat)
       .mulUnsafe(liquidationRatio.toFormat(calcFormat))

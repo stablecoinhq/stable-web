@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   Card,
+  CardContent,
   CardHeader,
   CircularProgress,
   Fab,
@@ -28,7 +29,7 @@ import getTranslationProps from '../getTranslationProps';
 import type EthereumProvider from 'ethereum/EthereumProvider';
 import type { CDP } from 'ethereum/contracts/GetCDPsHelper';
 import type { NextPageWithEthereum } from 'next';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 
 const useCDPs = (provider: EthereumProvider): CDP[] | undefined => {
   const chainLog = useChainLog(provider);
@@ -45,6 +46,12 @@ const useCDPs = (provider: EthereumProvider): CDP[] | undefined => {
 type ContentProps = {
   cdps: CDP[] | undefined;
 };
+
+const TableHeadCell: FC<{ children: ReactNode; align?: 'left' | 'right' | 'center' }> = ({ children, align }) => (
+  <TableCell align={align || 'right'} sx={{ fontWeight: 700 }}>
+    {children}
+  </TableCell>
+);
 
 const Content: FC<ContentProps> = ({ cdps }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.vault' });
@@ -66,16 +73,16 @@ const Content: FC<ContentProps> = ({ cdps }) => {
   }
 
   return (
-    <TableContainer>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+    <TableContainer component={Card}>
+      <Table sx={{ minWidth: 650 }} aria-label="cdp-table">
         <TableHead>
           <TableRow>
-            <TableCell>Asset</TableCell>
-            <TableCell align="right">Vault ID</TableCell>
-            <TableCell align="right">Collateralization Ratio</TableCell>
-            <TableCell align="right">Collateral Locked</TableCell>
-            <TableCell align="right">Dai Debt</TableCell>
-            <TableCell align="right">Manage</TableCell>
+            <TableHeadCell align="left">Asset</TableHeadCell>
+            <TableHeadCell>Vault ID</TableHeadCell>
+            <TableHeadCell>Collateralization Ratio</TableHeadCell>
+            <TableHeadCell>Collateral Locked</TableHeadCell>
+            <TableHeadCell>Dai Debt</TableHeadCell>
+            <TableHeadCell>Manage</TableHeadCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -119,7 +126,9 @@ const Page: NextPageWithEthereum = ({ provider }) => {
           </Link>
         }
       />
-      <Content cdps={cdps} />
+      <CardContent>
+        <Content cdps={cdps} />
+      </CardContent>
     </Card>
   );
 };
