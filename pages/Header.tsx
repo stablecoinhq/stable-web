@@ -4,6 +4,8 @@ import Link from 'next/link';
 
 import MetaMaskButton from 'ethereum/react/MetaMaskButton';
 
+import LanguagePicker from './LanguagePicker';
+
 import type { FC } from 'react';
 import type { WithNullableEthereum } from 'types/next';
 
@@ -18,6 +20,7 @@ const Header: FC<WithNullableEthereum> = ({ externalProvider, provider }) => {
             {t('title')}
           </Typography>
         </Link>
+        <LanguagePicker sx={{ mr: 2 }} />
         <MetaMaskButton externalProvider={externalProvider} provider={provider} />
       </Toolbar>
     </AppBar>
