@@ -54,7 +54,12 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
             tooltipText={t('lockedCollateralDesc')}
             unit={ilkInfo.symbol}
           />
-          <BNText label={t('debt')} value={debt} tooltipText={t('debtDesc')} unit={units('stableToken')} />
+          <BNText
+            label={t('debt')}
+            value={debt.round(UnitFormats.WAD.decimals).toFormat(UnitFormats.WAD)}
+            tooltipText={t('debtDesc')}
+            unit={units('stableToken')}
+          />
           <BNText label={t('colRatio')} value={collateralizationRatio} unit="%" />
         </Grid>
       </CardContent>

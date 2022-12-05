@@ -1,8 +1,7 @@
-import { FixedNumber } from 'ethers';
-
 import { UnitFormats } from 'ethereum/helpers/math';
 
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
+import type { FixedNumber } from 'ethers';
 
 export enum BurnError {
   // DAIの残高が不足している
@@ -46,7 +45,7 @@ export class BurnFormValidation {
     }
 
     const currentDebt = BurnFormValidation.getCurrentDebt(daiToRepay, debt, debtMultiplier);
-    if (BurnFormValidation.isOverRepaying(currentDebt)) {
+    if (BurnFormValidation.isOverRepaying(debt, daiToRepay, debtMultiplier)) {
       errors.push(BurnError.invalidRepayAmount);
     }
 
@@ -77,11 +76,16 @@ export class BurnFormValidation {
     return daiBalance.toFormat(format).subUnsafe(daiToRepay.toFormat(format)).isNegative();
   }
 
-  // currentDebt - 1 < 0
-  static isOverRepaying(currentDebt: FixedNumber): boolean {
-    const ONE_DAI = FixedNumber.fromString('1', UnitFormats.WAD);
-
-    return currentDebt.addUnsafe(ONE_DAI.toFormat(format)).isNegative();
+  // normalizedDebt - daiToRepay < 0
+  // 有効小数点18桁にしてから計算する
+  static isOverRepaying(debt: FixedNumber, daiToRepay: FixedNumber, debtMultiplier: FixedNumber): boolean {
+    // ここのroundは繰上げだから大丈夫
+    const normalizedDebt = debtMultiplier
+      .toFormat(format)
+      .mulUnsafe(debt.toFormat(format))
+      .round(UnitFormats.WAD.decimals)
+      .toFormat(UnitFormats.WAD);
+    return normalizedDebt.subUnsafe(daiToRepay.toFormat(UnitFormats.WAD)).isNegative();
   }
 
   // Vat.urn.ink < collateralToFree
@@ -96,10 +100,10 @@ export class BurnFormValidation {
     currentDebt: FixedNumber,
     price: FixedNumber,
   ) {
-    const currentSurplus = price
+    const currentCollateralInDai = price
       .toFormat(format)
       .mulUnsafe(lockedBalance.toFormat(format).subUnsafe(collateralToFree.toFormat(format)));
-    return currentSurplus.subUnsafe(currentDebt).isNegative();
+    return currentCollateralInDai.subUnsafe(currentDebt).isNegative();
   }
 
   // 0 < currentDebt < debtFloor
