@@ -1,4 +1,4 @@
-import { FixedNumber } from 'ethers';
+import { BigNumber, FixedNumber } from 'ethers';
 
 import { assertFixedFormat, getBiggestDecimalsFormat, UnitFormats, COL_RATIO_FORMAT } from './helpers/math';
 
@@ -90,5 +90,22 @@ export default class Vault {
       .mulUnsafe(assertFixedFormat(liqRatio, UnitFormats.RAY).toFormat(calcFormat))
       .divUnsafe(assertFixedFormat(colRatio, COL_RATIO_FORMAT).toFormat(calcFormat).toFormat(calcFormat));
     return result.round(UnitFormats.WAD.decimals).toFormat(UnitFormats.WAD);
+  }
+
+  // Collateralization Ratio = Vat.urn.ink * Vat.ilk.spot * Spot.ilk.mat / (Vat.urn.art * Vat.ilk.rate)
+  static getCollateralizationRatio(
+    lockedBalance: FixedNumber,
+    urnDebt: FixedNumber,
+    liquidationRatio: FixedNumber,
+    ilkStatus: IlkStatus,
+  ) {
+    const calcFormat = UnitFormats.RAD;
+    const { price, debtMultiplier } = ilkStatus;
+    return lockedBalance
+      .toFormat(calcFormat)
+      .mulUnsafe(liquidationRatio.toFormat(calcFormat))
+      .mulUnsafe(price.toFormat(calcFormat))
+      .divUnsafe(urnDebt.toFormat(calcFormat).mulUnsafe(debtMultiplier.toFormat(calcFormat)))
+      .mulUnsafe(FixedNumber.fromValue(BigNumber.from(100)).toFormat(calcFormat));
   }
 }

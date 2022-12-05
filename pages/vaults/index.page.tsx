@@ -1,17 +1,19 @@
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable i18next/no-literal-string */
 import AddIcon from '@mui/icons-material/Add';
 import {
   Box,
+  Button,
   Card,
-  CardContent,
   CardHeader,
   CircularProgress,
   Fab,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography,
 } from '@mui/material';
 import { useTranslation } from 'next-i18next';
@@ -64,20 +66,38 @@ const Content: FC<ContentProps> = ({ cdps }) => {
   }
 
   return (
-    <List>
-      {cdps.map(({ id, urn, ilk }) => (
-        <ListItem key={id.toString()} disablePadding>
-          <Link href={`/vaults/${id.toString()}`} passHref>
-            <ListItemButton>
-              <ListItemIcon>
-                <AccountBalanceWalletIcon />
-              </ListItemIcon>
-              <ListItemText primary={`${ilk.inString} (${id.toString()})`} secondary={urn} />
-            </ListItemButton>
-          </Link>
-        </ListItem>
-      ))}
-    </List>
+    <TableContainer>
+      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Asset</TableCell>
+            <TableCell align="right">Vault ID</TableCell>
+            <TableCell align="right">Collateralization Ratio</TableCell>
+            <TableCell align="right">Collateral Locked</TableCell>
+            <TableCell align="right">Dai Debt</TableCell>
+            <TableCell align="right">Manage</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {cdps.map(({ id, ilk, urnStatus, collateralizationRatio }) => (
+            <TableRow key={id.toString()} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+              <TableCell component="th" scope="row">
+                {ilk.inString}
+              </TableCell>
+              <TableCell align="right">{id.toString()}</TableCell>
+              <TableCell align="right">{collateralizationRatio.round(1).toString()} %</TableCell>
+              <TableCell align="right">{urnStatus.lockedBalance.toString()}</TableCell>
+              <TableCell align="right">{urnStatus.debt.toString()}</TableCell>
+              <TableCell align="right">
+                <Link href={`/vaults/${id.toString()}`} passHref>
+                  <Button variant="contained">Manage Vault</Button>
+                </Link>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 
@@ -99,9 +119,7 @@ const Page: NextPageWithEthereum = ({ provider }) => {
           </Link>
         }
       />
-      <CardContent>
-        <Content cdps={cdps} />
-      </CardContent>
+      <Content cdps={cdps} />
     </Card>
   );
 };

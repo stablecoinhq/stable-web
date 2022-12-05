@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
-import { BigNumber, FixedNumber } from 'ethers';
+import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useMemo } from 'react';
 
+import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
 
 import BNText from './BNText';
@@ -29,17 +30,11 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
   const { urn, freeBalance, lockedBalance, debt: urnDebt } = urnStatus;
   // Collateralization Ratio = Vat.urn.ink * Vat.ilk.spot * Spot.ilk.mat / (Vat.urn.art * Vat.ilk.rate)
   const collateralizationRatio = useMemo(() => {
-    const { debtMultiplier, price } = ilkStatus;
     const calcFormat = UnitFormats.RAY;
-    if (urnDebt.isZero() || debtMultiplier.isZero()) {
+    if (urnDebt.isZero()) {
       return FixedNumber.fromString('0', calcFormat);
     }
-    return lockedBalance
-      .toFormat(calcFormat)
-      .mulUnsafe(liquidationRatio.toFormat(calcFormat))
-      .mulUnsafe(price.toFormat(calcFormat))
-      .divUnsafe(urnDebt.toFormat(calcFormat).mulUnsafe(debtMultiplier.toFormat(calcFormat)))
-      .mulUnsafe(FixedNumber.fromValue(BigNumber.from(100)).toFormat(calcFormat));
+    return Vault.getCollateralizationRatio(lockedBalance, urnDebt, liquidationRatio, ilkStatus);
   }, [ilkStatus, lockedBalance, urnDebt, liquidationRatio]);
 
   return (
