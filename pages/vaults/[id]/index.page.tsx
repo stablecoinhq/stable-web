@@ -128,9 +128,19 @@ const Controller: FC<ControllerProps> = ({
           />
         );
       case 'burn':
-        return <BurnForm ilkInfo={vault.ilkInfo} buttonContent="Burn" onBurn={burn} />;
+        return (
+          <BurnForm
+            ilkInfo={vault.ilkInfo}
+            buttonContent="Burn"
+            onBurn={burn}
+            daiBalance={daiBalance}
+            lockedBalance={lockedBalance}
+            debt={debt}
+            ilkStatus={ilkStatus}
+          />
+        );
     }
-  }, [burn, mint, selectedTab, vault, liquidationRatio, ilkStatus, tokenBalance, debt, lockedBalance]);
+  }, [burn, mint, selectedTab, vault, liquidationRatio, ilkStatus, tokenBalance, debt, lockedBalance, daiBalance]);
 
   return (
     <>
