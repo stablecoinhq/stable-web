@@ -9,7 +9,7 @@ import { UnitFormats, CENT, COL_RATIO_FORMAT } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import BNText from 'ethereum/react/cards/BNText';
 
-import { canMint, MintError } from './canMint';
+import { MintFormValidation, MintError } from './MintFormValidation';
 
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
@@ -85,13 +85,12 @@ const MintForm: FC<MintFormProps> = ({
     });
   }, [collateralAmount, onMint, ratio]);
 
-  const formErrors: MintError[] = useMemo(
-    () =>
-      collateralAmount && ratio
-        ? canMint(balance, lockedBalance, debt, collateralAmount, ratio, liquidationRatio, ilkStatus)
-        : [],
-    [balance, collateralAmount, ilkStatus, debt, lockedBalance, liquidationRatio, ratio],
-  );
+  const formErrors: MintError[] = useMemo(() => {
+    if (collateralAmount && ratio) {
+      return MintFormValidation.canMint(balance, collateralAmount, daiAmount, lockedBalance, debt, ilkStatus);
+    }
+    return [];
+  }, [balance, collateralAmount, ilkStatus, debt, lockedBalance, ratio, daiAmount]);
 
   const showErrorMessage = (e: MintError) => {
     switch (e) {
