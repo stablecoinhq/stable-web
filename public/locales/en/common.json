@@ -76,7 +76,12 @@
       "new": "New $t(terms.vault_one)",
       "noVaults": "No $t(terms.vault_other) found",
       "notFound": "The specified $t(terms.vault_one) not found",
-      "title": "{{ilk}} $t(terms.vault_one) ({{id}})"
+      "title": "{{ilk}} $t(terms.vault_one) ({{id}})",
+      "collateralType": "Collateral Type",
+      "id": "Vault ID",
+      "lockedCollateral": "Locked Collateral",
+      "debt": "Debt",
+      "manageVault": "Manage Vault"
     }
   },
   "site": {

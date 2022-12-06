@@ -35,7 +35,13 @@
       "listTitle": "$t(terms.vault_one)",
       "new": "新規$t(terms.vault_one)",
       "noVaults": "$t(terms.vault_other)がありません",
-      "notFound": "指定された$t(terms.vault_one)が見つかりませんでした"
+      "notFound": "指定された$t(terms.vault_one)が見つかりませんでした",
+      "title": "{{ilk}} $t(terms.vault_one) ({{id}})",
+      "collateralType": "担保の種類",
+      "id": "Vault ID",
+      "lockedCollateral": "ロックされた担保",
+      "debt": "負債",
+      "manageVault": "管理"
     }
   },
   "terms": {
