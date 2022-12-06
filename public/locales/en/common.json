@@ -38,7 +38,13 @@
       "colRatio": "$t(terms.colRatio)",
       "lockAmount": "Amount of {{gem}} to lock",
       "mintAmountLabel": "Amount of $t(units.stableToken)s to be minted.",
-      "mintAmountTooltipText": "Amount of $t(units.stableToken)s to be minted."
+      "mintAmountTooltipText": "Amount of $t(units.stableToken)s to be minted.",
+      "error": {
+        "insufficientBalance": "Insufficient balance.",
+        "collateralTooLow": "Collateralization ratio is too low.",
+        "debtTooLow": "Amount of $t(units.stableToken) being minted is too low.",
+        "issuingTooMuchCoins": "Amount of $t(units.stableToken) issued is above Maximum Liquidity"
+      }
     }
   },
   "metamask": {

@@ -1,5 +1,5 @@
 import { FixedFormat } from '@ethersproject/bignumber';
-import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from '@mui/material';
+import { Button, Card, Grid, InputAdornment, TextField, CircularProgress, FormHelperText } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
@@ -9,18 +9,34 @@ import { UnitFormats, CENT, COL_RATIO_FORMAT } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import BNText from 'ethereum/react/cards/BNText';
 
+import { MintFormValidation, MintError } from './MintFormValidation';
+
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
+import type { IlkStatus } from 'ethereum/contracts/VatHelper';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
 export type MintFormProps = {
   ilkInfo: IlkInfo;
+  ilkStatus: IlkStatus;
   buttonContent: ReactNode;
-  price: FixedNumber;
   liquidationRatio: FixedNumber;
+  balance: FixedNumber;
+  lockedBalance: FixedNumber;
+  debt: FixedNumber;
   onMint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
 };
 
-const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidationRatio, price }) => {
+const MintForm: FC<MintFormProps> = ({
+  ilkInfo,
+  ilkStatus,
+  onMint,
+  buttonContent,
+  liquidationRatio,
+  balance,
+  lockedBalance,
+  debt,
+}) => {
+  const { price } = ilkStatus;
   const { t } = useTranslation('common', { keyPrefix: 'forms.mint' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
 
@@ -69,6 +85,26 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidati
     });
   }, [collateralAmount, onMint, ratio]);
 
+  const formErrors: MintError[] = useMemo(() => {
+    if (collateralAmount && ratio) {
+      return MintFormValidation.canMint(balance, collateralAmount, daiAmount, lockedBalance, debt, ilkStatus);
+    }
+    return [];
+  }, [balance, collateralAmount, ilkStatus, debt, lockedBalance, ratio, daiAmount]);
+
+  const showErrorMessage = (e: MintError) => {
+    switch (e) {
+      case MintError.insufficientBalance:
+        return t('error.insufficientBalance');
+      case MintError.collateralTooLow:
+        return t('error.collateralTooLow');
+      case MintError.debtTooLow:
+        return t('error.debtTooLow');
+      case MintError.issuingTooMuchCoins:
+        return t('error.issuingTooMuchCoins');
+    }
+  };
+
   return (
     <Card component="form" elevation={0}>
       <Grid container padding={2} spacing={2}>
@@ -99,9 +135,19 @@ const MintForm: FC<MintFormProps> = ({ ilkInfo, onMint, buttonContent, liquidati
           unit={units('stableToken')}
         />
         <Grid item xs={12}>
-          <Button variant="contained" fullWidth disabled={!collateralAmount || !ratio || minting} onClick={onButtonClick}>
+          <Button
+            variant="contained"
+            fullWidth
+            disabled={!collateralAmount || daiAmount.isZero() || !ratio || minting || formErrors.length !== 0}
+            onClick={onButtonClick}
+          >
             {minting ? <CircularProgress /> : buttonContent}
           </Button>
+          {formErrors.map((e) => (
+            <FormHelperText key={e} error>
+              {showErrorMessage(e)}
+            </FormHelperText>
+          ))}
         </Grid>
       </Grid>
     </Card>
