@@ -1,4 +1,3 @@
-import Vault from 'ethereum/Vault';
 import { DSProxy__factory, DssCdpManager__factory } from 'generated/types';
 
 import IlkType from '../IlkType';
@@ -49,19 +48,14 @@ export default class CDPManagerHelper {
       this.vat.getIlkStatus(ilk),
       this.spot.getLiquidationRatio(ilk),
     ]);
-    const collateralizationRatio = Vault.getCollateralizationRatio(
-      urnStatus.lockedBalance,
-      urnStatus.debt,
-      liquidationRatio,
-      ilkStatus,
-    );
     return {
       id: cdpId,
       urn,
       ilk,
       owner,
       urnStatus,
-      collateralizationRatio,
+      ilkStatus,
+      liquidationRatio,
     };
   }
 }

@@ -24,7 +24,7 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
 
   const debt = useMemo(
-    () => urnStatus.debt.toFormat(UnitFormats.RAY).mulUnsafe(ilkStatus.debtMultiplier),
+    () => Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier),
     [urnStatus.debt, ilkStatus.debtMultiplier],
   );
   const { urn, freeBalance, lockedBalance, debt: urnDebt } = urnStatus;

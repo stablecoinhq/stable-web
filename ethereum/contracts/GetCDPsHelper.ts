@@ -1,5 +1,4 @@
 import IlkType from 'ethereum/IlkType';
-import Vault from 'ethereum/Vault';
 import { GetCdps__factory } from 'generated/types';
 
 import { INT_FORMAT, toFixedNumber } from '../helpers/math';
@@ -7,7 +6,7 @@ import { INT_FORMAT, toFixedNumber } from '../helpers/math';
 import type EthereumProvider from '../EthereumProvider';
 import type CDPManagerHelper from './CDPManagerHelper';
 import type SpotHelper from './SpotHelper';
-import type { UrnStatus } from './VatHelper';
+import type { IlkStatus, UrnStatus } from './VatHelper';
 import type VatHelper from './VatHelper';
 import type { FixedNumber } from 'ethers';
 import type { GetCdps, DSProxy } from 'generated/types';
@@ -18,7 +17,8 @@ export type CDP = {
   ilk: IlkType;
   owner: DSProxy;
   urnStatus: UrnStatus;
-  collateralizationRatio: FixedNumber;
+  ilkStatus: IlkStatus;
+  liquidationRatio: FixedNumber;
 };
 
 export default class GetCDPsHelper {
@@ -45,12 +45,7 @@ export default class GetCDPsHelper {
           this.vat.getIlkStatus(ilk),
           this.spot.getLiquidationRatio(ilk),
         ]);
-        const collateralizationRatio = Vault.getCollateralizationRatio(
-          urnStatus.lockedBalance,
-          urnStatus.debt,
-          liquidationRatio,
-          ilkStatus,
-        );
+
         return {
           id: toFixedNumber(cdpId, INT_FORMAT),
           urn,
@@ -58,7 +53,7 @@ export default class GetCDPsHelper {
           owner: proxy,
           urnStatus,
           ilkStatus,
-          collateralizationRatio,
+          liquidationRatio,
         };
       }),
     );

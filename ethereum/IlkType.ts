@@ -16,4 +16,8 @@ export default class IlkType {
   static fromBytes32(inBytes32: string) {
     return new IlkType(parseBytes32String(inBytes32), inBytes32);
   }
+
+  get currencySymbol() {
+    return this.inString.split('-')[0]!;
+  }
 }

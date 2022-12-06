@@ -111,4 +111,14 @@ export default class Vault {
       .divUnsafe(urnDebt.toFormat(calcFormat).mulUnsafe(debtMultiplier.toFormat(calcFormat)))
       .mulUnsafe(FixedNumber.fromValue(BigNumber.from(100)).toFormat(calcFormat));
   }
+
+  // Urn debt = Vat.urn.art * Vat.ilk.rate
+  static getDebt(urnDebt: FixedNumber, debtMultiplier: FixedNumber) {
+    const calcFormat = getBiggestDecimalsFormat(urnDebt.format, debtMultiplier.format);
+    return urnDebt
+      .toFormat(calcFormat)
+      .mulUnsafe(debtMultiplier.toFormat(calcFormat))
+      .round(UnitFormats.WAD.decimals)
+      .toFormat(UnitFormats.WAD);
+  }
 }
