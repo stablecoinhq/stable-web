@@ -32,6 +32,7 @@
     "@metamask/providers": "^9.1.0",
     "@mui/icons-material": "^5.10.3",
     "@mui/material": "^5.10.2",
+    "@mui/x-data-grid": "^5.17.14",
     "@svgr/webpack": "^6.3.1",
     "ethers": "^5.7.0",
     "i18next": "^22.0.6",

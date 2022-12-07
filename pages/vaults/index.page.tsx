@@ -1,19 +1,7 @@
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable i18next/no-literal-string */
 import AddIcon from '@mui/icons-material/Add';
-import {
-  Box,
-  Card,
-  CardContent,
-  CardHeader,
-  CircularProgress,
-  Fab,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-} from '@mui/material';
+import { Box, Card, CardContent, CardHeader, CircularProgress, Fab, Typography } from '@mui/material';
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import { useCallback } from 'react';
@@ -22,6 +10,8 @@ import { useChainLog, useGetCDPs, useProxyRegistry } from 'ethereum/react/Contra
 import usePromiseFactory from 'pages/usePromiseFactory';
 
 import getTranslationProps from '../getTranslationProps';
+
+import VaultTable from './[id]/VaultTable';
 
 import type EthereumProvider from 'ethereum/EthereumProvider';
 import type { CDP } from 'ethereum/contracts/GetCDPsHelper';
@@ -63,22 +53,7 @@ const Content: FC<ContentProps> = ({ cdps }) => {
     );
   }
 
-  return (
-    <List>
-      {cdps.map(({ id, urn, ilk }) => (
-        <ListItem key={id.toString()} disablePadding>
-          <Link href={`/vaults/${id.toString()}`} passHref>
-            <ListItemButton>
-              <ListItemIcon>
-                <AccountBalanceWalletIcon />
-              </ListItemIcon>
-              <ListItemText primary={`${ilk.inString} (${id.toString()})`} secondary={urn} />
-            </ListItemButton>
-          </Link>
-        </ListItem>
-      ))}
-    </List>
-  );
+  return <VaultTable cdps={cdps} />;
 };
 
 const Page: NextPageWithEthereum = ({ provider }) => {

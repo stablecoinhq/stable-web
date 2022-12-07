@@ -59,14 +59,19 @@ export default class ChainLogHelper {
     return this.getAddress('MCD_SPOT').then((address) => new SpotHelper(this.provider, address));
   }
 
-  dssCDPManager() {
-    return this.getAddress('CDP_MANAGER').then((address) => new CDPManagerHelper(this.provider, address));
+  async dssCDPManager() {
+    const [address, vat, spot] = await Promise.all([this.getAddress('CDP_MANAGER'), this.vat(), this.spot()]);
+    return new CDPManagerHelper(this.provider, address, vat, spot);
   }
 
-  getCDPs() {
-    return Promise.all([this.getAddress('GET_CDPS'), this.dssCDPManager()]).then(
-      ([address, dssCDPManager]) => new GetCDPsHelper(this.provider, address, dssCDPManager),
-    );
+  async getCDPs() {
+    const [address, dssCDPManager, vat, spot] = await Promise.all([
+      this.getAddress('GET_CDPS'),
+      this.dssCDPManager(),
+      this.vat(),
+      this.spot(),
+    ]);
+    return new GetCDPsHelper(this.provider, address, dssCDPManager, vat, spot);
   }
 
   proxyRegistry() {
