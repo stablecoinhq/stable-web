@@ -96,6 +96,9 @@ const Controller: FC<ControllerProps> = ({
   daiBalance,
   address,
 }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'cards.wallet' });
+  const { t: terms } = useTranslation('common', { keyPrefix: 'terms' });
+  const { t: units } = useTranslation('common', { keyPrefix: 'units' });
   const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback(
     (_, value) => {
@@ -145,14 +148,16 @@ const Controller: FC<ControllerProps> = ({
   return (
     <>
       <WalletStatusCard
-        label={selectedTab === 'mint' ? 'Balance' : 'DAI balance'}
+        label={
+          selectedTab === 'mint' ? t('balance', { gem: vault.ilkInfo.symbol }) : t('balance', { gem: units('stableToken') })
+        }
         balance={selectedTab === 'mint' ? tokenBalance : daiBalance}
         unit={selectedTab === 'mint' ? vault.ilkInfo.symbol : 'DAI'}
         address={address}
       />
       <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
-        <Tab label="Mint" value="mint" />
-        <Tab label="Burn" value="burn" />
+        <Tab label={terms('mint')} value="mint" />
+        <Tab label={terms('burn')} value="burn" />
       </Tabs>
       <TabContent />
     </>

@@ -66,7 +66,7 @@ const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidation
         <Grid container padding={2} spacing={2}>
           <BNText label={t('totalIssue')} value={totalIssue} tooltipText={t('totalIssueDesc')} unit={units('stableToken')} />
           <BNText
-            label={t('currentPrice')}
+            label={t('currentPrice', { collateral: ilkInfo.symbol })}
             value={curPrice}
             tooltipText={t('currentPriceDesc', { collateral: ilkInfo.name })}
             unit={units('jpy')}
@@ -76,7 +76,7 @@ const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidation
           <BNText
             label={t('maxLiquidity')}
             value={ilkStatus.debtCeiling}
-            tooltipText={t('maxLiquidityDesc')}
+            tooltipText={t('maxLiquidityDesc', { collateral: ilkInfo.name })}
             unit={units('stableToken')}
           />
           <BNText
