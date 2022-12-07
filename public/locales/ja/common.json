@@ -32,7 +32,7 @@
     "vault": {
       "cardDesc": "$t(terms.vault_one)の新規作成や既存の$t(terms.vault_other)の操作",
       "cardTitle": "$t(terms.vault_other)管理",
-      "listTitle": "$t(terms.vault_one)",
+      "listTitle": "$t(terms.vault_one)一覧",
       "new": "新規$t(terms.vault_one)",
       "noVaults": "$t(terms.vault_other)がありません",
       "notFound": "指定された$t(terms.vault_one)が見つかりませんでした",
@@ -46,6 +46,7 @@
   },
   "terms": {
     "collateral": "担保",
+    "colRatio": "担保率",
     "vault_one": "Vault",
     "vault_other": "Vault"
   },
