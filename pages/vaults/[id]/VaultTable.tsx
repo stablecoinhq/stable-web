@@ -5,6 +5,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Vault from 'ethereum/Vault';
+import { useConfigContext } from 'store/DisplayProvider';
 
 import type {
   GridColDef,
@@ -19,32 +20,6 @@ import type { FC } from 'react';
 
 export type BurnFormProps = {
   cdps: CDP[];
-};
-
-type GridRow = {
-  id: number;
-  collateralType: string;
-  collateralizationRatio: FixedNumber;
-  collateralLocked: [FixedNumber, string];
-  debt: FixedNumber;
-  manage: FixedNumber;
-};
-
-const toRow = (cdp: CDP): GridRow => {
-  const { id, urnStatus, ilkStatus, ilk, liquidationRatio } = cdp;
-  return {
-    id: parseInt(id.toString(), 10),
-    collateralType: ilk.inString,
-    collateralizationRatio: Vault.getCollateralizationRatio(
-      urnStatus.lockedBalance,
-      urnStatus.debt,
-      liquidationRatio,
-      ilkStatus,
-    ),
-    collateralLocked: [urnStatus.lockedBalance, ilk.currencySymbol],
-    debt: Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier),
-    manage: id,
-  };
 };
 
 const tableHeaderCell = (params: GridColumnHeaderParams<string>) => (
@@ -129,8 +104,24 @@ const makeColumns = (translations: ColumnTranaslations): GridColDef[] => {
 const VaultTable: FC<{ cdps: CDP[] }> = ({ cdps }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.vault' });
   const { t: terms } = useTranslation('common', { keyPrefix: 'terms' });
-
-  const rows = useMemo(() => cdps.map((cdp) => toRow(cdp)), [cdps]);
+  const { display } = useConfigContext();
+  const rows = useMemo(
+    () =>
+      cdps.map((cdp) => {
+        const { id, urnStatus, ilkStatus, ilk, liquidationRatio } = cdp;
+        return {
+          id: parseInt(id.toString(), 10),
+          collateralType: ilk.inString,
+          collateralizationRatio: display(
+            Vault.getCollateralizationRatio(urnStatus.lockedBalance, urnStatus.debt, liquidationRatio, ilkStatus),
+          ),
+          collateralLocked: [display(urnStatus.lockedBalance), ilk.currencySymbol],
+          debt: display(Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier)),
+          manage: id,
+        };
+      }),
+    [cdps, display],
+  );
   const columns = useMemo(() => {
     const translations: ColumnTranaslations = {
       collateralType: t('collateralType'),

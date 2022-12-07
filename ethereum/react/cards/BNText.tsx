@@ -1,5 +1,7 @@
 import { Grid, InputAdornment, TextField, Tooltip } from '@mui/material';
 
+import { useConfigContext } from 'store/DisplayProvider';
+
 import type { FixedNumber } from 'ethers';
 import type { FC, ReactNode } from 'react';
 
@@ -11,13 +13,14 @@ export type BNTextProps = {
 };
 
 const BNText: FC<BNTextProps> = ({ label, value, tooltipText, unit }) => {
+  const { display } = useConfigContext();
   const content = (
     <Grid item xs={6}>
       <TextField
         variant="standard"
         fullWidth
         label={label}
-        value={value.toString()}
+        value={display(value).toString()}
         inputProps={{ disabled: true }}
         InputProps={{ endAdornment: <InputAdornment position="end">{unit}</InputAdornment> }}
       />
