@@ -75,7 +75,9 @@
       "backToList": "$t(pages.errors.backToList)",
       "noIlks": "担保が見つかりませんでした",
       "openLabel": "$t(terms.vault_one)を新規作成",
-      "openDesc": "{{ilk}} $t(terms.vault_one)を新規作成"
+      "openDesc": "新規作成",
+      "currency": "通貨",
+      "currentPrice": "1 {{collateral}}あたりの価格"
     },
     "vault": {
       "backToList": "$t(pages.errors.backToList)",
@@ -99,7 +101,12 @@
     "vault_one": "Vault",
     "vault_other": "Vaults",
     "mint": "発行",
-    "burn": "返済"
+    "burn": "返済",
+    "annualFee": "年利",
+    "debtFloor": "負債額下限",
+    "totalIssued": "総発行量",
+    "maxLiquidity": "負債額上限",
+    "liqRatio": "最低担保率"
   },
   "units": {
     "stableToken": "DAI",

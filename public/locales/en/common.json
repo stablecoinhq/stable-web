@@ -74,8 +74,10 @@
     "ilk": {
       "backToList": "$t(pages.errors.backToList)",
       "noIlks": "No ilks found",
-      "openLabel": "Open new $t(terms.vault_one)",
-      "openDesc": "Open new {{ilk}} $t(terms.vault_one)"
+      "openLabel": "Create new $t(terms.vault_one)",
+      "openDesc": "Open new $t(terms.vault_one)",
+      "currency": "Currency",
+      "currentPrice": "Current Price per {{collateral}}"
     },
     "vault": {
       "backToList": "$t(pages.errors.backToList)",
@@ -102,7 +104,12 @@
     "vault_one": "Vault",
     "vault_other": "Vaults",
     "mint": "Mint",
-    "burn": "Burn"
+    "burn": "Burn",
+    "annualFee": "Annual Fee",
+    "debtFloor": "Debt Floor",
+    "totalIssued": "Total Issued",
+    "maxLiquidity": "Maximum Liquidity",
+    "liqRatio": "Liquidation Ratio"
   },
   "units": {
     "stableToken": "DAI",
