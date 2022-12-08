@@ -115,6 +115,11 @@ const Controller: FC<ControllerProps> = ({
     [chainLog, vault, updateAllBalance],
   );
 
+  const burnAll: BurnFormProps['onBurnAll'] = useCallback(
+    (dai, col) => vault.burnAll(chainLog, col, dai).then(() => updateAllBalance()),
+    [chainLog, vault, updateAllBalance],
+  );
+
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
       case 'mint':
@@ -136,6 +141,7 @@ const Controller: FC<ControllerProps> = ({
             ilkInfo={vault.ilkInfo}
             buttonContent="Burn"
             onBurn={burn}
+            onBurnAll={burnAll}
             daiBalance={daiBalance}
             lockedBalance={lockedBalance}
             debt={debt}
@@ -143,7 +149,7 @@ const Controller: FC<ControllerProps> = ({
           />
         );
     }
-  }, [burn, mint, selectedTab, vault, liquidationRatio, ilkStatus, tokenBalance, debt, lockedBalance, daiBalance]);
+  }, [burn, burnAll, mint, selectedTab, vault, liquidationRatio, ilkStatus, tokenBalance, debt, lockedBalance, daiBalance]);
 
   return (
     <>

@@ -71,6 +71,19 @@ export default class Vault {
     await actions.wipeAndFreeGem(cdpManager, daiJoin, this.ilkInfo, this.cdpId, colAmount, daiAmount).then((tx) => tx.wait());
   }
 
+  async burnAll(chainLog: ChainLogHelper, colAmount: FixedNumber, daiAmount: FixedNumber) {
+    const [actions, cdpManager, daiJoin] = await Promise.all([
+      Promise.all([chainLog.proxyRegistry().then((proxyRegistry) => proxyRegistry.ensureDSProxy()), chainLog.dai()]).then(
+        ([proxy, dai]) =>
+          Promise.all([chainLog.proxyActions(proxy), dai.ensureAllowance(proxy.address, daiAmount)]).then(([x, _]) => x),
+      ),
+      chainLog.dssCDPManager(),
+      chainLog.daiJoin(),
+    ]);
+
+    await actions.wipeAllAndFreeGem(cdpManager, daiJoin, this.ilkInfo, this.cdpId, colAmount).then((tx) => tx.wait());
+  }
+
   static async open(
     chainLog: ChainLogHelper,
     ilkInfo: IlkInfo,

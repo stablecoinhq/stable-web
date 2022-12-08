@@ -32,11 +32,21 @@ export type BurnFormProps = {
   ilkInfo: IlkInfo;
   buttonContent: ReactNode;
   onBurn: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
+  onBurnAll: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
 };
 
 type BurnFormState = 'repay' | 'repayAll' | 'neutral';
 
-const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn, buttonContent, daiBalance, lockedBalance, debt, ilkStatus }) => {
+const BurnForm: FC<BurnFormProps> = ({
+  ilkInfo,
+  onBurn,
+  onBurnAll,
+  buttonContent,
+  daiBalance,
+  lockedBalance,
+  debt,
+  ilkStatus,
+}) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms.burn' });
   const [daiText, setDaiText] = useState('');
   const daiAmount = useMemo(() => toFixedNumberOrUndefined(daiText, UnitFormats.WAD), [daiText]);
@@ -69,7 +79,7 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn, buttonContent, daiBalanc
     switch (burnFormState) {
       case 'repayAll': {
         setBurning(true);
-        onBurn(Vault.getDebt(debt, ilkStatus.debtMultiplier), lockedBalance).finally(() => {
+        onBurnAll(Vault.getDebt(debt, ilkStatus.debtMultiplier), lockedBalance).finally(() => {
           setBurning(false);
           setBurnFormState('neutral');
         });
@@ -89,7 +99,7 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn, buttonContent, daiBalanc
       case 'neutral':
         break;
     }
-  }, [burnFormState, debt, ilkStatus.debtMultiplier, lockedBalance, daiAmount, colAmount, onBurn]);
+  }, [burnFormState, debt, ilkStatus.debtMultiplier, lockedBalance, daiAmount, colAmount, onBurn, onBurnAll]);
 
   const formErrors: BurnError[] = useMemo(() => {
     if (colAmount && daiAmount) {
