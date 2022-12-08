@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useCallback } from 'react';
 
 import MetaMaskButton from 'ethereum/react/MetaMaskButton';
-import { useConfigContext } from 'store/DisplayProvider';
+import { useDisplayContext } from 'store/DisplayProvider';
 
 import LanguagePicker from './LanguagePicker';
 
@@ -13,7 +13,7 @@ import type { WithNullableEthereum } from 'types/next';
 
 const Header: FC<WithNullableEthereum> = ({ externalProvider, provider }) => {
   const { t } = useTranslation('common', { keyPrefix: 'site' });
-  const { unit, toggleDisplayUnit } = useConfigContext();
+  const { unit, toggleDisplayUnit } = useDisplayContext();
   const onToggle: ChangeEventHandler<HTMLInputElement> = useCallback(() => {
     toggleDisplayUnit();
   }, [toggleDisplayUnit]);

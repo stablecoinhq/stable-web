@@ -23,7 +23,7 @@ import { useCallback, useMemo } from 'react';
 import ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import { CENT, getAnnualFee, getTotalIssued, UnitFormats } from 'ethereum/helpers/math';
 import usePromiseFactory from 'pages/usePromiseFactory';
-import { useConfigContext } from 'store/DisplayProvider';
+import { useDisplayContext } from 'store/DisplayProvider';
 
 import getTranslationProps from '../getTranslationProps';
 
@@ -75,7 +75,7 @@ type RenderRowProps = {
 const RenderRow: FC<RenderRowProps> = ({ field, value, unit }) => (
   <TableRow>
     <TableCell sx={{ px: 0, py: 1, border: 'none', fontWeight: 600 }}>{field}</TableCell>
-    <TableCell align="right" sx={{ px: 0, py: 1, border: 'none' }}>{`${value} ${unit}`}</TableCell>
+    <TableCell align="right" sx={{ px: 0, py: 1, border: 'none', maxWidth: 150 }}>{`${value} ${unit}`}</TableCell>
   </TableRow>
 );
 
@@ -91,7 +91,7 @@ const RenderIlk: FC<RenderIlkProps> = ({ ilk, ilkInfo, ilkStatus, liquidationRat
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
   const { t: terms } = useTranslation('common', { keyPrefix: 'terms' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
-  const { display } = useConfigContext();
+  const { display } = useDisplayContext();
 
   const liquidationRatioPercent = useMemo(() => liquidationRatio.mulUnsafe(CENT.toFormat(UnitFormats.RAY)), [liquidationRatio]);
   const curPrice = useMemo(() => ilkStatus.price.mulUnsafe(liquidationRatio), [ilkStatus.price, liquidationRatio]);

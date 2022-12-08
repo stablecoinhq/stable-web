@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import type { FixedNumber } from 'ethers';
 import type { FC, ReactNode } from 'react';
@@ -14,9 +14,13 @@ export type DisplayContextType = {
   display: (n: FixedNumber) => FixedNumber;
 };
 
-const DisplayContext = createContext<DisplayContextType>({ unit: 'simple', toggleDisplayUnit: () => {}, display: (n) => n });
+const DisplayContext = createContext<DisplayContextType>({
+  unit: 'simple',
+  toggleDisplayUnit: () => {},
+  display: (n) => n,
+});
 
-export const useConfigContext = () => useContext(DisplayContext);
+export const useDisplayContext = () => useContext(DisplayContext);
 
 const round = (num: FixedNumber, decimals: number) => {
   const comps = num.toString().split('.');
@@ -34,7 +38,21 @@ const round = (num: FixedNumber, decimals: number) => {
 export const DisplayProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [unit, setDisplayUnit] = useState<DisplayUnit>('simple');
 
-  const toggleDisplayUnit = useCallback(() => setDisplayUnit((prev) => (prev === 'detailed' ? 'simple' : 'detailed')), []);
+  const toggleDisplayUnit = useCallback(
+    () =>
+      setDisplayUnit((prev) => {
+        const next = prev === 'detailed' ? 'simple' : 'detailed';
+        localStorage.setItem('displayUnit', next);
+        return next;
+      }),
+    [],
+  );
+
+  useEffect(() => {
+    const u = localStorage.getItem('displayUnit') as DisplayUnit | null;
+    setDisplayUnit(u || 'simple');
+  }, []);
+
   const display = useCallback((n: FixedNumber) => (unit === 'simple' ? round(n, ROUND_AT) : n), [unit]);
   const values = useMemo(() => ({ unit, toggleDisplayUnit, display }), [toggleDisplayUnit, display, unit]);
   return <DisplayContext.Provider value={values}>{children}</DisplayContext.Provider>;

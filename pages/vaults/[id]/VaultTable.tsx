@@ -5,7 +5,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Vault from 'ethereum/Vault';
-import { useConfigContext } from 'store/DisplayProvider';
+import { useDisplayContext } from 'store/DisplayProvider';
 
 import type {
   GridColDef,
@@ -104,7 +104,7 @@ const makeColumns = (translations: ColumnTranaslations): GridColDef[] => {
 const VaultTable: FC<{ cdps: CDP[] }> = ({ cdps }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.vault' });
   const { t: terms } = useTranslation('common', { keyPrefix: 'terms' });
-  const { display } = useConfigContext();
+  const { display } = useDisplayContext();
   const rows = useMemo(
     () =>
       cdps.map((cdp) => {
