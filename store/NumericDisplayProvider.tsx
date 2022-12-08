@@ -10,7 +10,7 @@ type DisplayMode = 'simple' | 'detailed';
  */
 const ROUND_AT = 2;
 /**
- * 与えられた数値が有効小数点ROUND_ATよりも小さい場合(x)の有効小数点(x + ROUND_AT_DETAIL)
+ * 与えられた数値が有効小数点ROUND_ATよりも小さい場合(n桁)の有効小数点(n + ROUND_AT_DETAIL)
  */
 const ROUND_AT_DETAIL = 4;
 

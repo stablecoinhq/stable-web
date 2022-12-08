@@ -115,7 +115,7 @@ const VaultTable: FC<{ cdps: CDP[] }> = ({ cdps }) => {
           collateralizationRatio: format(
             Vault.getCollateralizationRatio(urnStatus.lockedBalance, urnStatus.debt, liquidationRatio, ilkStatus),
           ),
-          collateralLocked: [format(urnStatus.lockedBalance), ilk.currencySymbol],
+          collateralLocked: [format(urnStatus.lockedBalance), ilk.currencySymbol] as [FixedNumber, string],
           debt: format(Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier)),
           manage: id,
         };

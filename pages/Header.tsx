@@ -14,7 +14,7 @@ import type { WithNullableEthereum } from 'types/next';
 const Header: FC<WithNullableEthereum> = ({ externalProvider, provider }) => {
   const { t } = useTranslation('common', { keyPrefix: 'site' });
   const { displayMode, toggleDisplay } = useNumericDisplayContext();
-  const onToggle: ChangeEventHandler<HTMLInputElement> = useCallback(
+  const handleChange: ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
       toggleDisplay(event.target.checked);
     },
@@ -29,7 +29,7 @@ const Header: FC<WithNullableEthereum> = ({ externalProvider, provider }) => {
           </Typography>
         </Link>
         <FormControlLabel
-          control={<Switch checked={displayMode === 'detailed'} onChange={onToggle} name="unit" color="default" />}
+          control={<Switch checked={displayMode === 'detailed'} onChange={handleChange} name="unit" color="default" />}
           label="詳細表示"
         />
         <LanguagePicker sx={{ mr: 2 }} />
