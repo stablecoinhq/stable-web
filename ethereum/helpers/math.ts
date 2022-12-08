@@ -2,6 +2,7 @@ import { FixedFormat, parseFixed } from '@ethersproject/bignumber';
 import { parseUnits } from '@ethersproject/units';
 import { FixedNumber } from 'ethers';
 
+import type { IlkStatus } from 'ethereum/contracts/VatHelper';
 import type { BigNumber } from 'ethers';
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -68,4 +69,14 @@ export const pow = (base: FixedNumber, exp: number) => {
 export function multiplyGasLimit(estimatedGasLimit: BigNumber) {
   const GAS_LIMIT_MULTIPLIER = 120;
   return estimatedGasLimit.mul(GAS_LIMIT_MULTIPLIER).div(100);
+}
+
+export function getAnnualFee(stabilityFee: FixedNumber) {
+  return pow(stabilityFee, YEAR_IN_SECONDS)
+    .subUnsafe(FixedNumber.fromString('1', INT_FORMAT).toFormat(UnitFormats.RAY))
+    .mulUnsafe(CENT.toFormat(UnitFormats.RAY));
+}
+
+export function getTotalIssued(ilkStatus: IlkStatus) {
+  return ilkStatus.normalizedDebt.toFormat(UnitFormats.RAY).mulUnsafe(ilkStatus.debtMultiplier);
 }

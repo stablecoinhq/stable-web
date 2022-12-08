@@ -1,39 +1,128 @@
+/* eslint-disable i18next/no-literal-string */
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { Box, Button, Card, CardActions, CardContent, CardHeader, CircularProgress, Grid, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  CircularProgress,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Typography,
+} from '@mui/material';
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
+import { CENT, getAnnualFee, getTotalIssued, UnitFormats } from 'ethereum/helpers/math';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
 import getTranslationProps from '../getTranslationProps';
 
 import type EthereumProvider from 'ethereum/EthereumProvider';
 import type IlkType from 'ethereum/IlkType';
+import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
+import type { IlkStatus } from 'ethereum/contracts/VatHelper';
+import type { FixedNumber } from 'ethers';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
 const useIlks = (provider: EthereumProvider) =>
   usePromiseFactory(
-    useCallback(async () => new ChainLogHelper(provider).ilkRegistry().then((ilkRegistry) => ilkRegistry.list()), [provider]),
+    useCallback(async () => {
+      const chainLog = new ChainLogHelper(provider);
+      const [ilkRegistry, vat, spot, jug] = await Promise.all([
+        chainLog.ilkRegistry(),
+        chainLog.vat(),
+        chainLog.spot(),
+        chainLog.jug(),
+      ]);
+      const list = await ilkRegistry.list();
+      return Promise.all(
+        list.map(async (ilk) => {
+          const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await Promise.all([
+            ilkRegistry.info(ilk),
+            vat.getIlkStatus(ilk),
+            spot.getLiquidationRatio(ilk),
+            jug.getStabilityFee(ilk),
+          ]);
+          return {
+            ilk,
+            ilkInfo,
+            ilkStatus,
+            liquidationRatio,
+            stabilityFee,
+          };
+        }),
+      );
+    }, [provider]),
   )[0];
+
+type RenderRowProps = {
+  field: string;
+  value: FixedNumber;
+  unit: string;
+};
+
+const RenderRow: FC<RenderRowProps> = ({ field, value, unit }) => (
+  <TableRow>
+    <TableCell sx={{ px: 0, py: 1, border: 'none', fontWeight: 600 }}>{field}</TableCell>
+    <TableCell align="right" sx={{ px: 0, py: 1, border: 'none' }}>{`${value} ${unit}`}</TableCell>
+  </TableRow>
+);
 
 type RenderIlkProps = {
   ilk: IlkType;
+  ilkInfo: IlkInfo;
+  ilkStatus: IlkStatus;
+  liquidationRatio: FixedNumber;
+  stabilityFee: FixedNumber;
 };
 
-const RenderIlk: FC<RenderIlkProps> = ({ ilk }) => {
+const RenderIlk: FC<RenderIlkProps> = ({ ilk, ilkInfo, ilkStatus, liquidationRatio, stabilityFee }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
+  const { t: terms } = useTranslation('common', { keyPrefix: 'terms' });
+  const { t: units } = useTranslation('common', { keyPrefix: 'units' });
 
+  const liquidationRatioPercent = useMemo(() => liquidationRatio.mulUnsafe(CENT.toFormat(UnitFormats.RAY)), [liquidationRatio]);
+  const curPrice = useMemo(() => ilkStatus.price.mulUnsafe(liquidationRatio), [ilkStatus.price, liquidationRatio]);
+
+  const annualFee = useMemo(() => getAnnualFee(stabilityFee), [stabilityFee]);
+  const totalIssued = useMemo(() => getTotalIssued(ilkStatus), [ilkStatus]);
   return (
-    <Grid item xs={6}>
+    <Grid item xs={12} md={6} lg={4}>
       <Card>
-        <CardHeader title={ilk.inString} />
+        <CardContent>
+          <Typography variant="h5" component="div">
+            {ilk.inString}
+          </Typography>
+          <Typography sx={{ mb: 1.5 }} color="text.secondary">
+            {ilkInfo.name}
+          </Typography>
+          <TableContainer>
+            <Table>
+              <TableBody>
+                <RenderRow field={t('currentPrice', { collateral: ilkInfo.symbol })} value={curPrice} unit={units('jpy')} />
+                <RenderRow field={terms('liqRatio')} value={liquidationRatioPercent} unit="%" />
+                <RenderRow field={terms('annualFee')} value={annualFee} unit="%" />
+                <RenderRow field={terms('totalIssued')} value={totalIssued} unit={units('stableToken')} />
+                <RenderRow field={terms('maxLiquidity')} value={ilkStatus.debtCeiling} unit={units('stableToken')} />
+                <RenderRow field={terms('debtFloor')} value={ilkStatus.debtFloor} unit={units('stableToken')} />
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
         <CardActions>
           <Link href={`/ilks/${ilk.inString}`} passHref>
             <Button endIcon={<ArrowForwardIcon />} style={{ justifyContent: 'start' }} fullWidth>
-              {t('openDesc', { ilk: ilk.inString })}
+              {t('openDesc')}
             </Button>
           </Link>
         </CardActions>
@@ -43,7 +132,7 @@ const RenderIlk: FC<RenderIlkProps> = ({ ilk }) => {
 };
 
 type ContentProps = {
-  ilks: IlkType[] | undefined;
+  ilks: RenderIlkProps[] | undefined;
 };
 
 const Content: FC<ContentProps> = ({ ilks }) => {
@@ -67,8 +156,15 @@ const Content: FC<ContentProps> = ({ ilks }) => {
 
   return (
     <Grid container spacing={4}>
-      {ilks.map((ilk) => (
-        <RenderIlk key={ilk.inString} ilk={ilk} />
+      {ilks.map(({ ilk, ilkInfo, ilkStatus, liquidationRatio, stabilityFee }) => (
+        <RenderIlk
+          key={ilk.inString}
+          ilk={ilk}
+          ilkInfo={ilkInfo}
+          ilkStatus={ilkStatus}
+          liquidationRatio={liquidationRatio}
+          stabilityFee={stabilityFee}
+        />
       ))}
     </Grid>
   );

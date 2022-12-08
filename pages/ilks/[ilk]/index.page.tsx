@@ -140,7 +140,7 @@ const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
 
   return (
     <Card elevation={0}>
-      <CardHeader title={t('openDesc', { ilk: ilkType.inString })} />
+      <CardHeader title={t('openLabel', { ilk: ilkType.inString })} />
       <CardContent>
         <Content provider={provider} ilkType={ilkType} />
       </CardContent>

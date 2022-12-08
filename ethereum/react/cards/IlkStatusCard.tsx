@@ -1,9 +1,8 @@
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
-import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo } from 'react';
 
-import { pow, UnitFormats, INT_FORMAT, YEAR_IN_SECONDS, CENT } from 'ethereum/helpers/math';
+import { UnitFormats, CENT, getAnnualFee, getTotalIssued } from 'ethereum/helpers/math';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
 import BNText from './BNText';
@@ -12,6 +11,7 @@ import type IlkType from 'ethereum/IlkType';
 import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
+import type { FixedNumber } from 'ethers';
 import type { FC } from 'react';
 
 export type IlkStatusCardProps = {
@@ -44,18 +44,9 @@ const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidation
   const { t } = useTranslation('common', { keyPrefix: 'cards.ilk' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
 
-  const totalIssue = useMemo(
-    () => ilkStatus.normalizedDebt.toFormat(UnitFormats.RAY).mulUnsafe(ilkStatus.debtMultiplier),
-    [ilkStatus.debtMultiplier, ilkStatus.normalizedDebt],
-  );
+  const totalIssue = useMemo(() => getTotalIssued(ilkStatus), [ilkStatus]);
   const curPrice = useMemo(() => ilkStatus.price.mulUnsafe(liquidationRatio), [ilkStatus.price, liquidationRatio]);
-  const annualFee = useMemo(
-    () =>
-      pow(stabilityFee, YEAR_IN_SECONDS)
-        .subUnsafe(FixedNumber.fromString('1', INT_FORMAT).toFormat(UnitFormats.RAY))
-        .mulUnsafe(CENT.toFormat(UnitFormats.RAY)),
-    [stabilityFee],
-  );
+  const annualFee = useMemo(() => getAnnualFee(stabilityFee), [stabilityFee]);
 
   const liquidationRatioPercent = useMemo(() => liquidationRatio.mulUnsafe(CENT.toFormat(UnitFormats.RAY)), [liquidationRatio]);
 
