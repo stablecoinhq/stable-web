@@ -5,7 +5,7 @@ import { useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import useEthereumProvider from 'ethereum/react/useEthereumProvider';
-import { DisplayProvider } from 'store/DisplayProvider';
+import { NumericDisplayProvider } from 'store/NumericDisplayProvider';
 import 'styles/globals.scss';
 
 import nextI18NextConfig from '../next-i18next.config';
@@ -85,7 +85,7 @@ const MyApp = (appProps: AppProps) => {
 
   return (
     <ThemeProvider theme={theme}>
-      <DisplayProvider>
+      <NumericDisplayProvider>
         <Header externalProvider={external} provider={provider} />
         {external && provider ? (
           // eslint-disable-next-line react/jsx-props-no-spreading
@@ -93,7 +93,7 @@ const MyApp = (appProps: AppProps) => {
         ) : (
           <WithoutEthereum externalProvider={external} provider={provider} />
         )}
-      </DisplayProvider>
+      </NumericDisplayProvider>
     </ThemeProvider>
   );
 };

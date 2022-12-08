@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useCallback } from 'react';
 
 import MetaMaskButton from 'ethereum/react/MetaMaskButton';
-import { useDisplayContext } from 'store/DisplayProvider';
+import { useNumericDisplayContext } from 'store/NumericDisplayProvider';
 
 import LanguagePicker from './LanguagePicker';
 
@@ -13,10 +13,13 @@ import type { WithNullableEthereum } from 'types/next';
 
 const Header: FC<WithNullableEthereum> = ({ externalProvider, provider }) => {
   const { t } = useTranslation('common', { keyPrefix: 'site' });
-  const { unit, toggleDisplayUnit } = useDisplayContext();
-  const onToggle: ChangeEventHandler<HTMLInputElement> = useCallback(() => {
-    toggleDisplayUnit();
-  }, [toggleDisplayUnit]);
+  const { displayMode, toggleDisplay } = useNumericDisplayContext();
+  const onToggle: ChangeEventHandler<HTMLInputElement> = useCallback(
+    (event) => {
+      toggleDisplay(event.target.checked);
+    },
+    [toggleDisplay],
+  );
   return (
     <AppBar position="static">
       <Toolbar>
@@ -26,7 +29,7 @@ const Header: FC<WithNullableEthereum> = ({ externalProvider, provider }) => {
           </Typography>
         </Link>
         <FormControlLabel
-          control={<Switch checked={unit === 'detailed'} onChange={onToggle} name="unit" color="default" />}
+          control={<Switch checked={displayMode === 'detailed'} onChange={onToggle} name="unit" color="default" />}
           label="詳細表示"
         />
         <LanguagePicker sx={{ mr: 2 }} />

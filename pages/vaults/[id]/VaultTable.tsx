@@ -5,7 +5,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Vault from 'ethereum/Vault';
-import { useDisplayContext } from 'store/DisplayProvider';
+import { useNumericDisplayContext } from 'store/NumericDisplayProvider';
 
 import type {
   GridColDef,
@@ -104,7 +104,7 @@ const makeColumns = (translations: ColumnTranaslations): GridColDef[] => {
 const VaultTable: FC<{ cdps: CDP[] }> = ({ cdps }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.vault' });
   const { t: terms } = useTranslation('common', { keyPrefix: 'terms' });
-  const { display } = useDisplayContext();
+  const { format } = useNumericDisplayContext();
   const rows = useMemo(
     () =>
       cdps.map((cdp) => {
@@ -112,15 +112,15 @@ const VaultTable: FC<{ cdps: CDP[] }> = ({ cdps }) => {
         return {
           id: parseInt(id.toString(), 10),
           collateralType: ilk.inString,
-          collateralizationRatio: display(
+          collateralizationRatio: format(
             Vault.getCollateralizationRatio(urnStatus.lockedBalance, urnStatus.debt, liquidationRatio, ilkStatus),
           ),
-          collateralLocked: [display(urnStatus.lockedBalance), ilk.currencySymbol],
-          debt: display(Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier)),
+          collateralLocked: [format(urnStatus.lockedBalance), ilk.currencySymbol],
+          debt: format(Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier)),
           manage: id,
         };
       }),
-    [cdps, display],
+    [cdps, format],
   );
   const columns = useMemo(() => {
     const translations: ColumnTranaslations = {
