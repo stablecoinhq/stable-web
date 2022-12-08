@@ -8,6 +8,21 @@ import type { IlkStatus } from './contracts/VatHelper';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 
+const roundUp = (num: FixedNumber, decimals: number): FixedNumber => {
+  const comps = num.toString().split('.');
+  if (comps.length === 1) {
+    comps.push('0');
+  }
+  if (comps[1]!.length <= decimals) {
+    return num;
+  }
+
+  const factor = FixedNumber.from(`1${'0'.repeat(decimals)}`, num.format);
+  const bump = FixedNumber.from('1', num.format);
+
+  return num.mulUnsafe(factor).addUnsafe(bump).floor().divUnsafe(factor);
+};
+
 export default class Vault {
   readonly ilkInfo: IlkInfo;
   private readonly cdpId: FixedNumber;
@@ -113,13 +128,13 @@ export default class Vault {
   }
 
   // Urn debt = Vat.urn.art * Vat.ilk.rate
-  // 有効小数点をトークンに合わせているため、厳密な値ではない。あくまで表示用
+  // 負債をDAIトークンに換算するために繰り上げを行なっている。
+  // 四捨五入などで繰り下げると、全額返済を行なう際に問題が生じる
   static getDebt(urnDebt: FixedNumber, debtMultiplier: FixedNumber) {
     const calcFormat = getBiggestDecimalsFormat(urnDebt.format, debtMultiplier.format);
-    return urnDebt
-      .toFormat(calcFormat)
-      .mulUnsafe(debtMultiplier.toFormat(calcFormat))
-      .round(UnitFormats.WAD.decimals)
-      .toFormat(UnitFormats.WAD);
+    return roundUp(
+      urnDebt.toFormat(calcFormat).mulUnsafe(debtMultiplier.toFormat(calcFormat)),
+      UnitFormats.WAD.decimals,
+    ).toFormat(UnitFormats.WAD);
   }
 }

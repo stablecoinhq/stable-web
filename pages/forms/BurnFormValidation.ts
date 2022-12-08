@@ -1,3 +1,4 @@
+import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
 
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
@@ -80,11 +81,7 @@ export class BurnFormValidation {
   // 有効小数点18桁にしてから計算する
   static isOverRepaying(debt: FixedNumber, daiToRepay: FixedNumber, debtMultiplier: FixedNumber): boolean {
     // ここのroundは繰上げだから大丈夫
-    const normalizedDebt = debtMultiplier
-      .toFormat(format)
-      .mulUnsafe(debt.toFormat(format))
-      .round(UnitFormats.WAD.decimals)
-      .toFormat(UnitFormats.WAD);
+    const normalizedDebt = Vault.getDebt(debt, debtMultiplier);
     return normalizedDebt.subUnsafe(daiToRepay.toFormat(UnitFormats.WAD)).isNegative();
   }
 

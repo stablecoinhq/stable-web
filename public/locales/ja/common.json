@@ -19,7 +19,7 @@
       "colRatio": "$t(terms.colRatio)",
       "colRatioDesc": "担保率は、担保として提供されるトークンの価値と$t(units.stableToken)の負債残高の比率です。",
       "debt": "負債",
-      "debtDesc": "$t(terms.vault_one)が負っている$t(terms.stableToken)の負債です。",
+      "debtDesc": "$t(terms.vault_one)が負っている$t(units.stableToken)の負債です。",
       "freeCollateral": "ロックされていない担保",
       "freeCollateralDesc": "Vaultコントラクトにロックされているが、担保として利用されていない通貨です。",
       "lockedCollateral": "ロックされている担保",
@@ -35,6 +35,7 @@
     "burn": {
       "redeemAmount": "返済する$t(units.stableToken)の数量",
       "freeAmount": "引き出す{{gem}}の数量",
+      "repayAll": "全額返済する",
       "error": {
         "insufficientBalance": "残高不足です",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
