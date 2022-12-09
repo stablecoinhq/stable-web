@@ -16,10 +16,10 @@ import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
-import BurnController from './BurnController';
-import MintController from './MintController';
+import BurnFormController from './BurnFormController';
+import MintFormController from './MintFormController';
 
-import type { TabValue } from './ControllerTypes';
+import type { TabValue } from './FormLayout';
 import type CDPManagerHelper from 'ethereum/contracts/CDPManagerHelper';
 import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type { CDP } from 'ethereum/contracts/GetCDPsHelper';
@@ -85,7 +85,6 @@ const Controller: FC<ControllerProps> = ({
   address,
 }) => {
   const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
-  // ここで状態を初期化する
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback(
     (_, value) => {
       setSelectedTab(value);
@@ -106,7 +105,7 @@ const Controller: FC<ControllerProps> = ({
     switch (selectedTab) {
       case 'mint':
         return (
-          <MintController
+          <MintFormController
             ilkInfo={vault.ilkInfo}
             ilkStatus={ilkStatus}
             urnStatus={urnStatus}
@@ -123,7 +122,7 @@ const Controller: FC<ControllerProps> = ({
         );
       case 'burn':
         return (
-          <BurnController
+          <BurnFormController
             ilkInfo={vault.ilkInfo}
             burn={burn}
             liquidationRatio={liquidationRatio}
