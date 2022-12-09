@@ -13,10 +13,15 @@ import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { FC } from 'react';
 
+export type ValidValue = {
+  value: FixedNumber;
+  isValid: boolean;
+};
+
 export type CurrentVaultStatus = {
-  collateralizationRatio: FixedNumber;
-  collateralAmount: FixedNumber;
-  debt: FixedNumber;
+  collateralizationRatio: ValidValue;
+  collateralAmount: ValidValue;
+  debt: ValidValue;
 };
 
 export type VaultStatusCardProps = {
@@ -58,20 +63,23 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
             value={lockedBalance}
             tooltipText={t('lockedCollateralDesc')}
             unit={ilkInfo.symbol}
-            helperText={renderHelperText(current?.collateralAmount)}
+            helperText={renderHelperText(current?.collateralAmount.value)}
+            error={current?.collateralAmount.isValid}
           />
           <BNText
             label={t('debt')}
             value={debt}
             tooltipText={t('debtDesc')}
             unit={units('stableToken')}
-            helperText={renderHelperText(current?.debt)}
+            helperText={renderHelperText(current?.debt.value)}
+            error={current?.debt.isValid}
           />
           <BNText
             label={t('colRatio')}
             value={collateralizationRatio}
             unit="%"
-            helperText={renderHelperText(current?.collateralizationRatio)}
+            helperText={renderHelperText(current?.collateralizationRatio.value)}
+            error={current?.collateralizationRatio.isValid}
           />
         </Grid>
       </CardContent>

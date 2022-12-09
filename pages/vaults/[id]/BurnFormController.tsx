@@ -4,6 +4,7 @@ import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import BurnForm from 'pages/forms/BurnForm';
+import { BurnFormValidation } from 'pages/forms/BurnFormValidation';
 
 import FormLayout from './FormLayout';
 
@@ -78,7 +79,7 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
     if (daiAmount && collateralAmount) {
       // Vat.urn.art * Var.urn.rate - daiAmount
       const currentCollateralAmount = urnStatus.lockedBalance.subUnsafe(collateralAmount);
-      const currentDebt = Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier).subUnsafe(daiAmount);
+      const currentDebt = BurnFormValidation.getCurrentDebt(daiAmount, urnStatus.debt, ilkStatus.debtMultiplier);
       const normalizedDebt = urnStatus.debt
         .toFormat(formats)
         .subUnsafe(daiAmount.toFormat(formats).divUnsafe(ilkStatus.debtMultiplier.toFormat(formats)));
@@ -89,9 +90,25 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         ilkStatus,
       );
       return {
-        debt: currentDebt,
-        collateralizationRatio,
-        collateralAmount: currentCollateralAmount,
+        debt: {
+          value: currentDebt,
+          isValid:
+            BurnFormValidation.isBelowDebtFloor(currentDebt, ilkStatus.debtFloor) ||
+            BurnFormValidation.isOverRepaying(urnStatus.debt, daiAmount, ilkStatus.debtMultiplier),
+        },
+        collateralizationRatio: {
+          value: collateralizationRatio,
+          isValid: BurnFormValidation.isCollateralizationRatioTooLow(
+            urnStatus.lockedBalance,
+            collateralAmount,
+            currentDebt,
+            ilkStatus.price,
+          ),
+        },
+        collateralAmount: {
+          value: currentCollateralAmount,
+          isValid: BurnFormValidation.isInvalidCollateralFreeAmount(urnStatus.lockedBalance, collateralAmount),
+        },
       };
     }
   }, [colText, daiText, ilkInfo.gem.format, ilkStatus, liquidationRatio, urnStatus.debt, urnStatus.lockedBalance]);

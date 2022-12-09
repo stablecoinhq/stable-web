@@ -103,7 +103,7 @@ export class BurnFormValidation {
     const currentCollateralInDai = price
       .toFormat(format)
       .mulUnsafe(lockedBalance.toFormat(format).subUnsafe(collateralToFree.toFormat(format)));
-    return currentCollateralInDai.subUnsafe(currentDebt).isNegative();
+    return currentCollateralInDai.subUnsafe(currentDebt.toFormat(format)).isNegative();
   }
 
   // 0 < currentDebt < debtFloor

@@ -11,13 +11,15 @@ export type BNTextProps = {
   unit: string;
   tooltipText?: ReactNode;
   helperText?: ReactNode;
+  error?: boolean;
 };
 
-const BNText: FC<BNTextProps> = ({ label, value, tooltipText, unit, helperText }) => {
+const BNText: FC<BNTextProps> = ({ label, value, tooltipText, unit, helperText, error }) => {
   const { format } = useNumericDisplayContext();
   const content = (
     <Grid item xs={6}>
       <TextField
+        error={error}
         variant="standard"
         fullWidth
         label={label}

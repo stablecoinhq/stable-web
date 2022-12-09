@@ -5,6 +5,7 @@ import Vault from 'ethereum/Vault';
 import { CENT, COL_RATIO_FORMAT } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import MintForm from 'pages/forms/MintForm';
+import { MintFormValidation } from 'pages/forms/MintFormValidation';
 
 import FormLayout from './FormLayout';
 
@@ -73,9 +74,23 @@ const MintFormController: FC<MintFormControllerProps> = ({
         ilkStatus,
       );
       return {
-        collateralizationRatio,
-        collateralAmount: currentCollateralAmount,
-        debt: Vault.getDebt(currentUrnDebt, ilkStatus.debtMultiplier),
+        collateralizationRatio: {
+          value: collateralizationRatio,
+          isValid: MintFormValidation.isBelowLiquidationRatio(
+            daiAmount,
+            urnStatus.debt,
+            urnStatus.lockedBalance,
+            collateralAmount,
+            ilkStatus,
+          ),
+        },
+        collateralAmount: { value: currentCollateralAmount, isValid: false },
+        debt: {
+          value: Vault.getDebt(currentUrnDebt, ilkStatus.debtMultiplier),
+          isValid:
+            MintFormValidation.isAboveDebtCeiling(daiAmount, ilkStatus) ||
+            MintFormValidation.isBelowDebtFloor(daiAmount, urnStatus.debt, ilkStatus),
+        },
       };
     }
   }, [amountText, ilkInfo.gem.format, ilkStatus, liquidationRatio, ratioText, urnStatus.debt, urnStatus.lockedBalance]);
