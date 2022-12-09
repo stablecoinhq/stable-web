@@ -1,14 +1,16 @@
+import { FixedFormat } from '@ethersproject/bignumber';
 import WarningIcon from '@mui/icons-material/Warning';
 import { Box, Button, Card, CardContent, CardHeader, CircularProgress, Stack, SvgIcon, Typography } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import IlkType from 'ethereum/IlkType';
 import Vault from 'ethereum/Vault';
-import { UnitFormats } from 'ethereum/helpers/math';
+import { CENT, COL_RATIO_FORMAT, UnitFormats } from 'ethereum/helpers/math';
+import { cutDecimals, pickNumbers } from 'ethereum/helpers/stringNumber';
 import { useChainLog } from 'ethereum/react/ContractHooks';
 import IlkStatusCard, { useIlkStatusCardProps } from 'ethereum/react/cards/IlkStatusCard';
 import WalletStatusCard from 'ethereum/react/cards/WalletStatusCard';
@@ -63,6 +65,21 @@ const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidati
     [chainLog, ilkInfo, ilkStatus, liquidationRatio, router],
   );
 
+  const [amountText, setAmountText] = useState('');
+  const [ratioText, setRatioText] = useState(() => {
+    const initialRatio = liquidationRatio
+      .toFormat(COL_RATIO_FORMAT)
+      .mulUnsafe(CENT.toFormat(COL_RATIO_FORMAT))
+      .toFormat(FixedFormat.from(0));
+    return initialRatio.toString();
+  });
+
+  const onAmountChange = useCallback(
+    (value: string) => setAmountText(cutDecimals(pickNumbers(value), ilkInfo.gem.format.decimals)),
+    [ilkInfo.gem.format.decimals],
+  );
+  const onRatioChange = useCallback((value: string) => setRatioText(cutDecimals(pickNumbers(value), 0)), []);
+
   return (
     <MintForm
       ilkInfo={ilkInfo}
@@ -73,6 +90,10 @@ const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidati
       balance={balance}
       debt={FixedNumber.fromString('0', UnitFormats.WAD)}
       lockedBalance={FixedNumber.fromString('0', UnitFormats.WAD)}
+      onAmountChange={onAmountChange}
+      onRatioChange={onRatioChange}
+      amountText={amountText}
+      ratioText={ratioText}
     />
   );
 };

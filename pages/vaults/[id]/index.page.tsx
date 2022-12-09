@@ -1,17 +1,5 @@
 import WarningIcon from '@mui/icons-material/Warning';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CircularProgress,
-  Stack,
-  SvgIcon,
-  Tab,
-  Tabs,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Card, CardContent, CardHeader, CircularProgress, Stack, SvgIcon, Typography } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
@@ -23,19 +11,19 @@ import { INT_FORMAT } from 'ethereum/helpers/math';
 import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import { useCDPManager, useChainLog, useProxyRegistry } from 'ethereum/react/ContractHooks';
 import IlkStatusCard, { useIlkStatusCardProps } from 'ethereum/react/cards/IlkStatusCard';
-import VaultStatusCard from 'ethereum/react/cards/VaultStatusCard';
-import WalletStatusCard from 'ethereum/react/cards/WalletStatusCard';
-import BurnForm from 'pages/forms/BurnForm';
-import MintForm from 'pages/forms/MintForm';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
+import BurnController from './BurnController';
+import MintController from './MintController';
+
+import type { TabValue } from './ControllerTypes';
 import type CDPManagerHelper from 'ethereum/contracts/CDPManagerHelper';
 import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type { CDP } from 'ethereum/contracts/GetCDPsHelper';
-import type { IlkStatus } from 'ethereum/contracts/VatHelper';
+import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { BurnFormProps } from 'pages/forms/BurnForm';
 import type { MintFormProps } from 'pages/forms/MintForm';
@@ -73,6 +61,7 @@ type ControllerProps = {
   chainLog: ChainLogHelper;
   vault: Vault;
   ilkStatus: IlkStatus;
+  urnStatus: UrnStatus;
   debt: FixedNumber;
   lockedBalance: FixedNumber;
   liquidationRatio: FixedNumber;
@@ -82,11 +71,10 @@ type ControllerProps = {
   updateAllBalance: () => void;
 };
 
-type TabValue = 'mint' | 'burn';
-
 const Controller: FC<ControllerProps> = ({
   chainLog,
   vault,
+  urnStatus,
   ilkStatus,
   liquidationRatio,
   updateAllBalance,
@@ -96,10 +84,8 @@ const Controller: FC<ControllerProps> = ({
   daiBalance,
   address,
 }) => {
-  const { t } = useTranslation('common', { keyPrefix: 'cards.wallet' });
-  const { t: terms } = useTranslation('common', { keyPrefix: 'terms' });
-  const { t: units } = useTranslation('common', { keyPrefix: 'units' });
   const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
+  // ここで状態を初期化する
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback(
     (_, value) => {
       setSelectedTab(value);
@@ -110,6 +96,7 @@ const Controller: FC<ControllerProps> = ({
     (amount, ratio) => vault.mint(chainLog, ilkStatus, liquidationRatio, amount, ratio).then(() => updateAllBalance()),
     [chainLog, ilkStatus, liquidationRatio, vault, updateAllBalance],
   );
+
   const burn: BurnFormProps['onBurn'] = useCallback(
     (dai, col) => vault.burn(chainLog, col, dai).then(() => updateAllBalance()),
     [chainLog, vault, updateAllBalance],
@@ -119,49 +106,55 @@ const Controller: FC<ControllerProps> = ({
     switch (selectedTab) {
       case 'mint':
         return (
-          <MintForm
+          <MintController
             ilkInfo={vault.ilkInfo}
             ilkStatus={ilkStatus}
-            buttonContent="Mint"
-            onMint={mint}
+            urnStatus={urnStatus}
+            mint={mint}
             liquidationRatio={liquidationRatio}
             balance={tokenBalance}
             lockedBalance={lockedBalance}
             debt={debt}
+            address={address}
+            buttonContent="Mint"
+            selectedTab={selectedTab}
+            onSelectTab={onSelectTab}
           />
         );
       case 'burn':
         return (
-          <BurnForm
+          <BurnController
             ilkInfo={vault.ilkInfo}
-            buttonContent="Burn"
-            onBurn={burn}
-            daiBalance={daiBalance}
+            burn={burn}
+            liquidationRatio={liquidationRatio}
+            urnStatus={urnStatus}
+            balance={daiBalance}
             lockedBalance={lockedBalance}
             debt={debt}
+            address={address}
             ilkStatus={ilkStatus}
+            selectedTab={selectedTab}
+            onSelectTab={onSelectTab}
           />
         );
     }
-  }, [burn, mint, selectedTab, vault, liquidationRatio, ilkStatus, tokenBalance, debt, lockedBalance, daiBalance]);
+  }, [
+    selectedTab,
+    vault.ilkInfo,
+    ilkStatus,
+    urnStatus,
+    mint,
+    liquidationRatio,
+    tokenBalance,
+    lockedBalance,
+    debt,
+    onSelectTab,
+    burn,
+    daiBalance,
+    address,
+  ]);
 
-  return (
-    <>
-      <WalletStatusCard
-        label={
-          selectedTab === 'mint' ? t('balance', { gem: vault.ilkInfo.symbol }) : t('balance', { gem: units('stableToken') })
-        }
-        balance={selectedTab === 'mint' ? tokenBalance : daiBalance}
-        unit={selectedTab === 'mint' ? vault.ilkInfo.symbol : 'DAI'}
-        address={address}
-      />
-      <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
-        <Tab label={terms('mint')} value="mint" />
-        <Tab label={terms('burn')} value="burn" />
-      </Tabs>
-      <TabContent />
-    </>
-  );
+  return <TabContent />;
 };
 
 type ContentProps = {
@@ -215,15 +208,10 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
         liquidationRatio={ilkCard.liquidationRatio}
         stabilityFee={ilkCard.stabilityFee}
       />
-      <VaultStatusCard
-        urnStatus={urnStatus}
-        ilkStatus={ilkCard.ilkStatus}
-        liquidationRatio={ilkCard.liquidationRatio}
-        ilkInfo={ilkCard.ilkInfo}
-      />
       <Controller
         chainLog={chainLog}
         vault={vault}
+        urnStatus={urnStatus}
         ilkStatus={ilkCard.ilkStatus}
         liquidationRatio={ilkCard.liquidationRatio}
         updateAllBalance={updateAllBalance}

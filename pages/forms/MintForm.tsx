@@ -1,4 +1,3 @@
-import { FixedFormat } from '@ethersproject/bignumber';
 import { Button, Card, Grid, InputAdornment, TextField, CircularProgress, FormHelperText } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
@@ -6,7 +5,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import Vault from 'ethereum/Vault';
 import { UnitFormats, CENT, COL_RATIO_FORMAT } from 'ethereum/helpers/math';
-import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
+import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import BNText from 'ethereum/react/cards/BNText';
 
 import { MintFormValidation, MintError } from './MintFormValidation';
@@ -24,6 +23,10 @@ export type MintFormProps = {
   lockedBalance: FixedNumber;
   debt: FixedNumber;
   onMint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
+  onAmountChange: (s: string) => void;
+  onRatioChange: (s: string) => void;
+  amountText: string;
+  ratioText: string;
 };
 
 const MintForm: FC<MintFormProps> = ({
@@ -35,24 +38,19 @@ const MintForm: FC<MintFormProps> = ({
   balance,
   lockedBalance,
   debt,
+  onAmountChange,
+  onRatioChange,
+  amountText,
+  ratioText,
 }) => {
   const { price } = ilkStatus;
   const { t } = useTranslation('common', { keyPrefix: 'forms.mint' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
 
-  const [amountText, setAmountText] = useState('');
   const collateralAmount = useMemo(
     () => toFixedNumberOrUndefined(amountText, ilkInfo.gem.format),
     [amountText, ilkInfo.gem.format],
   );
-  // input as percentage, return as ratio
-  const [ratioText, setRatioText] = useState(() => {
-    const initialRatio = liquidationRatio
-      .toFormat(COL_RATIO_FORMAT)
-      .mulUnsafe(CENT.toFormat(COL_RATIO_FORMAT))
-      .toFormat(FixedFormat.from(0));
-    return initialRatio.toString();
-  });
   const ratio = useMemo(
     () => toFixedNumberOrUndefined(ratioText, COL_RATIO_FORMAT)?.divUnsafe(CENT.toFormat(COL_RATIO_FORMAT)),
     [ratioText],
@@ -65,13 +63,13 @@ const MintForm: FC<MintFormProps> = ({
   }, [collateralAmount, ratio, liquidationRatio, price]);
   const [minting, setMinting] = useState(false);
 
-  const onAmountChange: ChangeEventHandler<HTMLInputElement> = useCallback(
-    (event) => setAmountText(cutDecimals(pickNumbers(event.target.value), ilkInfo.gem.format.decimals)),
-    [ilkInfo.gem.format.decimals],
+  const handleAmountChange: ChangeEventHandler<HTMLInputElement> = useCallback(
+    (event) => onAmountChange(event.target.value),
+    [onAmountChange],
   );
-  const onRatioChange: ChangeEventHandler<HTMLInputElement> = useCallback(
-    (event) => setRatioText(cutDecimals(pickNumbers(event.target.value), 0)),
-    [],
+  const handleRatioChange: ChangeEventHandler<HTMLInputElement> = useCallback(
+    (event) => onRatioChange(event.target.value),
+    [onRatioChange],
   );
 
   const onButtonClick: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
@@ -113,7 +111,7 @@ const MintForm: FC<MintFormProps> = ({
             fullWidth
             label={t('lockAmount', { gem: ilkInfo.name })}
             value={amountText}
-            onChange={onAmountChange}
+            onChange={handleAmountChange}
             InputProps={{
               endAdornment: <InputAdornment position="end">{ilkInfo.symbol}</InputAdornment>,
             }}
@@ -124,7 +122,7 @@ const MintForm: FC<MintFormProps> = ({
             fullWidth
             label={t('colRatio')}
             value={ratioText}
-            onChange={onRatioChange}
+            onChange={handleRatioChange}
             InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
           />
         </Grid>
