@@ -1,8 +1,9 @@
 import { FixedFormat } from '@ethersproject/bignumber';
 import { useCallback, useMemo, useState } from 'react';
 
+import Vault from 'ethereum/Vault';
 import { CENT, COL_RATIO_FORMAT } from 'ethereum/helpers/math';
-import { cutDecimals, pickNumbers } from 'ethereum/helpers/stringNumber';
+import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import MintForm from 'pages/forms/MintForm';
 
 import FormLayout from './FormLayout';
@@ -10,6 +11,7 @@ import FormLayout from './FormLayout';
 import type { TabValue } from './FormLayout';
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
+import type { CurrentVaultStatus } from 'ethereum/react/cards/VaultStatusCard';
 import type { FixedNumber } from 'ethers';
 import type { FC, ReactNode } from 'react';
 
@@ -57,6 +59,27 @@ const MintFormController: FC<MintFormControllerProps> = ({
   );
   const onRatioChange = useCallback((value: string) => setRatioText(cutDecimals(pickNumbers(value), 0)), []);
 
+  const current: CurrentVaultStatus | undefined = useMemo(() => {
+    const ratio = toFixedNumberOrUndefined(ratioText, COL_RATIO_FORMAT)?.divUnsafe(CENT.toFormat(COL_RATIO_FORMAT));
+    const collateralAmount = toFixedNumberOrUndefined(amountText, ilkInfo.gem.format);
+    if (ratio && collateralAmount) {
+      const daiAmount = Vault.getDaiAmount(collateralAmount, ratio, liquidationRatio, ilkStatus.price);
+      const currentCollateralAmount = urnStatus.lockedBalance.addUnsafe(collateralAmount);
+      const currentUrnDebt = urnStatus.debt.addUnsafe(daiAmount);
+      const collateralizationRatio = Vault.getCollateralizationRatio(
+        currentCollateralAmount,
+        currentUrnDebt,
+        liquidationRatio,
+        ilkStatus,
+      );
+      return {
+        collateralizationRatio,
+        collateralAmount: currentCollateralAmount,
+        debt: Vault.getDebt(currentUrnDebt, ilkStatus.debtMultiplier),
+      };
+    }
+  }, [amountText, ilkInfo.gem.format, ilkStatus, liquidationRatio, ratioText, urnStatus.debt, urnStatus.lockedBalance]);
+
   const mintForm: ReactNode = useMemo(
     () => (
       <MintForm
@@ -93,6 +116,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
     <FormLayout
       ilkInfo={ilkInfo}
       ilkStatus={ilkStatus}
+      current={current}
       liquidationRatio={liquidationRatio}
       balance={balance}
       address={address}

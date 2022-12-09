@@ -6,6 +6,7 @@ import WalletStatusCard from 'ethereum/react/cards/WalletStatusCard';
 
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
+import type { CurrentVaultStatus } from 'ethereum/react/cards/VaultStatusCard';
 import type { FixedNumber } from 'ethers';
 import type { FC, ReactNode } from 'react';
 
@@ -20,6 +21,7 @@ type FormLayoutProps = {
   address: string;
   selectedTab: TabValue;
   onSelectTab: (_: unknown, value: TabValue) => void;
+  current?: CurrentVaultStatus;
   form: ReactNode;
 };
 
@@ -33,18 +35,25 @@ const FormLayout: FC<FormLayoutProps> = ({
   onSelectTab,
   address,
   form,
+  current,
 }) => {
   const { t: terms } = useTranslation('common', { keyPrefix: 'terms' });
   const { t } = useTranslation('common', { keyPrefix: 'cards.wallet' });
 
   return (
     <>
-      <VaultStatusCard urnStatus={urnStatus} ilkStatus={ilkStatus} liquidationRatio={liquidationRatio} ilkInfo={ilkInfo} />
       <WalletStatusCard
         label={t('balance', { gem: ilkInfo.symbol })}
         balance={balance}
         unit={ilkInfo.symbol}
         address={address}
+      />
+      <VaultStatusCard
+        urnStatus={urnStatus}
+        ilkStatus={ilkStatus}
+        liquidationRatio={liquidationRatio}
+        ilkInfo={ilkInfo}
+        current={current}
       />
       <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
         <Tab label={terms('mint')} value="mint" />

@@ -1,17 +1,21 @@
 import { useCallback, useMemo, useState } from 'react';
 
+import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
-import { cutDecimals, pickNumbers } from 'ethereum/helpers/stringNumber';
+import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import BurnForm from 'pages/forms/BurnForm';
 
 import FormLayout from './FormLayout';
 
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
+import type { CurrentVaultStatus } from 'ethereum/react/cards/VaultStatusCard';
 import type { FixedNumber } from 'ethers';
 import type { FC } from 'react';
 
 type TabValue = 'mint' | 'burn';
+
+const formats = UnitFormats.RAD;
 
 type BurnFormControllerProps = {
   ilkInfo: IlkInfo;
@@ -67,10 +71,36 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
     ),
     [balance, burn, colText, daiText, debt, ilkInfo, ilkStatus, lockedBalance, onAmountChange, onColChange],
   );
+
+  const current: CurrentVaultStatus | undefined = useMemo(() => {
+    const daiAmount = toFixedNumberOrUndefined(daiText, UnitFormats.WAD);
+    const collateralAmount = toFixedNumberOrUndefined(colText, ilkInfo.gem.format);
+    if (daiAmount && collateralAmount) {
+      // Vat.urn.art * Var.urn.rate - daiAmount
+      const currentCollateralAmount = urnStatus.lockedBalance.subUnsafe(collateralAmount);
+      const currentDebt = Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier).subUnsafe(daiAmount);
+      const normalizedDebt = urnStatus.debt
+        .toFormat(formats)
+        .subUnsafe(daiAmount.toFormat(formats).divUnsafe(ilkStatus.debtMultiplier.toFormat(formats)));
+      const collateralizationRatio = Vault.getCollateralizationRatio(
+        currentCollateralAmount,
+        normalizedDebt,
+        liquidationRatio,
+        ilkStatus,
+      );
+      return {
+        debt: currentDebt,
+        collateralizationRatio,
+        collateralAmount: currentCollateralAmount,
+      };
+    }
+  }, [colText, daiText, ilkInfo.gem.format, ilkStatus, liquidationRatio, urnStatus.debt, urnStatus.lockedBalance]);
+
   return (
     <FormLayout
       ilkInfo={ilkInfo}
       ilkStatus={ilkStatus}
+      current={current}
       liquidationRatio={liquidationRatio}
       balance={balance}
       address={address}
