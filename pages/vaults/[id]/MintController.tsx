@@ -1,19 +1,17 @@
 import { FixedFormat } from '@ethersproject/bignumber';
-import { Tab, Tabs } from '@mui/material';
-import { useCallback, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useCallback, useMemo, useState } from 'react';
 
 import { CENT, COL_RATIO_FORMAT } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers } from 'ethereum/helpers/stringNumber';
-import VaultStatusCard from 'ethereum/react/cards/VaultStatusCard';
-import WalletStatusCard from 'ethereum/react/cards/WalletStatusCard';
 import MintForm from 'pages/forms/MintForm';
+
+import ControllerLayout from './ControllerLayout';
 
 import type { TabValue } from './ControllerTypes';
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { FixedNumber } from 'ethers';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 
 type MintControllerProps = {
   ilkInfo: IlkInfo;
@@ -25,8 +23,8 @@ type MintControllerProps = {
   debt: FixedNumber;
   address: string;
   buttonContent: string;
-  selectedTab?: TabValue;
-  onSelectTab?: (_: unknown, value: TabValue) => void;
+  selectedTab: TabValue;
+  onSelectTab: (_: unknown, value: TabValue) => void;
   mint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
 };
 
@@ -44,9 +42,6 @@ const MintController: FC<MintControllerProps> = ({
   address,
   buttonContent,
 }) => {
-  const { t: terms } = useTranslation('common', { keyPrefix: 'terms' });
-  const { t } = useTranslation('common', { keyPrefix: 'cards.wallet' });
-
   const [amountText, setAmountText] = useState('');
   const [ratioText, setRatioText] = useState(() => {
     const initialRatio = liquidationRatio
@@ -62,21 +57,8 @@ const MintController: FC<MintControllerProps> = ({
   );
   const onRatioChange = useCallback((value: string) => setRatioText(cutDecimals(pickNumbers(value), 0)), []);
 
-  return (
-    <>
-      <VaultStatusCard urnStatus={urnStatus} ilkStatus={ilkStatus} liquidationRatio={liquidationRatio} ilkInfo={ilkInfo} />
-      <WalletStatusCard
-        label={t('balance', { gem: ilkInfo.symbol })}
-        balance={balance}
-        unit={ilkInfo.symbol}
-        address={address}
-      />
-      {selectedTab && onSelectTab && (
-        <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
-          <Tab label={terms('mint')} value="mint" />
-          <Tab label={terms('burn')} value="burn" />
-        </Tabs>
-      )}
+  const mintForm: ReactNode = useMemo(
+    () => (
       <MintForm
         ilkInfo={ilkInfo}
         ilkStatus={ilkStatus}
@@ -91,7 +73,34 @@ const MintController: FC<MintControllerProps> = ({
         amountText={amountText}
         ratioText={ratioText}
       />
-    </>
+    ),
+    [
+      amountText,
+      balance,
+      buttonContent,
+      debt,
+      ilkInfo,
+      ilkStatus,
+      liquidationRatio,
+      lockedBalance,
+      mint,
+      onAmountChange,
+      onRatioChange,
+      ratioText,
+    ],
+  );
+  return (
+    <ControllerLayout
+      ilkInfo={ilkInfo}
+      ilkStatus={ilkStatus}
+      liquidationRatio={liquidationRatio}
+      balance={balance}
+      address={address}
+      urnStatus={urnStatus}
+      selectedTab={selectedTab}
+      onSelectTab={onSelectTab}
+      form={mintForm}
+    />
   );
 };
 export default MintController;
