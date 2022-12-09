@@ -23,6 +23,7 @@ import { useCallback, useMemo } from 'react';
 import ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import { CENT, getAnnualFee, getTotalIssued, UnitFormats } from 'ethereum/helpers/math';
 import usePromiseFactory from 'pages/usePromiseFactory';
+import { useNumericDisplayContext } from 'store/NumericDisplayProvider';
 
 import getTranslationProps from '../getTranslationProps';
 
@@ -74,7 +75,7 @@ type RenderRowProps = {
 const RenderRow: FC<RenderRowProps> = ({ field, value, unit }) => (
   <TableRow>
     <TableCell sx={{ px: 0, py: 1, border: 'none', fontWeight: 600 }}>{field}</TableCell>
-    <TableCell align="right" sx={{ px: 0, py: 1, border: 'none' }}>{`${value} ${unit}`}</TableCell>
+    <TableCell align="right" sx={{ px: 0, py: 1, border: 'none', maxWidth: 150 }}>{`${value} ${unit}`}</TableCell>
   </TableRow>
 );
 
@@ -90,6 +91,7 @@ const RenderIlk: FC<RenderIlkProps> = ({ ilk, ilkInfo, ilkStatus, liquidationRat
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
   const { t: terms } = useTranslation('common', { keyPrefix: 'terms' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
+  const { format } = useNumericDisplayContext();
 
   const liquidationRatioPercent = useMemo(() => liquidationRatio.mulUnsafe(CENT.toFormat(UnitFormats.RAY)), [liquidationRatio]);
   const curPrice = useMemo(() => ilkStatus.price.mulUnsafe(liquidationRatio), [ilkStatus.price, liquidationRatio]);
@@ -109,12 +111,16 @@ const RenderIlk: FC<RenderIlkProps> = ({ ilk, ilkInfo, ilkStatus, liquidationRat
           <TableContainer>
             <Table>
               <TableBody>
-                <RenderRow field={t('currentPrice', { collateral: ilkInfo.symbol })} value={curPrice} unit={units('jpy')} />
-                <RenderRow field={terms('liqRatio')} value={liquidationRatioPercent} unit="%" />
-                <RenderRow field={terms('annualFee')} value={annualFee} unit="%" />
-                <RenderRow field={terms('totalIssued')} value={totalIssued} unit={units('stableToken')} />
-                <RenderRow field={terms('maxLiquidity')} value={ilkStatus.debtCeiling} unit={units('stableToken')} />
-                <RenderRow field={terms('debtFloor')} value={ilkStatus.debtFloor} unit={units('stableToken')} />
+                <RenderRow
+                  field={t('currentPrice', { collateral: ilkInfo.symbol })}
+                  value={format(curPrice)}
+                  unit={units('jpy')}
+                />
+                <RenderRow field={terms('liqRatio')} value={format(liquidationRatioPercent)} unit="%" />
+                <RenderRow field={terms('annualFee')} value={format(annualFee)} unit="%" />
+                <RenderRow field={terms('totalIssued')} value={format(totalIssued)} unit={units('stableToken')} />
+                <RenderRow field={terms('maxLiquidity')} value={format(ilkStatus.debtCeiling)} unit={units('stableToken')} />
+                <RenderRow field={terms('debtFloor')} value={format(ilkStatus.debtFloor)} unit={units('stableToken')} />
               </TableBody>
             </Table>
           </TableContainer>

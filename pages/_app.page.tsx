@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import useEthereumProvider from 'ethereum/react/useEthereumProvider';
+import { NumericDisplayProvider } from 'store/NumericDisplayProvider';
 import 'styles/globals.scss';
 
 import nextI18NextConfig from '../next-i18next.config';
@@ -84,13 +85,15 @@ const MyApp = (appProps: AppProps) => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Header externalProvider={external} provider={provider} />
-      {external && provider ? (
-        // eslint-disable-next-line react/jsx-props-no-spreading
-        <RenderWithEthereum externalProvider={external} provider={provider} {...appProps} />
-      ) : (
-        <WithoutEthereum externalProvider={external} provider={provider} />
-      )}
+      <NumericDisplayProvider>
+        <Header externalProvider={external} provider={provider} />
+        {external && provider ? (
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          <RenderWithEthereum externalProvider={external} provider={provider} {...appProps} />
+        ) : (
+          <WithoutEthereum externalProvider={external} provider={provider} />
+        )}
+      </NumericDisplayProvider>
     </ThemeProvider>
   );
 };
