@@ -141,6 +141,8 @@ const MintForm: FC<MintFormProps> = ({
           >
             {minting ? <CircularProgress /> : buttonContent}
           </Button>
+        </Grid>
+        <Grid item xs={12}>
           {formErrors.map((e) => (
             <FormHelperText key={e} error>
               {showErrorMessage(e)}

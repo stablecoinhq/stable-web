@@ -1,3 +1,4 @@
+import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
 
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
@@ -69,14 +70,12 @@ export class MintFormValidation {
   ): boolean {
     const { debtMultiplier, price } = ilkStatus;
     if (!(debt.isZero() && daiAmount.isZero())) {
-      const currentDebt = debtMultiplier
-        .toFormat(format)
-        .mulUnsafe(debt.toFormat(format).addUnsafe(daiAmount.toFormat(format)));
+      const currentDebt = Vault.getDebt(debt, debtMultiplier, daiAmount);
       const currentSurplus = price
         .toFormat(format)
         .mulUnsafe(lockedBalance.toFormat(format).addUnsafe(collateralAmount.toFormat(format)));
 
-      return currentSurplus.subUnsafe(currentDebt).isNegative();
+      return currentSurplus.subUnsafe(currentDebt.toFormat(format)).isNegative();
     }
     return false;
   }

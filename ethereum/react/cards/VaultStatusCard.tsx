@@ -51,7 +51,8 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
     return Vault.getCollateralizationRatio(lockedBalance, urnDebt, liquidationRatio, ilkStatus);
   }, [ilkStatus, lockedBalance, urnDebt, liquidationRatio]);
 
-  const renderHelperText = (num?: FixedNumber) => num && <span style={{ fontSize: 15 }}>{format(num).toString()}</span>;
+  const renderHelperText = (num?: FixedNumber) =>
+    num ? <span style={{ fontSize: 13 }}>{format(num).toString()}</span> : <span style={{ fontSize: 13 }}>&nbsp;</span>;
   return (
     <Card>
       <CardHeader title={t('title')} subheader={urn} />

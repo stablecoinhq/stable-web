@@ -2,7 +2,7 @@ import { FixedFormat } from '@ethersproject/bignumber';
 import { useCallback, useMemo, useState } from 'react';
 
 import Vault from 'ethereum/Vault';
-import { CENT, COL_RATIO_FORMAT } from 'ethereum/helpers/math';
+import { CENT, COL_RATIO_FORMAT, UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import MintForm from 'pages/forms/MintForm';
 import { MintFormValidation } from 'pages/forms/MintFormValidation';
@@ -63,13 +63,15 @@ const MintFormController: FC<MintFormControllerProps> = ({
   const current: CurrentVaultStatus | undefined = useMemo(() => {
     const ratio = toFixedNumberOrUndefined(ratioText, COL_RATIO_FORMAT)?.divUnsafe(CENT.toFormat(COL_RATIO_FORMAT));
     const collateralAmount = toFixedNumberOrUndefined(amountText, ilkInfo.gem.format);
+    const format = UnitFormats.RAD;
     if (ratio && collateralAmount) {
       const daiAmount = Vault.getDaiAmount(collateralAmount, ratio, liquidationRatio, ilkStatus.price);
       const currentCollateralAmount = urnStatus.lockedBalance.addUnsafe(collateralAmount);
-      const currentUrnDebt = urnStatus.debt.addUnsafe(daiAmount);
+      const currentUrnDebt = Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier, daiAmount);
+
       const collateralizationRatio = Vault.getCollateralizationRatio(
         currentCollateralAmount,
-        currentUrnDebt,
+        currentUrnDebt.toFormat(format).divUnsafe(ilkStatus.debtMultiplier.toFormat(format)),
         liquidationRatio,
         ilkStatus,
       );
@@ -86,7 +88,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
         },
         collateralAmount: { value: currentCollateralAmount, isValid: false },
         debt: {
-          value: Vault.getDebt(currentUrnDebt, ilkStatus.debtMultiplier),
+          value: currentUrnDebt,
           isValid:
             MintFormValidation.isAboveDebtCeiling(daiAmount, ilkStatus) ||
             MintFormValidation.isBelowDebtFloor(daiAmount, urnStatus.debt, ilkStatus),

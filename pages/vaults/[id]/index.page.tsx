@@ -84,6 +84,8 @@ const Controller: FC<ControllerProps> = ({
   daiBalance,
   address,
 }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'terms' });
+
   const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback(
     (_, value) => {
@@ -115,7 +117,7 @@ const Controller: FC<ControllerProps> = ({
             lockedBalance={lockedBalance}
             debt={debt}
             address={address}
-            buttonContent="Mint"
+            buttonContent={t('mint')}
             selectedTab={selectedTab}
             onSelectTab={onSelectTab}
           />
@@ -130,6 +132,7 @@ const Controller: FC<ControllerProps> = ({
             balance={daiBalance}
             lockedBalance={lockedBalance}
             debt={debt}
+            buttonContent={t('burn')}
             address={address}
             ilkStatus={ilkStatus}
             selectedTab={selectedTab}
@@ -147,10 +150,11 @@ const Controller: FC<ControllerProps> = ({
     tokenBalance,
     lockedBalance,
     debt,
+    address,
+    t,
     onSelectTab,
     burn,
     daiBalance,
-    address,
   ]);
 
   return <TabContent />;
