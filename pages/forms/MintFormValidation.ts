@@ -86,14 +86,11 @@ export class MintFormValidation {
    */
   static isBelowDebtFloor(daiAmount: FixedNumber, debt: FixedNumber, ilkStatus: IlkStatus): boolean {
     const { debtMultiplier, debtFloor } = ilkStatus;
-    return (
-      !daiAmount.isZero() &&
-      debtMultiplier
-        .toFormat(format)
-        .mulUnsafe(debt.toFormat(format).addUnsafe(daiAmount.toFormat(format)))
-        .subUnsafe(debtFloor.toFormat(format))
-        .isNegative()
-    );
+    return debtMultiplier
+      .toFormat(format)
+      .mulUnsafe(debt.toFormat(format).addUnsafe(daiAmount.toFormat(format)))
+      .subUnsafe(debtFloor.toFormat(format))
+      .isNegative();
   }
 
   /**
