@@ -25,7 +25,7 @@
       "lockedCollateral": "ロックされている担保",
       "lockedCollateralDesc": "$t(terms.vault_one)にロックされている担保の数量です。",
       "title": "$t(terms.vault_one)の状態",
-      "liquidationPrice": "精算価格",
+      "liquidationPrice": "$t(terms.liquidationPrice)",
       "liquidationPriceDesc": "{{collateral}}の価格がこれ以上下がった場合、このVaultは精算されます。"
     },
     "wallet": {
@@ -144,6 +144,7 @@
     "totalIssued": "総発行量",
     "maxLiquidity": "負債額上限",
     "liqRatio": "最低担保率",
+    "liquidationPrice": "精算価格",
     "savings": "JSR"
   },
   "units": {
