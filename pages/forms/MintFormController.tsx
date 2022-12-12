@@ -22,12 +22,10 @@ type MintFormControllerProps = {
   urnStatus: UrnStatus;
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
-  lockedBalance: FixedNumber;
-  debt: FixedNumber;
   address: string;
   buttonContent: string;
-  selectedTab: TabValue;
-  onSelectTab: (_: unknown, value: TabValue) => void;
+  selectedTab?: TabValue;
+  onSelectTab?: (_: unknown, value: TabValue) => void;
   mint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
 };
 
@@ -36,8 +34,6 @@ const MintFormController: FC<MintFormControllerProps> = ({
   ilkStatus,
   liquidationRatio,
   balance,
-  lockedBalance,
-  debt,
   urnStatus,
   selectedTab,
   onSelectTab,
@@ -106,8 +102,8 @@ const MintFormController: FC<MintFormControllerProps> = ({
         onMint={mint}
         liquidationRatio={liquidationRatio}
         balance={balance}
-        lockedBalance={lockedBalance}
-        debt={debt}
+        lockedBalance={urnStatus.lockedBalance}
+        debt={urnStatus.debt}
         onAmountChange={onAmountChange}
         onRatioChange={onRatioChange}
         amountText={amountText}
@@ -118,15 +114,15 @@ const MintFormController: FC<MintFormControllerProps> = ({
       amountText,
       balance,
       buttonContent,
-      debt,
       ilkInfo,
       ilkStatus,
       liquidationRatio,
-      lockedBalance,
       mint,
       onAmountChange,
       onRatioChange,
       ratioText,
+      urnStatus.debt,
+      urnStatus.lockedBalance,
     ],
   );
   return (

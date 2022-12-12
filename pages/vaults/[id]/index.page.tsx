@@ -16,10 +16,10 @@ import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
 import usePromiseFactory from 'pages/usePromiseFactory';
 
-import BurnFormController from './BurnFormController';
-import MintFormController from './MintFormController';
+import BurnFormController from '../../forms/BurnFormController';
+import MintFormController from '../../forms/MintFormController';
 
-import type { TabValue } from './FormLayout';
+import type { TabValue } from '../../forms/FormLayout';
 import type CDPManagerHelper from 'ethereum/contracts/CDPManagerHelper';
 import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type { CDP } from 'ethereum/contracts/GetCDPsHelper';
@@ -114,8 +114,6 @@ const Controller: FC<ControllerProps> = ({
             mint={mint}
             liquidationRatio={liquidationRatio}
             balance={tokenBalance}
-            lockedBalance={lockedBalance}
-            debt={debt}
             address={address}
             buttonContent={t('mint')}
             selectedTab={selectedTab}

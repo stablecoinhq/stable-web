@@ -19,8 +19,8 @@ type FormLayoutProps = {
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
   address: string;
-  selectedTab: TabValue;
-  onSelectTab: (_: unknown, value: TabValue) => void;
+  selectedTab?: TabValue;
+  onSelectTab?: (_: unknown, value: TabValue) => void;
   current?: CurrentVaultStatus;
   form: ReactNode;
 };
@@ -55,10 +55,12 @@ const FormLayout: FC<FormLayoutProps> = ({
         ilkInfo={ilkInfo}
         current={current}
       />
-      <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
-        <Tab label={terms('mint')} value="mint" />
-        <Tab label={terms('burn')} value="burn" />
-      </Tabs>
+      {selectedTab && onSelectTab && (
+        <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
+          <Tab label={terms('mint')} value="mint" />
+          <Tab label={terms('burn')} value="burn" />
+        </Tabs>
+      )}
       {form}
     </>
   );
