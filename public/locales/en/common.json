@@ -139,6 +139,7 @@
     "totalIssued": "Total Issued",
     "maxLiquidity": "Maximum Liquidity",
     "liqRatio": "Liquidation Ratio",
+    "liquidationPrice": "Liquidation Price",
     "savings": "JSR"
   },
   "units": {

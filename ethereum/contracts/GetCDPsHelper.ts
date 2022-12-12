@@ -36,15 +36,18 @@ export default class GetCDPsHelper {
 
   async getCDPs(proxy: DSProxy): Promise<CDP[]> {
     const [cdpIds, urns, ilks] = await this.contract.getCdpsDesc(this.manager.address, proxy.address);
+    const ilkTypes = Array.from(new Set(ilks)).map((i) => IlkType.fromBytes32(i));
+    const ilkStatusList = await Promise.all(ilkTypes.map(async (ilk) => ({ ilk, status: await this.vat.getIlkStatus(ilk) })));
+    const liquidationRatios = await Promise.all(
+      ilkTypes.map(async (ilk) => ({ ilk, lr: await this.spot.getLiquidationRatio(ilk) })),
+    );
     return Promise.all(
       cdpIds.map(async (cdpId, i) => {
         const urn = urns[i]!;
         const ilk = IlkType.fromBytes32(ilks[i]!);
-        const [urnStatus, ilkStatus, liquidationRatio] = await Promise.all([
-          this.vat.getUrnStatus(ilk, urn),
-          this.vat.getIlkStatus(ilk),
-          this.spot.getLiquidationRatio(ilk),
-        ]);
+        const [urnStatus] = await Promise.all([this.vat.getUrnStatus(ilk, urn)]);
+        const ilkStatus = ilkStatusList.filter((v) => v.ilk.inString === ilk.inString)[0]!.status;
+        const liquidationRatio = liquidationRatios.filter((v) => v.ilk.inString === ilk.inString)[0]!.lr;
 
         return {
           id: toFixedNumber(cdpId, INT_FORMAT),
