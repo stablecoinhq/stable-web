@@ -92,7 +92,7 @@ export class BurnFormValidation {
     return lockedBalance.toFormat(format).subUnsafe(collateralToFree.toFormat(format)).isNegative();
   }
 
-  // currentDebt < Vat.ilk.spot * (Vat.urn.ink + collateralAmount)
+  // currentDebt !== 0 && currentDebt < Vat.ilk.spot * (Vat.urn.ink + collateralAmount)
   static isCollateralizationRatioTooLow(
     lockedBalance: FixedNumber,
     collateralToFree: FixedNumber,

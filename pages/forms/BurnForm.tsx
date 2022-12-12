@@ -64,6 +64,20 @@ const BurnForm: FC<BurnFormProps> = ({
     });
   }, [colAmount, daiAmount, onBurn]);
 
+  const isInvalidRepayAmount = useMemo(
+    () => daiAmount && BurnFormValidation.isInsufficientBalance(daiBalance, daiAmount),
+    [daiAmount, daiBalance],
+  );
+  const isOverRepaying = useMemo(
+    () => daiAmount && colAmount && BurnFormValidation.isOverRepaying(debt, daiAmount, ilkStatus.debtMultiplier),
+    [colAmount, daiAmount, debt, ilkStatus.debtMultiplier],
+  );
+
+  const isInvalidCollateralFreeAmount = useMemo(
+    () => colAmount && daiAmount && BurnFormValidation.isInvalidCollateralFreeAmount(lockedBalance, colAmount),
+    [colAmount, daiAmount, lockedBalance],
+  );
+
   const formErrors: BurnError[] = useMemo(() => {
     if (colAmount && daiAmount) {
       return BurnFormValidation.canBurn(daiBalance, lockedBalance, debt, colAmount, daiAmount, ilkStatus);
@@ -92,6 +106,7 @@ const BurnForm: FC<BurnFormProps> = ({
             fullWidth
             label={t('redeemAmount')}
             value={daiText}
+            error={isInvalidRepayAmount || isOverRepaying}
             onChange={handleDaiChange}
             InputProps={{
               endAdornment: <InputAdornment position="end">DAI</InputAdornment>,
@@ -101,6 +116,7 @@ const BurnForm: FC<BurnFormProps> = ({
         <Grid item xs={6}>
           <TextField
             fullWidth
+            error={isInvalidCollateralFreeAmount}
             label={t('freeAmount', { gem: ilkInfo.name })}
             value={colText}
             onChange={handleColChange}

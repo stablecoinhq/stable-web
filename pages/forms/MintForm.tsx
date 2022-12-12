@@ -90,6 +90,18 @@ const MintForm: FC<MintFormProps> = ({
     return [];
   }, [balance, collateralAmount, ilkStatus, debt, lockedBalance, ratio, daiAmount]);
 
+  const isInsufficientBalance = useMemo(
+    () => collateralAmount && MintFormValidation.isInsufficientBalance(balance, collateralAmount),
+    [balance, collateralAmount],
+  );
+
+  const isCollateralizationRatioTooLow = useMemo(
+    () =>
+      collateralAmount &&
+      MintFormValidation.isBelowLiquidationRatio(daiAmount, debt, lockedBalance, collateralAmount, ilkStatus),
+    [collateralAmount, daiAmount, debt, ilkStatus, lockedBalance],
+  );
+
   const showErrorMessage = (e: MintError) => {
     switch (e) {
       case MintError.insufficientBalance:
@@ -110,6 +122,7 @@ const MintForm: FC<MintFormProps> = ({
           <TextField
             fullWidth
             label={t('lockAmount', { gem: ilkInfo.name })}
+            error={isInsufficientBalance}
             value={amountText}
             onChange={handleAmountChange}
             InputProps={{
@@ -122,6 +135,7 @@ const MintForm: FC<MintFormProps> = ({
             fullWidth
             label={t('colRatio')}
             value={ratioText}
+            error={isCollateralizationRatioTooLow}
             onChange={handleRatioChange}
             InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
           />

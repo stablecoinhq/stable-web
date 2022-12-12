@@ -53,8 +53,11 @@ export const round = (num: FixedNumber, decimals: number) => {
   }
   const nonZeroAt = comps[1]!.search(/[^0]/);
   // 整数部が0、かつ有効小数点が指定された桁数より小さい場合には、有効小数点を変更する
+  // decimalで四捨五入した結果0になる場合には変更する
   const roundAt =
-    nonZeroAt > decimals && comps[0]! === '0' ? Math.min(nonZeroAt + ROUND_AT_DETAIL, num.format.decimals) : decimals;
+    (nonZeroAt > decimals && comps[0]! === '0') || num.round(decimals).isZero()
+      ? Math.min(nonZeroAt + ROUND_AT_DETAIL, num.format.decimals)
+      : decimals;
   return num.round(roundAt);
 };
 

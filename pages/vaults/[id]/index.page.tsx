@@ -62,8 +62,6 @@ type ControllerProps = {
   vault: Vault;
   ilkStatus: IlkStatus;
   urnStatus: UrnStatus;
-  debt: FixedNumber;
-  lockedBalance: FixedNumber;
   liquidationRatio: FixedNumber;
   tokenBalance: FixedNumber;
   daiBalance: FixedNumber;
@@ -78,8 +76,6 @@ const Controller: FC<ControllerProps> = ({
   ilkStatus,
   liquidationRatio,
   updateAllBalance,
-  debt,
-  lockedBalance,
   tokenBalance,
   daiBalance,
   address,
@@ -128,8 +124,6 @@ const Controller: FC<ControllerProps> = ({
             liquidationRatio={liquidationRatio}
             urnStatus={urnStatus}
             balance={daiBalance}
-            lockedBalance={lockedBalance}
-            debt={debt}
             buttonContent={t('burn')}
             address={address}
             ilkStatus={ilkStatus}
@@ -146,8 +140,6 @@ const Controller: FC<ControllerProps> = ({
     mint,
     liquidationRatio,
     tokenBalance,
-    lockedBalance,
-    debt,
     address,
     t,
     onSelectTab,
@@ -216,8 +208,6 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
         ilkStatus={ilkCard.ilkStatus}
         liquidationRatio={ilkCard.liquidationRatio}
         updateAllBalance={updateAllBalance}
-        debt={urnStatus.debt}
-        lockedBalance={urnStatus.lockedBalance}
         tokenBalance={tokenBalance}
         daiBalance={daiBalance}
         address={address}

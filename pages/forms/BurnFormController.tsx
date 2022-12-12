@@ -24,9 +24,7 @@ type BurnFormControllerProps = {
   urnStatus: UrnStatus;
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
-  lockedBalance: FixedNumber;
   buttonContent: string;
-  debt: FixedNumber;
   address: string;
   selectedTab: TabValue;
   onSelectTab: (_: unknown, value: TabValue) => void;
@@ -38,9 +36,7 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
   ilkStatus,
   liquidationRatio,
   balance,
-  lockedBalance,
   buttonContent,
-  debt,
   urnStatus,
   address,
   selectedTab,
@@ -54,7 +50,10 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
     (value: string) => setDaiText(cutDecimals(pickNumbers(value), UnitFormats.WAD.decimals)),
     [],
   );
-  const onColChange = useCallback((value: string) => setColText(cutDecimals(pickNumbers(value), 0)), []);
+  const onColChange = useCallback(
+    (value: string) => setColText(cutDecimals(pickNumbers(value), ilkInfo.gem.format.decimals)),
+    [ilkInfo.gem.format.decimals],
+  );
 
   const burnForm = useMemo(
     () => (
@@ -63,8 +62,8 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         ilkStatus={ilkStatus}
         buttonContent={buttonContent}
         daiBalance={balance}
-        lockedBalance={lockedBalance}
-        debt={debt}
+        lockedBalance={urnStatus.lockedBalance}
+        debt={urnStatus.debt}
         onBurn={burn}
         onAmountChange={onAmountChange}
         onColChange={onColChange}
@@ -72,7 +71,19 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         colText={colText}
       />
     ),
-    [balance, burn, buttonContent, colText, daiText, debt, ilkInfo, ilkStatus, lockedBalance, onAmountChange, onColChange],
+    [
+      balance,
+      burn,
+      buttonContent,
+      colText,
+      daiText,
+      ilkInfo,
+      ilkStatus,
+      onAmountChange,
+      onColChange,
+      urnStatus.debt,
+      urnStatus.lockedBalance,
+    ],
   );
 
   const current: CurrentVaultStatus | undefined = useMemo(() => {
@@ -104,12 +115,13 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         },
         collateralizationRatio: {
           value: collateralizationRatio,
-          isValid: BurnFormValidation.isCollateralizationRatioTooLow(
-            urnStatus.lockedBalance,
-            collateralAmount,
-            currentDebt,
-            ilkStatus.price,
-          ),
+          isValid:
+            BurnFormValidation.isCollateralizationRatioTooLow(
+              urnStatus.lockedBalance,
+              collateralAmount,
+              currentDebt,
+              ilkStatus.price,
+            ) || collateralizationRatio.isNegative(),
         },
         collateralAmount: {
           value: currentCollateralAmount,

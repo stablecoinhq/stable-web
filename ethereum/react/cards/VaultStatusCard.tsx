@@ -51,8 +51,12 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
     return Vault.getCollateralizationRatio(lockedBalance, urnDebt, liquidationRatio, ilkStatus);
   }, [ilkStatus, lockedBalance, urnDebt, liquidationRatio]);
 
-  const renderHelperText = (num?: FixedNumber) =>
-    num ? <span style={{ fontSize: 13 }}>{format(num).toString()}</span> : <span style={{ fontSize: 13 }}>&nbsp;</span>;
+  const renderHelperText = (num: FixedNumber | undefined, unit: string) =>
+    num ? (
+      <span style={{ fontSize: 13 }}>{`${format(num).toString()} ${unit}`}</span>
+    ) : (
+      <span style={{ fontSize: 13 }}>&nbsp;</span>
+    );
   return (
     <Card>
       <CardHeader title={t('title')} subheader={urn} />
@@ -64,7 +68,7 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
             value={lockedBalance}
             tooltipText={t('lockedCollateralDesc')}
             unit={ilkInfo.symbol}
-            helperText={renderHelperText(current?.collateralAmount.value)}
+            helperText={renderHelperText(current?.collateralAmount.value, ilkInfo.symbol)}
             error={current?.collateralAmount.isValid}
           />
           <BNText
@@ -72,14 +76,14 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
             value={debt}
             tooltipText={t('debtDesc')}
             unit={units('stableToken')}
-            helperText={renderHelperText(current?.debt.value)}
+            helperText={renderHelperText(current?.debt.value, units('stableToken'))}
             error={current?.debt.isValid}
           />
           <BNText
             label={t('colRatio')}
             value={collateralizationRatio}
             unit="%"
-            helperText={renderHelperText(current?.collateralizationRatio.value)}
+            helperText={renderHelperText(current?.collateralizationRatio.value, '%')}
             error={current?.collateralizationRatio.isValid}
           />
         </Grid>
