@@ -112,14 +112,20 @@
         "description": "$t(terms.savings)にて現在預けられている$t(unit.stableToken)の残高",
         "form": {
           "label": "預け入れる$t(units.stableToken)の数量",
-          "submit": "預け入れる"
+          "submit": "預け入れる",
+          "errors": {
+            "insufficientBalance": "残高不足です"
+          }
         }
       },
       "withdraw": {
         "form": {
           "label": "引き出す$t(units.stableToken)の数量",
-          "withdrawAll": "全額引き出し",
-          "submit": "引き出す"
+          "withdrawAll": "預金から全額引き出し",
+          "submit": "引き出す",
+          "errors": {
+            "insufficientWithdrawAmount": "預金引き出し額が無効な値です"
+          }
         }
       }
     }

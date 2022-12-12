@@ -8,6 +8,7 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
+  FormHelperText,
 } from '@mui/material';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,7 +30,7 @@ type WithdrawState = 'withdraw' | 'withdrawAll' | 'neutral';
 
 const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onWithdraw, onWithdrawAll }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn.withdraw.form' });
-  const { t: error } = useTranslation('common', { keyPrefix: 'forms.mint.error' });
+  const { t: error } = useTranslation('common', { keyPrefix: 'pages.earn.withdraw.form.errors' });
 
   const [amountText, setAmountText] = useState('');
 
@@ -91,19 +92,11 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
   return (
     <Card component="form" elevation={0}>
       <Grid container padding={2} spacing={2}>
-        <Grid item xs={6}>
-          <FormGroup>
-            <FormControlLabel
-              disabled={withdrawState === 'withdraw' || withdrawing}
-              control={<Checkbox checked={withdrawState === 'withdrawAll'} onChange={onWithdrawAllChange} />}
-              label={t('withdrawAll')}
-            />
-          </FormGroup>
+        <Grid item xs={12} lg={6}>
           <TextField
             fullWidth
             label={t('label')}
             error={isInvalidWithdrawAmount}
-            helperText={isInvalidWithdrawAmount && error('insufficientBalance')}
             value={amountText}
             disabled={withdrawState === 'withdrawAll' || withdrawing}
             onChange={onAmountChange}
@@ -111,8 +104,14 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
               endAdornment: <InputAdornment position="end">DAI</InputAdornment>,
             }}
           />
+          <FormGroup>
+            <FormControlLabel
+              disabled={withdrawState === 'withdraw' || withdrawing}
+              control={<Checkbox checked={withdrawState === 'withdrawAll'} onChange={onWithdrawAllChange} />}
+              label={t('withdrawAll')}
+            />
+          </FormGroup>
         </Grid>
-
         <Grid item xs={12}>
           <Button
             variant="contained"
@@ -122,6 +121,9 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
           >
             {withdrawing ? <CircularProgress /> : buttonContent}
           </Button>
+        </Grid>
+        <Grid item xs={12}>
+          {isInvalidWithdrawAmount && <FormHelperText error>{error('insufficientWithdrawAmount')}</FormHelperText>}
         </Grid>
       </Grid>
     </Card>

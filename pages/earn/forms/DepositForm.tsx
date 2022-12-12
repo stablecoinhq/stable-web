@@ -1,4 +1,4 @@
-import { Button, Card, Grid, InputAdornment, TextField, CircularProgress } from '@mui/material';
+import { Button, Card, Grid, InputAdornment, TextField, CircularProgress, FormHelperText } from '@mui/material';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -16,7 +16,7 @@ export type DepositFormProps = {
 
 const DepositForm: FC<DepositFormProps> = ({ onDeposit, buttonContent, balance }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn.deposit.form' });
-  const { t: error } = useTranslation('common', { keyPrefix: 'forms.mint.error' });
+  const { t: error } = useTranslation('common', { keyPrefix: 'pages.earn.deposit.form.errors' });
 
   const [amountText, setAmountText] = useState('');
   const formats = UnitFormats.WAD;
@@ -44,13 +44,12 @@ const DepositForm: FC<DepositFormProps> = ({ onDeposit, buttonContent, balance }
   return (
     <Card component="form" elevation={0}>
       <Grid container padding={2} spacing={2}>
-        <Grid item xs={6}>
+        <Grid item xs={12} lg={6}>
           <TextField
             fullWidth
             label={t('label')}
             value={amountText}
             error={isInvalidDepositAmount}
-            helperText={isInvalidDepositAmount && error('insufficientBalance')}
             onChange={onAmountChange}
             InputProps={{
               endAdornment: <InputAdornment position="end">DAI</InputAdornment>,
@@ -67,6 +66,9 @@ const DepositForm: FC<DepositFormProps> = ({ onDeposit, buttonContent, balance }
           >
             {depositing ? <CircularProgress /> : buttonContent}
           </Button>
+        </Grid>
+        <Grid item xs={12}>
+          {isInvalidDepositAmount && <FormHelperText error>{error('insufficientBalance')}</FormHelperText>}
         </Grid>
       </Grid>
     </Card>
