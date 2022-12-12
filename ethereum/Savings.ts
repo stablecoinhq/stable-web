@@ -4,8 +4,9 @@ import { INT_FORMAT, pow, toFixedNumber, UnitFormats, YEAR_IN_SECONDS } from 'et
 
 import type ChainLogHelper from './contracts/ChainLogHelper';
 import type ERC20Helper from './contracts/ERC20Helper';
+import type ProxyActionsDsrHelper from './contracts/ProxyActionsDsrHelper';
 import type ProxyRegistryHelper from './contracts/ProxyRegistryHelper';
-import type { DaiJoin, Pot } from 'generated/types';
+import type { DaiJoin, DSProxy, Pot } from 'generated/types';
 
 export default class Savings {
   chainLog: ChainLogHelper;
@@ -13,22 +14,48 @@ export default class Savings {
   pot: Pot;
   dai: ERC20Helper;
   proxyRegistry: ProxyRegistryHelper;
+  actions?: ProxyActionsDsrHelper;
+  proxy?: DSProxy;
 
-  constructor(chainLog: ChainLogHelper, daiJoin: DaiJoin, pot: Pot, dai: ERC20Helper, proxyRegistry: ProxyRegistryHelper) {
+  constructor(
+    chainLog: ChainLogHelper,
+    daiJoin: DaiJoin,
+    pot: Pot,
+    dai: ERC20Helper,
+    proxyRegistry: ProxyRegistryHelper,
+    proxy?: DSProxy,
+    actions?: ProxyActionsDsrHelper,
+  ) {
     this.chainLog = chainLog;
     this.daiJoin = daiJoin;
     this.pot = pot;
     this.dai = dai;
     this.proxyRegistry = proxyRegistry;
+    this.actions = actions;
+    this.proxy = proxy;
+  }
+
+  private async getProxyAndActions() {
+    if (this.proxy && this.actions) {
+      return {
+        proxy: this.proxy,
+        actions: this.actions,
+      };
+    }
+    const proxy = await this.proxyRegistry.ensureDSProxy();
+    const actions = await this.chainLog.proxyActionsDsr(proxy);
+    return {
+      proxy,
+      actions,
+    };
   }
 
   async deposit(daiAmount: FixedNumber) {
     if (daiAmount.isNegative() || daiAmount.isZero()) {
       return;
     }
-    const proxy = await this.proxyRegistry.ensureDSProxy();
+    const { proxy, actions } = await this.getProxyAndActions();
     await this.dai.ensureAllowance(proxy.address, daiAmount, 3);
-    const actions = await this.chainLog.proxyActionsDsr(proxy);
     const tx = await actions.deposit(this.daiJoin, this.pot, daiAmount);
     await tx.wait();
   }
@@ -37,24 +64,21 @@ export default class Savings {
     if (daiAmount.isNegative() || daiAmount.isZero()) {
       return;
     }
-    const proxy = await this.proxyRegistry.ensureDSProxy();
-    const actions = await this.chainLog.proxyActionsDsr(proxy);
+    const { actions } = await this.getProxyAndActions();
     const tx = await actions.withdraw(this.daiJoin, this.pot, daiAmount);
     await tx.wait();
   }
 
   async withdrawAll() {
-    const proxy = await this.proxyRegistry.ensureDSProxy();
-    const actions = await this.chainLog.proxyActionsDsr(proxy);
+    const { actions } = await this.getProxyAndActions();
     const tx = await actions.withdrawAll(this.daiJoin, this.pot);
     await tx.wait();
   }
 
   async getDepositAmount() {
-    const proxy = await this.proxyRegistry.getDSProxy();
-    if (proxy) {
+    if (this.proxy) {
       const [pie, chi, rho, dsr] = await Promise.all([
-        this.pot.pie(proxy.address),
+        this.pot.pie(this.proxy.address),
         this.pot.chi(),
         this.pot.rho(),
         this.pot.dsr(),
@@ -73,7 +97,7 @@ export default class Savings {
         .round(18)
         .toFormat(UnitFormats.WAD);
       return {
-        address: proxy.address,
+        address: this.proxy.address,
         amount,
       };
     }
@@ -93,7 +117,10 @@ export default class Savings {
       chainLog.dai(),
       chainLog.proxyRegistry(),
     ]);
+    const proxy = await proxyRegistry.getDSProxy();
 
-    return new Savings(chainLog, daiJoin, pot, dai, proxyRegistry);
+    const actions = proxy ? await chainLog.proxyActionsDsr(proxy) : undefined;
+
+    return new Savings(chainLog, daiJoin, pot, dai, proxyRegistry, proxy, actions);
   }
 }
