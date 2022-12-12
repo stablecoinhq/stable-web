@@ -25,13 +25,11 @@ export default class ProxyRegistryHelper {
     });
   }
 
-  private createDSProxy() {
-    return this.contract['build()']()
-      .then(async (pendingTx) => {
-        await pendingTx.wait();
-        return getContractAddress(pendingTx);
-      })
-      .then((address) => DSProxy__factory.connect(address, this.provider.getSigner()));
+  private async createDSProxy() {
+    const pendingTx = await this.contract['build()']();
+    await pendingTx.wait(3);
+    const address = getContractAddress(pendingTx);
+    return DSProxy__factory.connect(address, this.provider.getSigner());
   }
 
   async ensureDSProxy() {

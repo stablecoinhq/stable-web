@@ -2,7 +2,7 @@
   "cards": {
     "ilk": {
       "annualFee": "年利",
-      "annualFeeDesc": "YenDAOプロトコルは、Vaultsから発生するDaiに対して安定化手数料を課しています。これは変動金利であり、リスク対策チームが提出した提案に応じて変更されます。",
+      "annualFeeDesc": "YenDAOプロトコルは、Vaultsから発生する$t(units.stableToken)に対して安定化手数料を課しています。これは変動金利であり、リスク対策チームが提出した提案に応じて変更されます。",
       "currentPrice": "1 {{collateral}}あたりの価格",
       "currentPriceDesc": "オラクルから取得した担保{{collateral}}の価格です。",
       "debtFloor": "負債額下限",
@@ -19,7 +19,7 @@
       "colRatio": "$t(terms.colRatio)",
       "colRatioDesc": "担保率は、担保として提供されるトークンの価値と$t(units.stableToken)の負債残高の比率です。",
       "debt": "負債",
-      "debtDesc": "$t(terms.vault_one)が負っている$t(terms.stableToken)の負債です。",
+      "debtDesc": "$t(terms.vault_one)が負っている$t(units.stableToken)の負債です。",
       "freeCollateral": "ロックされていない担保",
       "freeCollateralDesc": "Vaultコントラクトにロックされているが、担保として利用されていない通貨です。",
       "lockedCollateral": "ロックされている担保",
@@ -28,13 +28,20 @@
     },
     "wallet": {
       "title": "ウォレットの状態",
-      "balance": "{{gem}}の保有残高"
+      "balance": "{{gem}}の保有残高",
+      "description": "ウォレットが現在保有している$t(units.stableToken)の残高"
+    },
+    "savings": {
+      "title": "金利",
+      "annualSavingRate": "預金金利率",
+      "annualSavingRateDesc": "DSRにおける年間預金金利率"
     }
   },
   "forms": {
     "burn": {
       "redeemAmount": "返済する$t(units.stableToken)の数量",
       "freeAmount": "引き出す{{gem}}の数量",
+      "submit": "返済する",
       "error": {
         "insufficientBalance": "残高不足です",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
@@ -48,11 +55,11 @@
       "lockAmount": "担保に入れる{{gem}}の数量",
       "mintAmountLabel": "発行される$t(units.stableToken)の数量",
       "mintAmountTooltipText": "発行される$t(units.stableToken)sの数量",
+      "submit": "発行する",
       "error": {
         "insufficientBalance": "残高不足です",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
-        "debtTooLow": "$t(terms.vault_one)の負債額が下限値を下回っています。",
-        "issuingTooMuchCoins": "負債額が上限値を上回っています。"
+        "debtTooLow": "$t(terms.vault_one)の負債額が下限値を下回っています。"
       }
     }
   },
@@ -84,7 +91,7 @@
       "cardDesc": "$t(terms.vault_one)の新規作成や既存の$t(terms.vault_other)の操作",
       "cardTitle": "$t(terms.vault_other)管理",
       "listTitle": "$t(terms.vault_one)一覧",
-      "new": "新規$t(terms.vault_one)",
+      "new": "新規作成",
       "noVaults": "$t(terms.vault_other)がありません",
       "notFound": "指定された$t(terms.vault_one)が見つかりませんでした",
       "title": "{{ilk}} $t(terms.vault_one) ({{id}})",
@@ -93,6 +100,34 @@
       "lockedCollateral": "ロックされた担保",
       "debt": "負債",
       "manageVault": "管理"
+    },
+    "earn": {
+      "cardTitle": "利息を得る",
+      "cardDesc": "$t(terms.savings)に$t(units.stableToken)を預け入れて利息を得る",
+      "depositTab": "預け入れ",
+      "withdrawTab": "引き出し",
+      "deposit": {
+        "title": "預金状態",
+        "label": "預金残高",
+        "description": "$t(terms.savings)にて現在預けられている$t(unit.stableToken)の残高",
+        "form": {
+          "label": "預け入れる$t(units.stableToken)の数量",
+          "submit": "預け入れる",
+          "errors": {
+            "insufficientBalance": "残高不足です"
+          }
+        }
+      },
+      "withdraw": {
+        "form": {
+          "label": "引き出す$t(units.stableToken)の数量",
+          "withdrawAll": "預金から全額引き出し",
+          "submit": "引き出す",
+          "errors": {
+            "insufficientWithdrawAmount": "預金引き出し額が無効な値です"
+          }
+        }
+      }
     }
   },
   "terms": {
@@ -106,7 +141,8 @@
     "debtFloor": "負債額下限",
     "totalIssued": "総発行量",
     "maxLiquidity": "負債額上限",
-    "liqRatio": "最低担保率"
+    "liqRatio": "最低担保率",
+    "savings": "JSR"
   },
   "units": {
     "stableToken": "DAI",

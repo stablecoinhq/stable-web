@@ -39,6 +39,7 @@ const Home: NextPageWithEthereum = () => {
   return (
     <Grid container spacing={4}>
       <Item cardTitle={t('vault.cardTitle')} cardBody={t('vault.cardDesc')} buttonTitle={t('vault.listTitle')} href="/vaults" />
+      <Item cardTitle={t('earn.cardTitle')} cardBody={t('earn.cardDesc')} buttonTitle="Earn" href="/earn" />
     </Grid>
   );
 };

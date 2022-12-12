@@ -99,6 +99,7 @@ const Controller: FC<ControllerProps> = ({
   const { t } = useTranslation('common', { keyPrefix: 'cards.wallet' });
   const { t: terms } = useTranslation('common', { keyPrefix: 'terms' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
+  const { t: forms } = useTranslation('common', { keyPrefix: 'forms' });
   const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback(
     (_, value) => {
@@ -122,7 +123,7 @@ const Controller: FC<ControllerProps> = ({
           <MintForm
             ilkInfo={vault.ilkInfo}
             ilkStatus={ilkStatus}
-            buttonContent="Mint"
+            buttonContent={forms('mint.submit')}
             onMint={mint}
             liquidationRatio={liquidationRatio}
             balance={tokenBalance}
@@ -134,7 +135,7 @@ const Controller: FC<ControllerProps> = ({
         return (
           <BurnForm
             ilkInfo={vault.ilkInfo}
-            buttonContent="Burn"
+            buttonContent={forms('burn.submit')}
             onBurn={burn}
             daiBalance={daiBalance}
             lockedBalance={lockedBalance}
@@ -143,7 +144,7 @@ const Controller: FC<ControllerProps> = ({
           />
         );
     }
-  }, [burn, mint, selectedTab, vault, liquidationRatio, ilkStatus, tokenBalance, debt, lockedBalance, daiBalance]);
+  }, [burn, mint, selectedTab, vault, liquidationRatio, ilkStatus, tokenBalance, debt, lockedBalance, daiBalance, forms]);
 
   return (
     <>

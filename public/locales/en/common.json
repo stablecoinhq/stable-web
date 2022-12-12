@@ -28,7 +28,13 @@
     },
     "wallet": {
       "title": "Wallet status",
-      "balance": "Balance of {{gem}}"
+      "balance": "Balance of {{gem}}",
+      "description": "Amount of token that wallet currently holds"
+    },
+    "savings": {
+      "title": "Saving Rate",
+      "annualSavingRate": "Annual saving rate",
+      "annualSavingRateDesc": "Annual saving rate of the DSR"
     }
   },
   "forms": {
@@ -93,6 +99,28 @@
       "lockedCollateral": "Locked Collateral",
       "debt": "Debt",
       "manageVault": "Manage Vault"
+    },
+    "earn": {
+      "cardTitle": "Earn Savings",
+      "cardDesc": "Deposit your $t(terms.stableToken) to $t(terms.savings) and earn savings.",
+      "depositTab": "Deposit",
+      "withdrawTab": "Withdraw",
+      "deposit": {
+        "title": "Deposit Status",
+        "label": "Deposit Balance",
+        "description": "Amount of $t(terms.stableToken) currently being deposited at $t(terms.savings)",
+        "form": {
+          "label": "Amount of $t(terms.stableToken) to deposit",
+          "submit": "Deposit"
+        }
+      },
+      "withdraw": {
+        "form": {
+          "label": "Amount of $t(terms.stableToken) to withdraw",
+          "withdrawAll": "Withdraw all",
+          "submit": "Withdraw"
+        }
+      }
     }
   },
   "site": {
@@ -109,7 +137,8 @@
     "debtFloor": "Debt Floor",
     "totalIssued": "Total Issued",
     "maxLiquidity": "Maximum Liquidity",
-    "liqRatio": "Liquidation Ratio"
+    "liqRatio": "Liquidation Ratio",
+    "savings": "JSR"
   },
   "units": {
     "stableToken": "DAI",
