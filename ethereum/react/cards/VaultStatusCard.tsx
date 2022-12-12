@@ -20,6 +20,7 @@ export type ValidValue = {
 
 export type CurrentVaultStatus = {
   collateralizationRatio: ValidValue;
+  liquidationPrice: ValidValue;
   collateralAmount: ValidValue;
   debt: ValidValue;
 };
@@ -36,13 +37,11 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
   const { t } = useTranslation('common', { keyPrefix: 'cards.vault' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
   const { format } = useNumericDisplayContext();
-
   const debt = useMemo(
     () => Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier),
     [urnStatus.debt, ilkStatus.debtMultiplier],
   );
-  const { urn, freeBalance, lockedBalance, debt: urnDebt } = urnStatus;
-  // Collateralization Ratio = Vat.urn.ink * Vat.ilk.spot * Spot.ilk.mat / (Vat.urn.art * Vat.ilk.rate)
+  const { urn, lockedBalance, debt: urnDebt } = urnStatus;
   const collateralizationRatio = useMemo(() => {
     const calcFormat = UnitFormats.RAY;
     if (urnDebt.isZero()) {
@@ -51,6 +50,10 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
     return Vault.getCollateralizationRatio(lockedBalance, urnDebt, liquidationRatio, ilkStatus);
   }, [ilkStatus, lockedBalance, urnDebt, liquidationRatio]);
 
+  const liquidationPrice = useMemo(
+    () => Vault.getLiquidationPrice(lockedBalance, urnDebt, ilkStatus.debtMultiplier, liquidationRatio),
+    [ilkStatus.debtMultiplier, liquidationRatio, lockedBalance, urnDebt],
+  );
   const renderHelperText = (num: FixedNumber | undefined, unit: string) =>
     num ? (
       <span style={{ fontSize: 13 }}>{`${format(num).toString()} ${unit}`}</span>
@@ -62,7 +65,13 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
       <CardHeader title={t('title')} subheader={urn} />
       <CardContent>
         <Grid container padding={2} spacing={2}>
-          <BNText label={t('freeCollateral')} value={freeBalance} tooltipText={t('freeCollateralDesc')} unit={ilkInfo.symbol} />
+          <BNText
+            label={t('colRatio')}
+            value={collateralizationRatio}
+            unit="%"
+            helperText={renderHelperText(current?.collateralizationRatio.value, '%')}
+            error={current?.collateralizationRatio.isValid}
+          />
           <BNText
             label={t('lockedCollateral')}
             value={lockedBalance}
@@ -80,11 +89,12 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
             error={current?.debt.isValid}
           />
           <BNText
-            label={t('colRatio')}
-            value={collateralizationRatio}
-            unit="%"
-            helperText={renderHelperText(current?.collateralizationRatio.value, '%')}
-            error={current?.collateralizationRatio.isValid}
+            label={t('liquidationPrice')}
+            tooltipText={t('liquidationPriceDesc', { collateral: ilkInfo.name })}
+            value={liquidationPrice}
+            helperText={renderHelperText(current?.liquidationPrice.value, units('jpy'))}
+            unit={units('jpy')}
+            error={current?.liquidationPrice.isValid}
           />
         </Grid>
       </CardContent>

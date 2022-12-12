@@ -6,9 +6,9 @@ import { useTranslation } from 'react-i18next';
 import Savings from 'ethereum/Savings';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { useChainLog } from 'ethereum/react/ContractHooks';
+import BalanceStatusCard from 'pages/earn/BalanceStatusCard';
 import getTranslationProps from 'pages/getTranslationProps';
 import usePromiseFactory from 'pages/usePromiseFactory';
-import BalanceStatusCard from 'pages/vaults/[id]/BalanceStatusCard';
 
 import SavingRateCard from './SavingRateCard';
 import DepositForm from './forms/DepositForm';

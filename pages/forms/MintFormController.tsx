@@ -71,6 +71,13 @@ const MintFormController: FC<MintFormControllerProps> = ({
         liquidationRatio,
         ilkStatus,
       );
+      const liquidationPrice = Vault.getLiquidationPrice(
+        currentCollateralAmount,
+        currentUrnDebt.toFormat(format).divUnsafe(ilkStatus.debtMultiplier.toFormat(format)),
+        ilkStatus.debtMultiplier,
+        liquidationRatio,
+      );
+
       return {
         collateralizationRatio: {
           value: collateralizationRatio,
@@ -88,6 +95,10 @@ const MintFormController: FC<MintFormControllerProps> = ({
           isValid:
             MintFormValidation.isAboveDebtCeiling(daiAmount, ilkStatus) ||
             MintFormValidation.isBelowDebtFloor(daiAmount, urnStatus.debt, ilkStatus),
+        },
+        liquidationPrice: {
+          value: liquidationPrice,
+          isValid: liquidationPrice.isNegative(),
         },
       };
     }

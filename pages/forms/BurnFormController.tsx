@@ -106,6 +106,12 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         liquidationRatio,
         ilkStatus,
       );
+      const liquidationPrice = Vault.getLiquidationPrice(
+        currentCollateralAmount,
+        normalizedDebt,
+        ilkStatus.debtMultiplier,
+        liquidationRatio,
+      );
       return {
         debt: {
           value: currentDebt,
@@ -126,6 +132,10 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         collateralAmount: {
           value: currentCollateralAmount,
           isValid: BurnFormValidation.isInvalidCollateralFreeAmount(urnStatus.lockedBalance, collateralAmount),
+        },
+        liquidationPrice: {
+          value: liquidationPrice,
+          isValid: liquidationPrice.isNegative(),
         },
       };
     }
