@@ -8,6 +8,21 @@ import type { IlkStatus } from './contracts/VatHelper';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 
+const roundUp = (num: FixedNumber, decimals: number): FixedNumber => {
+  const comps = num.toString().split('.');
+  if (comps.length === 1) {
+    comps.push('0');
+  }
+  if (comps[1]!.length <= decimals) {
+    return num;
+  }
+
+  const factor = FixedNumber.from(`1${'0'.repeat(decimals)}`, num.format);
+  const bump = FixedNumber.from('1', num.format);
+
+  return num.mulUnsafe(factor).addUnsafe(bump).floor().divUnsafe(factor);
+};
+
 export default class Vault {
   readonly ilkInfo: IlkInfo;
   private readonly cdpId: FixedNumber;
@@ -48,7 +63,25 @@ export default class Vault {
     await actions.wipeAndFreeGem(cdpManager, daiJoin, this.ilkInfo, this.cdpId, colAmount, daiAmount).then((tx) => tx.wait());
   }
 
-  static async open(chainLog: ChainLogHelper, ilkInfo: IlkInfo, colAmount: FixedNumber, daiAmount: FixedNumber) {
+  async burnAll(chainLog: ChainLogHelper, colAmount: FixedNumber, daiAmount: FixedNumber) {
+    const [actions, cdpManager, daiJoin] = await Promise.all([
+      Promise.all([chainLog.proxyRegistry().then((proxyRegistry) => proxyRegistry.ensureDSProxy()), chainLog.dai()]).then(
+        ([proxy, dai]) =>
+          Promise.all([chainLog.proxyActions(proxy), dai.ensureAllowance(proxy.address, daiAmount)]).then(([x, _]) => x),
+      ),
+      chainLog.dssCDPManager(),
+      chainLog.daiJoin(),
+    ]);
+
+    await actions.wipeAllAndFreeGem(cdpManager, daiJoin, this.ilkInfo, this.cdpId, colAmount).then((tx) => tx.wait());
+  }
+
+  static async open(
+    chainLog: ChainLogHelper,
+    ilkInfo: IlkInfo,
+    colAmount: FixedNumber,
+    daiAmount: FixedNumber,
+  ) {
     const [actions, cdpManager, jug, daiJoin] = await Promise.all([
       chainLog
         .proxyRegistry()
@@ -98,10 +131,13 @@ export default class Vault {
   // Urn debt = Vat.urn.art * Vat.ilk.rate + daiAmount
   static getDebt(urnDebt: FixedNumber, debtMultiplier: FixedNumber, daiAmount?: FixedNumber) {
     const calcFormat = getBiggestDecimalsFormat(urnDebt.format, debtMultiplier.format);
-    return urnDebt
-      .toFormat(calcFormat)
-      .mulUnsafe(debtMultiplier.toFormat(calcFormat))
-      .addUnsafe(daiAmount?.toFormat(calcFormat) || FixedNumber.fromString('0', calcFormat));
+    return roundUp(
+      urnDebt
+        .toFormat(calcFormat)
+        .mulUnsafe(debtMultiplier.toFormat(calcFormat))
+        .addUnsafe(daiAmount?.toFormat(calcFormat) || FixedNumber.fromString('0', calcFormat)),
+      UnitFormats.WAD.decimals,
+    ).toFormat(UnitFormats.WAD);
   }
 
   // liquidation price = Spot.ilks.mat * Vat.urn.art * Vat.ilk.rate / Vat.urn.ink

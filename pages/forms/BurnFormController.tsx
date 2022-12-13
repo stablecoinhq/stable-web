@@ -29,6 +29,7 @@ type BurnFormControllerProps = {
   selectedTab: TabValue;
   onSelectTab: (_: unknown, value: TabValue) => void;
   burn: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
+  burnAll: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
 };
 
 const BurnFormController: FC<BurnFormControllerProps> = ({
@@ -42,6 +43,7 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
   selectedTab,
   onSelectTab,
   burn,
+  burnAll,
 }) => {
   const [daiText, setDaiText] = useState('');
   const [colText, setColText] = useState('');
@@ -65,6 +67,7 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
         onBurn={burn}
+        onBurnAll={burnAll}
         onAmountChange={onAmountChange}
         onColChange={onColChange}
         daiText={daiText}
@@ -74,6 +77,7 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
     [
       balance,
       burn,
+      burnAll,
       buttonContent,
       colText,
       daiText,

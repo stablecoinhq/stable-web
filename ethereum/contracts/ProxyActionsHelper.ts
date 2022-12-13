@@ -149,4 +149,34 @@ export default class ProxyActionsHelper {
       ]),
     );
   }
+
+  wipeAllAndFreeGem(
+    cdpManager: CDPManagerHelper,
+    daiJoin: DaiJoin,
+    ilkInfo: IlkInfo,
+    cdpId: FixedNumber,
+    collateralAmount: FixedNumber,
+  ) {
+    if (ilkInfo.symbol === 'ETH') {
+      return this.execute(
+        this.encodeFunctionData('wipeAllAndFreeETH', [
+          cdpManager.address,
+          ilkInfo.gemJoin.address,
+          daiJoin.address,
+          toBigNumber(cdpId, INT_FORMAT),
+          toBigNumber(collateralAmount, ilkInfo.gem.format),
+        ]),
+      );
+    }
+
+    return this.execute(
+      this.encodeFunctionData('wipeAllAndFreeGem', [
+        cdpManager.address,
+        ilkInfo.gemJoin.address,
+        daiJoin.address,
+        toBigNumber(cdpId, INT_FORMAT),
+        toBigNumber(collateralAmount, ilkInfo.gem.format),
+      ]),
+    );
+  }
 }
