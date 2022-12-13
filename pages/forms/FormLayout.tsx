@@ -39,13 +39,18 @@ const FormLayout: FC<FormLayoutProps> = ({
 }) => {
   const { t: terms } = useTranslation('common', { keyPrefix: 'terms' });
   const { t } = useTranslation('common', { keyPrefix: 'cards.wallet' });
+  const { t: units } = useTranslation('common', { keyPrefix: 'units' });
 
   return (
     <>
       <WalletStatusCard
-        label={t('balance', { gem: ilkInfo.symbol })}
+        label={
+          selectedTab === 'mint' || selectedTab === undefined
+            ? t('balance', { gem: ilkInfo.symbol })
+            : t('balance', { gem: units('stableToken') })
+        }
         balance={balance}
-        unit={ilkInfo.symbol}
+        unit={selectedTab === 'mint' || selectedTab === undefined ? ilkInfo.symbol : units('stableToken')}
         address={address}
       />
       <VaultStatusCard
