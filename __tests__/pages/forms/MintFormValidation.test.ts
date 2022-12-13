@@ -94,7 +94,7 @@ describe('MintFormValidation', () => {
       } as Partial<IlkStatus> as IlkStatus;
 
       it('returns false when colRatio = liqRatio', () => {
-        expect(MintFormValidation.isBelowLiquidationRatio(value1WAD, value3WAD, value2INT, value1INT, ilkStatus)).toBeFalsy();
+        expect(MintFormValidation.isBelowLiquidationRatio(value1WAD, value3WAD, value2INT, value1INT, ilkStatus)).toBeTruthy();
       });
     });
   });
