@@ -24,7 +24,9 @@
       "freeCollateralDesc": "Vaultコントラクトにロックされているが、担保として利用されていない通貨です。",
       "lockedCollateral": "ロックされている担保",
       "lockedCollateralDesc": "$t(terms.vault_one)にロックされている担保の数量です。",
-      "title": "$t(terms.vault_one)の状態"
+      "title": "$t(terms.vault_one)の状態",
+      "liquidationPrice": "精算価格",
+      "liquidationPriceDesc": "{{collateral}}の価格がこれ以上下がった場合、このVaultは精算されます。"
     },
     "wallet": {
       "title": "ウォレットの状態",

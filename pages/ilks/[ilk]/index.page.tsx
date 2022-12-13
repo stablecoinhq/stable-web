@@ -11,8 +11,7 @@ import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { useChainLog } from 'ethereum/react/ContractHooks';
 import IlkStatusCard, { useIlkStatusCardProps } from 'ethereum/react/cards/IlkStatusCard';
-import WalletStatusCard from 'ethereum/react/cards/WalletStatusCard';
-import MintForm from 'pages/forms/MintForm';
+import MintFormController from 'pages/forms/MintFormController';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
@@ -21,7 +20,7 @@ import usePromiseFactory from 'pages/usePromiseFactory';
 import type EthereumProvider from 'ethereum/EthereumProvider';
 import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
-import type { IlkStatus } from 'ethereum/contracts/VatHelper';
+import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
@@ -49,9 +48,10 @@ type OpenVaultProps = {
   ilkStatus: IlkStatus;
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
+  address: string;
 };
 
-const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidationRatio, balance }) => {
+const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidationRatio, balance, address }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
 
   const router = useRouter();
@@ -63,16 +63,24 @@ const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidati
     [chainLog, ilkInfo, ilkStatus, liquidationRatio, router],
   );
 
+  const zero = FixedNumber.fromString('0', UnitFormats.WAD);
+  const urnStatus: UrnStatus = {
+    urn: `0x${'0'.repeat(40)}`,
+    freeBalance: zero,
+    lockedBalance: zero,
+    debt: zero,
+  };
+
   return (
-    <MintForm
+    <MintFormController
       ilkInfo={ilkInfo}
-      buttonContent={t('openLabel')}
-      onMint={openVault}
-      liquidationRatio={liquidationRatio}
       ilkStatus={ilkStatus}
+      urnStatus={urnStatus}
+      mint={openVault}
+      liquidationRatio={liquidationRatio}
       balance={balance}
-      debt={FixedNumber.fromString('0', UnitFormats.WAD)}
-      lockedBalance={FixedNumber.fromString('0', UnitFormats.WAD)}
+      address={address}
+      buttonContent={t('openLabel')}
     />
   );
 };
@@ -113,13 +121,13 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
         liquidationRatio={ilkCard.liquidationRatio}
         stabilityFee={ilkCard.stabilityFee}
       />
-      <WalletStatusCard address={provider.address} balance={balance} label="Balance" unit={ilkCard.ilkInfo.symbol} />
       <OpenVault
         chainLog={chainLog}
         ilkInfo={ilkCard.ilkInfo}
         ilkStatus={ilkCard.ilkStatus}
         liquidationRatio={ilkCard.liquidationRatio}
         balance={balance}
+        address={provider.address}
       />
     </Stack>
   );

@@ -112,13 +112,33 @@ export default class Vault {
       .mulUnsafe(FixedNumber.fromValue(BigNumber.from(100)).toFormat(calcFormat));
   }
 
-  // Urn debt = Vat.urn.art * Vat.ilk.rate
-  // 有効小数点をトークンに合わせているため、厳密な値ではない。あくまで表示用
-  static getDebt(urnDebt: FixedNumber, debtMultiplier: FixedNumber) {
+  // Urn debt = Vat.urn.art * Vat.ilk.rate + daiAmount
+  static getDebt(urnDebt: FixedNumber, debtMultiplier: FixedNumber, daiAmount?: FixedNumber) {
     const calcFormat = getBiggestDecimalsFormat(urnDebt.format, debtMultiplier.format);
     return urnDebt
       .toFormat(calcFormat)
       .mulUnsafe(debtMultiplier.toFormat(calcFormat))
+      .addUnsafe(daiAmount?.toFormat(calcFormat) || FixedNumber.fromString('0', calcFormat));
+  }
+
+  // liquidation price = Spot.ilks.mat * Vat.urn.art * Vat.ilk.rate / Vat.urn.ink
+  static getLiquidationPrice(
+    lockedBalance: FixedNumber,
+    urnDebt: FixedNumber,
+    debtMultiplier: FixedNumber,
+    liquidationRatio: FixedNumber,
+  ) {
+    const calcFormat = getBiggestDecimalsFormat(urnDebt.format, debtMultiplier.format);
+
+    if (lockedBalance.isZero()) {
+      return FixedNumber.fromString('0', calcFormat);
+    }
+
+    return liquidationRatio
+      .toFormat(calcFormat)
+      .mulUnsafe(urnDebt.toFormat(calcFormat))
+      .mulUnsafe(debtMultiplier.toFormat(calcFormat))
+      .divUnsafe(lockedBalance.toFormat(calcFormat))
       .round(UnitFormats.WAD.decimals)
       .toFormat(UnitFormats.WAD);
   }

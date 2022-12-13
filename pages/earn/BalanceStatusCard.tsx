@@ -14,7 +14,6 @@ export type WalletStatusCardProps = {
   tooltipText: NonNullable<ReactNode>;
 };
 
-// 共通コンポーネントなので移動させた方がいいかも？
 const BalanceStatusCard: FC<WalletStatusCardProps> = ({ title, label, balance, address, tooltipText, unit }) => (
   <Card>
     <CardHeader title={title} subheader={address} />

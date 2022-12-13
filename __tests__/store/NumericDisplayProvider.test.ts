@@ -49,4 +49,10 @@ describe('round', () => {
     const verySmallNumber = `0.${'0'.repeat(UnitFormats.WAD.decimals - 1)}1`;
     testRound(verySmallNumber, verySmallNumber);
   });
+  it('should round when intger parts are present ', () => {
+    testRound('140.0000000000123001', '140.0');
+  });
+  it('should work when round result is zero', () => {
+    testRound('0.001913757549', '0.001914');
+  });
 });

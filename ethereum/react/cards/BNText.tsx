@@ -10,19 +10,23 @@ export type BNTextProps = {
   value: FixedNumber;
   unit: string;
   tooltipText?: ReactNode;
+  helperText?: ReactNode;
+  error?: boolean;
 };
 
-const BNText: FC<BNTextProps> = ({ label, value, tooltipText, unit }) => {
+const BNText: FC<BNTextProps> = ({ label, value, tooltipText, unit, helperText, error }) => {
   const { format } = useNumericDisplayContext();
   const content = (
     <Grid item xs={6}>
       <TextField
+        error={error}
         variant="standard"
         fullWidth
         label={label}
         value={format(value).toString()}
         inputProps={{ disabled: true }}
         InputProps={{ endAdornment: <InputAdornment position="end">{unit}</InputAdornment> }}
+        helperText={<span style={{ fontSize: 15 }}>{helperText}</span>}
       />
     </Grid>
   );

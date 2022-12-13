@@ -3,7 +3,7 @@ import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
 import { UnitFormats } from 'ethereum/helpers/math';
-import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
+import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 
 import { BurnFormValidation, BurnError } from './BurnFormValidation';
 
@@ -20,23 +20,37 @@ export type BurnFormProps = {
   ilkInfo: IlkInfo;
   buttonContent: ReactNode;
   onBurn: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
+  onAmountChange: (s: string) => void;
+  onColChange: (s: string) => void;
+  daiText: string;
+  colText: string;
 };
 
-const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn, buttonContent, daiBalance, lockedBalance, debt, ilkStatus }) => {
+const BurnForm: FC<BurnFormProps> = ({
+  ilkInfo,
+  onBurn,
+  buttonContent,
+  daiBalance,
+  lockedBalance,
+  debt,
+  ilkStatus,
+  daiText,
+  colText,
+  onAmountChange,
+  onColChange,
+}) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms.burn' });
-  const [daiText, setDaiText] = useState('');
   const daiAmount = useMemo(() => toFixedNumberOrUndefined(daiText, UnitFormats.WAD), [daiText]);
-  const [colText, setColText] = useState('');
   const colAmount = useMemo(() => toFixedNumberOrUndefined(colText, ilkInfo.gem.format), [colText, ilkInfo.gem.format]);
   const [burning, setBurning] = useState(false);
 
-  const onDaiChange: ChangeEventHandler<HTMLInputElement> = useCallback(
-    (event) => setDaiText(cutDecimals(pickNumbers(event.target.value), 18)),
-    [],
+  const handleDaiChange: ChangeEventHandler<HTMLInputElement> = useCallback(
+    (event) => onAmountChange(event.target.value),
+    [onAmountChange],
   );
-  const onColChange: ChangeEventHandler<HTMLInputElement> = useCallback(
-    (event) => setColText(cutDecimals(pickNumbers(event.target.value), ilkInfo.gem.format.decimals)),
-    [ilkInfo.gem.format.decimals],
+  const handleColChange: ChangeEventHandler<HTMLInputElement> = useCallback(
+    (event) => onColChange(event.target.value),
+    [onColChange],
   );
 
   const onButtonClick: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
@@ -49,6 +63,20 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn, buttonContent, daiBalanc
       setBurning(false);
     });
   }, [colAmount, daiAmount, onBurn]);
+
+  const isInvalidRepayAmount = useMemo(
+    () => daiAmount && BurnFormValidation.isInsufficientBalance(daiBalance, daiAmount),
+    [daiAmount, daiBalance],
+  );
+  const isOverRepaying = useMemo(
+    () => daiAmount && colAmount && BurnFormValidation.isOverRepaying(debt, daiAmount, ilkStatus.debtMultiplier),
+    [colAmount, daiAmount, debt, ilkStatus.debtMultiplier],
+  );
+
+  const isInvalidCollateralFreeAmount = useMemo(
+    () => colAmount && daiAmount && BurnFormValidation.isInvalidCollateralFreeAmount(lockedBalance, colAmount),
+    [colAmount, daiAmount, lockedBalance],
+  );
 
   const formErrors: BurnError[] = useMemo(() => {
     if (colAmount && daiAmount) {
@@ -78,7 +106,8 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn, buttonContent, daiBalanc
             fullWidth
             label={t('redeemAmount')}
             value={daiText}
-            onChange={onDaiChange}
+            error={isInvalidRepayAmount || isOverRepaying}
+            onChange={handleDaiChange}
             InputProps={{
               endAdornment: <InputAdornment position="end">DAI</InputAdornment>,
             }}
@@ -87,9 +116,10 @@ const BurnForm: FC<BurnFormProps> = ({ ilkInfo, onBurn, buttonContent, daiBalanc
         <Grid item xs={6}>
           <TextField
             fullWidth
+            error={isInvalidCollateralFreeAmount}
             label={t('freeAmount', { gem: ilkInfo.name })}
             value={colText}
-            onChange={onColChange}
+            onChange={handleColChange}
             InputProps={{
               endAdornment: <InputAdornment position="end">{ilkInfo.symbol}</InputAdornment>,
             }}

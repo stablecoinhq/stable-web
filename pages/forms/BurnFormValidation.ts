@@ -1,7 +1,9 @@
+import { FixedNumber } from 'ethers';
+
+import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
 
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
-import type { FixedNumber } from 'ethers';
 
 export enum BurnError {
   // ウォレットのDAIの残高が不足している
@@ -44,7 +46,11 @@ export class BurnFormValidation {
       errors.push(BurnError.insufficientBalance);
     }
 
-    const currentDebt = BurnFormValidation.getCurrentDebt(daiToRepay, debt, debtMultiplier);
+    const currentDebt = Vault.getDebt(
+      debt,
+      debtMultiplier,
+      daiToRepay.mulUnsafe(FixedNumber.fromString('-1', UnitFormats.WAD)),
+    );
     if (BurnFormValidation.isOverRepaying(debt, daiToRepay, debtMultiplier)) {
       errors.push(BurnError.invalidRepayAmount);
     }
@@ -62,13 +68,6 @@ export class BurnFormValidation {
     }
 
     return errors;
-  }
-
-  // currentDebt = Vat.ilk.rate * Vat.urn.art - daiToRepay
-  static getCurrentDebt(daiToRepay: FixedNumber, debt: FixedNumber, debtMultiplier: FixedNumber) {
-    const normalizedDebt = debtMultiplier.toFormat(format).mulUnsafe(debt.toFormat(format));
-    // Vat.ilk.rate * (Vat.urn.art) - daiAmount < Vat.ilk.spot * (Vat.urn.ink + collateralAmount)
-    return normalizedDebt.subUnsafe(daiToRepay.toFormat(format));
   }
 
   // daiBalance - daiToRepay < 0
@@ -93,7 +92,7 @@ export class BurnFormValidation {
     return lockedBalance.toFormat(format).subUnsafe(collateralToFree.toFormat(format)).isNegative();
   }
 
-  // currentDebt < Vat.ilk.spot * (Vat.urn.ink + collateralAmount)
+  // currentDebt !== 0 && currentDebt < Vat.ilk.spot * (Vat.urn.ink + collateralAmount)
   static isCollateralizationRatioTooLow(
     lockedBalance: FixedNumber,
     collateralToFree: FixedNumber,
@@ -103,7 +102,7 @@ export class BurnFormValidation {
     const currentCollateralInDai = price
       .toFormat(format)
       .mulUnsafe(lockedBalance.toFormat(format).subUnsafe(collateralToFree.toFormat(format)));
-    return currentCollateralInDai.subUnsafe(currentDebt).isNegative();
+    return currentCollateralInDai.subUnsafe(currentDebt.toFormat(format)).isNegative();
   }
 
   // 0 < currentDebt < debtFloor

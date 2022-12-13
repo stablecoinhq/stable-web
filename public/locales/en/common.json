@@ -1,3 +1,4 @@
+
 {
   "cards": {
     "ilk": {
@@ -24,6 +25,8 @@
       "freeCollateralDesc": "Amount of tokens that is currently being locked in Vault but not used as collateral",
       "lockedCollateral": "Locked Collateral",
       "lockedCollateralDesc": "Total amount of collateral that is locked in this vault",
+      "liquidationPrice": "Liquidation Price",
+      "liquidationPriceDesc": "If the price of {{collateral}} falls any further, this vault will be liquidated.",
       "title": "Vault status"
     },
     "wallet": {
