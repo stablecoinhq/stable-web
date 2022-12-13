@@ -59,7 +59,7 @@ export class MintFormValidation {
 
   /**
    * CollateralizationRatio is below liquidation ratio
-   * Vat.ilk.rate * (Vat.urn.art + daiAmount) < Vat.ilk.spot * (Vat.urn.ink + collateralAmount)
+   * Vat.ilk.rate * Vat.urn.art + daiAmount < Vat.ilk.spot * (Vat.urn.ink + collateralAmount)
    */
   static isBelowLiquidationRatio(
     daiAmount: FixedNumber,
@@ -74,7 +74,6 @@ export class MintFormValidation {
       const currentSurplus = price
         .toFormat(format)
         .mulUnsafe(lockedBalance.toFormat(format).addUnsafe(collateralAmount.toFormat(format)));
-
       return currentSurplus.subUnsafe(currentDebt.toFormat(format)).isNegative();
     }
     return false;
@@ -86,14 +85,11 @@ export class MintFormValidation {
    */
   static isBelowDebtFloor(daiAmount: FixedNumber, debt: FixedNumber, ilkStatus: IlkStatus): boolean {
     const { debtMultiplier, debtFloor } = ilkStatus;
-    return (
-      !daiAmount.isZero() &&
-      debtMultiplier
-        .toFormat(format)
-        .mulUnsafe(debt.toFormat(format).addUnsafe(daiAmount.toFormat(format)))
-        .subUnsafe(debtFloor.toFormat(format))
-        .isNegative()
-    );
+    return debtMultiplier
+      .toFormat(format)
+      .mulUnsafe(debt.toFormat(format).addUnsafe(daiAmount.toFormat(format)))
+      .subUnsafe(debtFloor.toFormat(format))
+      .isNegative();
   }
 
   /**
