@@ -57,10 +57,10 @@ const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidati
   const router = useRouter();
   const openVault = useCallback(
     async (amount: FixedNumber, ratio: FixedNumber) => {
-      await Vault.open(chainLog, ilkInfo, ilkStatus, liquidationRatio, amount, ratio);
+      await Vault.open(chainLog, ilkInfo, amount, ratio);
       await router.push('/vaults');
     },
-    [chainLog, ilkInfo, ilkStatus, liquidationRatio, router],
+    [chainLog, ilkInfo, router],
   );
 
   const zero = FixedNumber.fromString('0', UnitFormats.WAD);

@@ -1,8 +1,7 @@
-import { FixedFormat } from '@ethersproject/bignumber';
 import { useCallback, useMemo, useState } from 'react';
 
 import Vault from 'ethereum/Vault';
-import { CENT, COL_RATIO_FORMAT, UnitFormats } from 'ethereum/helpers/math';
+import { UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import MintForm from 'pages/forms/MintForm';
 import { MintFormValidation } from 'pages/forms/MintFormValidation';
@@ -42,26 +41,24 @@ const MintFormController: FC<MintFormControllerProps> = ({
   buttonContent,
 }) => {
   const [amountText, setAmountText] = useState('');
-  const [ratioText, setRatioText] = useState(() => {
-    const initialRatio = liquidationRatio
-      .toFormat(COL_RATIO_FORMAT)
-      .mulUnsafe(CENT.toFormat(COL_RATIO_FORMAT))
-      .toFormat(FixedFormat.from(0));
-    return initialRatio.toString();
-  });
+  const [daiAmountText, setDaiAmountText] = useState('');
 
   const onAmountChange = useCallback(
     (value: string) => setAmountText(cutDecimals(pickNumbers(value), ilkInfo.gem.format.decimals)),
     [ilkInfo.gem.format.decimals],
   );
-  const onRatioChange = useCallback((value: string) => setRatioText(cutDecimals(pickNumbers(value), 0)), []);
+
+  const onDaiAmountChange = useCallback(
+    (value: string) => setDaiAmountText(cutDecimals(pickNumbers(value), UnitFormats.WAD.decimals)),
+    [],
+  );
 
   const current: CurrentVaultStatus | undefined = useMemo(() => {
-    const ratio = toFixedNumberOrUndefined(ratioText, COL_RATIO_FORMAT)?.divUnsafe(CENT.toFormat(COL_RATIO_FORMAT));
     const collateralAmount = toFixedNumberOrUndefined(amountText, ilkInfo.gem.format);
+    const daiAmount = toFixedNumberOrUndefined(daiAmountText, UnitFormats.WAD);
+
     const format = UnitFormats.RAD;
-    if (ratio && collateralAmount) {
-      const daiAmount = Vault.getDaiAmount(collateralAmount, ratio, liquidationRatio, ilkStatus.price);
+    if (daiAmount && collateralAmount) {
       const currentCollateralAmount = urnStatus.lockedBalance.addUnsafe(collateralAmount);
       const currentUrnDebt = Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier, daiAmount);
 
@@ -102,7 +99,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
         },
       };
     }
-  }, [amountText, ilkInfo.gem.format, ilkStatus, liquidationRatio, ratioText, urnStatus.debt, urnStatus.lockedBalance]);
+  }, [amountText, daiAmountText, ilkInfo.gem.format, ilkStatus, liquidationRatio, urnStatus.debt, urnStatus.lockedBalance]);
 
   const mintForm: ReactNode = useMemo(
     () => (
@@ -111,30 +108,16 @@ const MintFormController: FC<MintFormControllerProps> = ({
         ilkStatus={ilkStatus}
         buttonContent={buttonContent}
         onMint={mint}
-        liquidationRatio={liquidationRatio}
         balance={balance}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
         onAmountChange={onAmountChange}
-        onRatioChange={onRatioChange}
         amountText={amountText}
-        ratioText={ratioText}
+        daiAmountText={daiAmountText}
+        onDaiAmountChange={onDaiAmountChange}
       />
     ),
-    [
-      amountText,
-      balance,
-      buttonContent,
-      ilkInfo,
-      ilkStatus,
-      liquidationRatio,
-      mint,
-      onAmountChange,
-      onRatioChange,
-      ratioText,
-      urnStatus.debt,
-      urnStatus.lockedBalance,
-    ],
+    [amountText, balance, buttonContent, daiAmountText, ilkInfo, ilkStatus, mint, onAmountChange, onDaiAmountChange, urnStatus.debt, urnStatus.lockedBalance],
   );
   return (
     <FormLayout

@@ -19,10 +19,8 @@ export default class Vault {
 
   async mint(
     chainLog: ChainLogHelper,
-    ilkStatus: IlkStatus,
-    liquidationRatio: FixedNumber,
     colAmount: FixedNumber,
-    colRatio: FixedNumber,
+    daiAmount: FixedNumber,
   ) {
     const [actions, cdpManager, jug, daiJoin] = await Promise.all([
       chainLog
@@ -36,8 +34,6 @@ export default class Vault {
       chainLog.jug(),
       chainLog.daiJoin(),
     ]);
-
-    const daiAmount = Vault.getDaiAmount(colAmount, colRatio, liquidationRatio, ilkStatus.price);
     await actions
       .lockGemAndDraw(cdpManager, jug, daiJoin, this.ilkInfo, this.cdpId, colAmount, daiAmount)
       .then((tx) => tx.wait());
@@ -59,10 +55,8 @@ export default class Vault {
   static async open(
     chainLog: ChainLogHelper,
     ilkInfo: IlkInfo,
-    ilkStatus: IlkStatus,
-    liquidationRatio: FixedNumber,
     colAmount: FixedNumber,
-    colRatio: FixedNumber,
+    daiAmount: FixedNumber,
   ) {
     const [actions, cdpManager, jug, daiJoin] = await Promise.all([
       chainLog
@@ -74,8 +68,6 @@ export default class Vault {
       chainLog.jug(),
       chainLog.daiJoin(),
     ]);
-
-    const daiAmount = Vault.getDaiAmount(colAmount, colRatio, liquidationRatio, ilkStatus.price);
     await actions.openLockGemAndDraw(cdpManager, jug, daiJoin, ilkInfo, colAmount, daiAmount).then((tx) => tx.wait());
   }
 
