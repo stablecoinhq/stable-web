@@ -205,7 +205,7 @@ const BurnForm: FC<BurnFormProps> = ({
               burning ||
               formErrors.length !== 0 ||
               (daiAmount && colAmount && daiAmount.isZero() && colAmount.isZero()) ||
-              !(burnFormState !== 'neutral') 
+              !(burnFormState !== 'neutral')
             }
             onClick={onButtonClick}
           >

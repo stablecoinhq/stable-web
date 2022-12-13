@@ -8,7 +8,7 @@ import type { IlkStatus } from './contracts/VatHelper';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 
-const roundUp = (num: FixedNumber, decimals: number): FixedNumber => {
+export const roundUp = (num: FixedNumber, decimals: number): FixedNumber => {
   const comps = num.toString().split('.');
   if (comps.length === 1) {
     comps.push('0');
@@ -18,7 +18,8 @@ const roundUp = (num: FixedNumber, decimals: number): FixedNumber => {
   }
 
   const factor = FixedNumber.from(`1${'0'.repeat(decimals)}`, num.format);
-  const bump = FixedNumber.from('1', num.format);
+  const n = comps[1]!.slice(decimals).search(/[^0]/) === -1 ? '0' : '1';
+  const bump = FixedNumber.from(n, num.format);
 
   return num.mulUnsafe(factor).addUnsafe(bump).floor().divUnsafe(factor);
 };
@@ -76,12 +77,7 @@ export default class Vault {
     await actions.wipeAllAndFreeGem(cdpManager, daiJoin, this.ilkInfo, this.cdpId, colAmount).then((tx) => tx.wait());
   }
 
-  static async open(
-    chainLog: ChainLogHelper,
-    ilkInfo: IlkInfo,
-    colAmount: FixedNumber,
-    daiAmount: FixedNumber,
-  ) {
+  static async open(chainLog: ChainLogHelper, ilkInfo: IlkInfo, colAmount: FixedNumber, daiAmount: FixedNumber) {
     const [actions, cdpManager, jug, daiJoin] = await Promise.all([
       chainLog
         .proxyRegistry()
