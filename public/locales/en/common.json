@@ -127,6 +127,9 @@
   "site": {
     "title": "stable-web"
   },
+  "notFound": {
+    "title": "This page could not be found"
+  },
   "terms": {
     "collateral": "collateral",
     "colRatio": "Collateralization Ratio",

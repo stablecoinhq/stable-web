@@ -130,6 +130,9 @@
       }
     }
   },
+  "notFound": {
+    "title": "該当するページは見つかりませんでした"
+  },
   "terms": {
     "collateral": "担保",
     "colRatio": "担保率",

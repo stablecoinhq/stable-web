@@ -109,7 +109,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
     );
   }
 
-  if (!ilkCard.ilkInfo.name) {
+  if (!ilkCard.ilkInfo.name || !ilkCard) {
     return <InvalidIlk />;
   }
 
