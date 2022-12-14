@@ -5,6 +5,7 @@ import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCallback, useMemo } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 
 import IlkType from 'ethereum/IlkType';
 import Vault from 'ethereum/Vault';
@@ -33,7 +34,7 @@ const InvalidIlk: FC = () => {
         <SvgIcon component={WarningIcon} inheritViewBox style={{ fontSize: 128 }} color="error" />
       </Box>
       <Typography variant="h6" component="div" padding={2}>
-        {t('notFound')}
+        {t('unableToLoadCollateral')}
       </Typography>
       <Link href="/ilks" passHref>
         <Button variant="contained">{t('backToList')}</Button>
@@ -146,13 +147,17 @@ const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
     return <InvalidIlk />;
   }
 
+  const invalidIlk = () => <InvalidIlk />;
+
   return (
-    <Card elevation={0}>
-      <CardHeader title={t('openLabel', { ilk: ilkType.inString })} />
-      <CardContent>
-        <Content provider={provider} ilkType={ilkType} />
-      </CardContent>
-    </Card>
+    <ErrorBoundary fallbackRender={invalidIlk} onError={(e_) => {}}>
+      <Card elevation={0}>
+        <CardHeader title={t('openLabel', { ilk: ilkType.inString })} />
+        <CardContent>
+          <Content provider={provider} ilkType={ilkType} />
+        </CardContent>
+      </Card>
+    </ErrorBoundary>
   );
 };
 

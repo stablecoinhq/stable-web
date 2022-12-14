@@ -9,8 +9,7 @@ import type { NextPage } from 'next';
 const NotFound: NextPage = () => {
   const { t } = useTranslation('common', { keyPrefix: 'notFound' });
 
-  return (
-  <Error statusCode={404} title={t('title')!} />);
+  return <Error statusCode={404} title={t('title')!} />;
 };
 
 export const getStaticProps = getTranslationProps;

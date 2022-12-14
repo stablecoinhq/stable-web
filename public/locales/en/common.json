@@ -84,7 +84,8 @@
       "openLabel": "Create new $t(terms.vault_one)",
       "openDesc": "Open new $t(terms.vault_one)",
       "currency": "Currency",
-      "currentPrice": "Current Price per {{collateral}}"
+      "currentPrice": "Current Price per {{collateral}}",
+      "unableToLoadCollateral": "Unable to load collateral"
     },
     "vault": {
       "backToList": "$t(pages.errors.backToList)",
