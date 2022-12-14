@@ -90,8 +90,8 @@ const Controller: FC<ControllerProps> = ({
     [setSelectedTab],
   );
   const mint: MintFormProps['onMint'] = useCallback(
-    (amount, ratio) => vault.mint(chainLog, ilkStatus, liquidationRatio, amount, ratio).then(() => updateAllBalance()),
-    [chainLog, ilkStatus, liquidationRatio, vault, updateAllBalance],
+    (collateralAmount, daiAmount) => vault.mint(chainLog, collateralAmount, daiAmount).then(() => updateAllBalance()),
+    [chainLog, vault, updateAllBalance],
   );
 
   const burn: BurnFormProps['onBurn'] = useCallback(

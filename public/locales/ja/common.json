@@ -53,10 +53,8 @@
       }
     },
     "mint": {
-      "colRatio": "$t(terms.colRatio)",
+      "stableTokenAmount": "発行する$t(units.stableToken)の数量",
       "lockAmount": "担保に入れる{{gem}}の数量",
-      "mintAmountLabel": "発行される$t(units.stableToken)の数量",
-      "mintAmountTooltipText": "発行される$t(units.stableToken)sの数量",
       "submit": "発行する",
       "error": {
         "insufficientBalance": "残高不足です",
