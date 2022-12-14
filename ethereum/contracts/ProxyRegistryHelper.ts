@@ -1,4 +1,3 @@
-import { getContractAddress } from '@ethersproject/address';
 import { AddressZero } from '@ethersproject/constants';
 
 import { DSProxy__factory, ProxyRegistry__factory } from 'generated/types';
@@ -20,7 +19,6 @@ export default class ProxyRegistryHelper {
       if (address === AddressZero) {
         return undefined;
       }
-
       return DSProxy__factory.connect(address, this.provider.getSigner());
     });
   }
@@ -28,8 +26,11 @@ export default class ProxyRegistryHelper {
   private async createDSProxy() {
     const pendingTx = await this.contract['build()']();
     await pendingTx.wait(3);
-    const address = getContractAddress(pendingTx);
-    return DSProxy__factory.connect(address, this.provider.getSigner());
+    const proxy = await this.getDSProxy();
+    if (proxy === undefined) {
+      throw new Error('Proxy address not found');
+    }
+    return proxy;
   }
 
   async ensureDSProxy() {
