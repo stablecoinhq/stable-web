@@ -85,7 +85,10 @@
       "openDesc": "Open new $t(terms.vault_one)",
       "currency": "Currency",
       "currentPrice": "Current Price per {{collateral}}",
-      "unableToLoadCollateral": "Unable to load collateral"
+      "unableToLoadCollateral": "Unable to load collateral",
+      "errors" : {
+        "errorWhileOpeningVault": "An error occured while opening vault. Please try again."
+      }
     },
     "vault": {
       "backToList": "$t(pages.errors.backToList)",
@@ -133,8 +136,7 @@
   },
   "error": {
     "close": "Close",
-    "title": "Error",
-    "errorOccured": "An error occured"
+    "title": "Error"
   },
   "terms": {
     "collateral": "collateral",

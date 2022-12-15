@@ -85,7 +85,10 @@
       "openDesc": "新規作成",
       "currency": "通貨",
       "currentPrice": "1 {{collateral}}あたりの価格",
-      "unableToLoadCollateral": "該当の担保情報を読み込むことができませんでした"
+      "unableToLoadCollateral": "該当の担保情報を読み込むことができませんでした",
+      "errors": {
+        "errorWhileOpeningVault": "Vault作成時にエラーが発生しました。再度お試しください。"
+      }
     },
     "vault": {
       "backToList": "$t(pages.errors.backToList)",
@@ -136,8 +139,7 @@
   },
   "error": {
     "title": "エラー",
-    "close": "閉じる",
-    "errorOccured": "エラーが発生しました"
+    "close": "閉じる"
   },
   "terms": {
     "collateral": "担保",

@@ -3,11 +3,10 @@ import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import { useCallback, useMemo } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
+import { ErrorBoundary, useErrorHandler } from 'react-error-boundary';
 
 import IlkType from 'ethereum/IlkType';
 import Vault from 'ethereum/Vault';
-import { InvalidGemAddress } from 'ethereum/contracts/ERC20Helper';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { useChainLog } from 'ethereum/react/ContractHooks';
 import IlkStatusCard, { useIlkStatusCardProps } from 'ethereum/react/cards/IlkStatusCard';
@@ -41,12 +40,15 @@ const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidati
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
 
   const router = useRouter();
+  const handleError = useErrorHandler();
+
   const openVault = useCallback(
     async (amount: FixedNumber, ratio: FixedNumber) => {
-      await Vault.open(chainLog, ilkInfo, amount, ratio);
-      await router.push('/vaults');
+      await Vault.open(chainLog, ilkInfo, amount, ratio)
+        .then(() => router.push('/vaults'))
+        .catch((e) => handleError(e));
     },
-    [chainLog, ilkInfo, router],
+    [chainLog, handleError, ilkInfo, router],
   );
 
   const zero = FixedNumber.fromString('0', UnitFormats.WAD);
@@ -77,6 +79,8 @@ type ContentProps = {
 };
 
 const Content: FC<ContentProps> = ({ provider, ilkType }) => {
+  const { t: error } = useTranslation('common', { keyPrefix: 'pages.ilk.errors' });
+
   const chainLog = useChainLog(provider);
   const ilkCard = useIlkStatusCardProps(chainLog, ilkType);
   const [balance] = usePromiseFactory(
@@ -99,14 +103,9 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
     return <InvalidIlk />;
   }
 
-  return (
-    <Stack padding={2} spacing={2}>
-      <IlkStatusCard
-        ilkInfo={ilkCard.ilkInfo}
-        ilkStatus={ilkCard.ilkStatus}
-        liquidationRatio={ilkCard.liquidationRatio}
-        stabilityFee={ilkCard.stabilityFee}
-      />
+  const openVaultFallBack = (props: FallbackProps) => (
+    <>
+      <ErrorDialog props={props} message={error('errorWhileOpeningVault')} />
       <OpenVault
         chainLog={chainLog}
         ilkInfo={ilkCard.ilkInfo}
@@ -115,29 +114,34 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
         balance={balance}
         address={provider.address}
       />
+    </>
+  );
+
+  return (
+    <Stack padding={2} spacing={2}>
+      <IlkStatusCard
+        ilkInfo={ilkCard.ilkInfo}
+        ilkStatus={ilkCard.ilkStatus}
+        liquidationRatio={ilkCard.liquidationRatio}
+        stabilityFee={ilkCard.stabilityFee}
+      />
+      <ErrorBoundary fallbackRender={openVaultFallBack}>
+        <OpenVault
+          chainLog={chainLog}
+          ilkInfo={ilkCard.ilkInfo}
+          ilkStatus={ilkCard.ilkStatus}
+          liquidationRatio={ilkCard.liquidationRatio}
+          balance={balance}
+          address={provider.address}
+        />
+      </ErrorBoundary>
     </Stack>
   );
 };
 
 const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
-  const fallBack = useCallback((props: FallbackProps) => {
-    switch (props.error) {
-      case InvalidGemAddress:
-        return <InvalidIlk />;
-      default:
-        return <ErrorDialog props={props} />;
-    }
-  }, []);
-
-  const onError = useCallback((err: Error) => {
-    switch (err) {
-      case InvalidGemAddress:
-        break;
-      default:
-        throw err;
-    }
-  }, []);
+  const fallBack = useCallback(() => <InvalidIlk />, []);
 
   const router = useRouter();
   const ilkType = useMemo(() => {
@@ -150,7 +154,7 @@ const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
   }
 
   return (
-    <ErrorBoundary FallbackComponent={fallBack} onError={onError}>
+    <ErrorBoundary fallbackRender={fallBack}>
       <Card elevation={0}>
         <CardHeader title={t('openLabel', { ilk: ilkType.inString })} />
         <CardContent>
