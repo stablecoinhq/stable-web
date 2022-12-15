@@ -235,7 +235,9 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
         liquidationRatio={ilkCard.liquidationRatio}
         stabilityFee={ilkCard.stabilityFee}
       />
-      <ErrorBoundary fallbackRender={fallback}>{controller}</ErrorBoundary>
+      <ErrorBoundary fallbackRender={fallback} resetKeys={[controller]}>
+        {controller}
+      </ErrorBoundary>
     </Stack>
   );
 };

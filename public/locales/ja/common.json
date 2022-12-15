@@ -134,6 +134,9 @@
             "insufficientWithdrawAmount": "預金引き出し額が無効な値です"
           }
         }
+      },
+      "errors" : {
+        "errorWhileEarn": "予期せぬエラーが発生しました。再度お試しください。"
       }
     }
   },

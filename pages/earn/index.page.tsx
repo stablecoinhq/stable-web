@@ -1,11 +1,13 @@
 import { Box, Card, CardContent, CircularProgress, Stack, Tab, Tabs } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useCallback, useState } from 'react';
+import { ErrorBoundary, useErrorHandler } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
 import Savings from 'ethereum/Savings';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { useChainLog } from 'ethereum/react/ContractHooks';
+import ErrorDialog from 'pages/ErrorDialog';
 import BalanceStatusCard from 'pages/earn/BalanceStatusCard';
 import getTranslationProps from 'pages/getTranslationProps';
 import usePromiseFactory from 'pages/usePromiseFactory';
@@ -20,6 +22,7 @@ import type EthereumProvider from 'ethereum/EthereumProvider';
 import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
+import type { FallbackProps } from 'react-error-boundary';
 
 type ControllerProps = {
   savingRate: Savings;
@@ -33,6 +36,7 @@ type TabValue = 'deposit' | 'withdraw';
 const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, depositAmount, balance }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn' });
   const [selectedTab, setSelectedTab] = useState<TabValue>('deposit');
+  const handleError = useErrorHandler();
 
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {
     setSelectedTab(value);
@@ -43,13 +47,21 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, deposit
     [savingRate, updateAllBalance],
   );
   const withdraw: WithdrawFormProps['onWithdraw'] = useCallback(
-    (amount) => savingRate.withdraw(amount).then(() => updateAllBalance()),
-    [savingRate, updateAllBalance],
+    (amount) =>
+      savingRate
+        .withdraw(amount)
+        .then(() => updateAllBalance())
+        .catch((e) => handleError(e)),
+    [handleError, savingRate, updateAllBalance],
   );
 
   const withdrawAll: WithdrawFormProps['onWithdrawAll'] = useCallback(
-    () => savingRate.withdrawAll().then(() => updateAllBalance()),
-    [savingRate, updateAllBalance],
+    () =>
+      savingRate
+        .withdrawAll()
+        .then(() => updateAllBalance())
+        .catch((e) => handleError(e)),
+    [handleError, savingRate, updateAllBalance],
   );
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
@@ -85,6 +97,8 @@ type ContentProps = {
 
 const Content: FC<ContentProps> = ({ chainLog, provider }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn' });
+  const { t: error } = useTranslation('common', { keyPrefix: 'pages.earn.errors' });
+
   const { t: wallet } = useTranslation('common', { keyPrefix: 'cards.wallet' });
 
   const [savingRate] = usePromiseFactory(useCallback(() => Savings.fromChainlog(chainLog), [chainLog]));
@@ -112,6 +126,17 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
     );
   }
 
+  const controller = (
+    <Controller savingRate={savingRate} updateAllBalance={updateAllBalance} depositAmount={deposit?.amount} balance={balance} />
+  );
+
+  const fallBack = (props: FallbackProps) => (
+    <>
+      <ErrorDialog props={props} message={error('errorWhileEarn')} />
+      {controller}
+    </>
+  );
+
   return (
     <Stack padding={2} spacing={2}>
       <SavingRateCard annualRate={annualRate} />
@@ -133,12 +158,9 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
         tooltipText={wallet('description')!}
         unit="DAI"
       />
-      <Controller
-        savingRate={savingRate}
-        updateAllBalance={updateAllBalance}
-        depositAmount={deposit?.amount}
-        balance={balance}
-      />
+      <ErrorBoundary fallbackRender={fallBack} resetKeys={[controller]}>
+        {controller}
+      </ErrorBoundary>
     </Stack>
   );
 };

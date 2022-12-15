@@ -114,7 +114,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
     />
   );
 
-  const openVaultFallBack = (props: FallbackProps) => (
+  const fallBack = (props: FallbackProps) => (
     <>
       <ErrorDialog props={props} message={error('errorWhileOpeningVault')} />
       {openVault}
@@ -129,7 +129,9 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
         liquidationRatio={ilkCard.liquidationRatio}
         stabilityFee={ilkCard.stabilityFee}
       />
-      <ErrorBoundary fallbackRender={openVaultFallBack}>{openVault}</ErrorBoundary>
+      <ErrorBoundary fallbackRender={fallBack} resetKeys={[openVault]}>
+        {openVault}
+      </ErrorBoundary>
     </Stack>
   );
 };
