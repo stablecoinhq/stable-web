@@ -134,6 +134,9 @@
   "notFound": {
     "title": "該当するページは見つかりませんでした"
   },
+  "error": {
+    "back": "戻る"
+  },
   "terms": {
     "collateral": "担保",
     "colRatio": "担保率",

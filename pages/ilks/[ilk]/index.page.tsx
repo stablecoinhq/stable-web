@@ -1,22 +1,24 @@
-import WarningIcon from '@mui/icons-material/Warning';
-import { Box, Button, Card, CardContent, CardHeader, CircularProgress, Stack, SvgIcon, Typography } from '@mui/material';
+import { Box, Card, CardContent, CardHeader, CircularProgress, Stack } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCallback, useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import IlkType from 'ethereum/IlkType';
 import Vault from 'ethereum/Vault';
+import { InvalidGemAddress } from 'ethereum/contracts/ERC20Helper';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { useChainLog } from 'ethereum/react/ContractHooks';
 import IlkStatusCard, { useIlkStatusCardProps } from 'ethereum/react/cards/IlkStatusCard';
+import Error from 'pages/Error';
 import MintFormController from 'pages/forms/MintFormController';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
 import usePromiseFactory from 'pages/usePromiseFactory';
+
+import InvalidIlk from './InvalidIlk';
 
 import type EthereumProvider from 'ethereum/EthereumProvider';
 import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
@@ -24,24 +26,7 @@ import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
-
-const InvalidIlk: FC = () => {
-  const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
-
-  return (
-    <Stack direction="column" alignItems="center" padding={2}>
-      <Box width={128} height={128}>
-        <SvgIcon component={WarningIcon} inheritViewBox style={{ fontSize: 128 }} color="error" />
-      </Box>
-      <Typography variant="h6" component="div" padding={2}>
-        {t('unableToLoadCollateral')}
-      </Typography>
-      <Link href="/ilks" passHref>
-        <Button variant="contained">{t('backToList')}</Button>
-      </Link>
-    </Stack>
-  );
-};
+import type { FallbackProps } from 'react-error-boundary';
 
 type OpenVaultProps = {
   chainLog: ChainLogHelper;
@@ -136,6 +121,14 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
 
 const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
+  const invalidIlk = useCallback((props: FallbackProps) => {
+    switch (props.error) {
+      case InvalidGemAddress:
+        return <InvalidIlk />;
+      default:
+        return <Error props={props} />;
+    }
+  }, []);
 
   const router = useRouter();
   const ilkType = useMemo(() => {
@@ -146,8 +139,6 @@ const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
   if (!ilkType) {
     return <InvalidIlk />;
   }
-
-  const invalidIlk = () => <InvalidIlk />;
 
   return (
     <ErrorBoundary fallbackRender={invalidIlk} onError={(e_) => {}}>

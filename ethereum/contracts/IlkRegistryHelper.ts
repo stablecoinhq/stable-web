@@ -42,7 +42,7 @@ export default class IlkRegistryHelper {
             type: ilkType,
             name: symbol === 'WETH' ? 'Ethereum' : name,
             symbol: symbol === 'WETH' ? 'ETH' : symbol,
-            gem: new ERC20Helper(this.provider, gem, format),
+            gem: ERC20Helper.fromAddress(this.provider, gem, format),
             gemJoin: GemJoin__factory.connect(join, this.provider.getSigner()),
           };
         })

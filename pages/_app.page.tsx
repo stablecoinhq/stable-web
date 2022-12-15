@@ -4,14 +4,16 @@ import { appWithTranslation } from 'next-i18next';
 import { useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
+import { UnsupportedNetworkError } from 'ethereum/contracts/ChainLogHelper';
 import useEthereumProvider from 'ethereum/react/useEthereumProvider';
 import { NumericDisplayProvider } from 'store/NumericDisplayProvider';
 import 'styles/globals.scss';
 
 import nextI18NextConfig from '../next-i18next.config';
 
+import Error from './Error';
 import Header from './Header';
-import UnsupportedNetwork, { propagateError } from './UnsupportedNetwork';
+import UnsupportedNetwork from './UnsupportedNetwork';
 import WithoutEthereum from './WithoutEthereum';
 
 import type { AppProps } from 'next/app';
@@ -20,11 +22,16 @@ import type { FallbackProps } from 'react-error-boundary';
 import type { WithEthereum } from 'types/next';
 
 const RenderWithEthereum: FC<WithEthereum & AppProps> = ({ externalProvider, provider, Component, pageProps }) => {
-  const renderUnsupportedNetwork = useCallback(
-    (props: FallbackProps) => (
-      // eslint-disable-next-line react/jsx-props-no-spreading
-      <UnsupportedNetwork externalProvider={externalProvider} {...props} />
-    ),
+  const renderError = useCallback(
+    (props: FallbackProps) => {
+      switch (props.error) {
+        case UnsupportedNetworkError:
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          return <UnsupportedNetwork externalProvider={externalProvider} {...props} />;
+        default:
+          return <Error props={props} />
+      }
+    },
     [externalProvider],
   );
 
@@ -34,12 +41,17 @@ const RenderWithEthereum: FC<WithEthereum & AppProps> = ({ externalProvider, pro
    * To prevent unexpected crash, we have to filter errors which should have already been fallen back.
    */
   const onError = useCallback((err: Error) => {
-    propagateError(err);
+    switch (err) {
+      case UnsupportedNetworkError:
+        break;
+      default:
+        throw err;
+    }
   }, []);
 
   return (
     <Box padding={4}>
-      <ErrorBoundary fallbackRender={renderUnsupportedNetwork} onError={onError} resetKeys={[provider]}>
+      <ErrorBoundary fallbackRender={renderError} onError={onError} resetKeys={[provider, pageProps]}>
         {/* eslint-disable-next-line react/jsx-props-no-spreading */}
         <Component externalProvider={externalProvider} provider={provider} {...pageProps} />
       </ErrorBoundary>

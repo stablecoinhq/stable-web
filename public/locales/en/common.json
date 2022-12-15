@@ -131,6 +131,9 @@
   "notFound": {
     "title": "This page could not be found"
   },
+  "error": {
+    "back": "戻る"
+  },
   "terms": {
     "collateral": "collateral",
     "colRatio": "Collateralization Ratio",

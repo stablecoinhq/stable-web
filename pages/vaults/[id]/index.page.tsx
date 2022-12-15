@@ -165,7 +165,7 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
   const [tokenBalance, updateTokenBalance] = usePromiseFactory(
     useCallback(async () => {
       if (ilkCard) {
-        return ilkCard.ilkInfo.gem.getBalance();
+        return ilkCard.ilkInfo.gem.getBalance(); // こいつが失敗している
       }
     }, [ilkCard]),
   );
