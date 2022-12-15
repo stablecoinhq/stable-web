@@ -103,7 +103,10 @@
       "id": "Vault ID",
       "lockedCollateral": "ロックされた担保",
       "debt": "負債",
-      "manageVault": "管理"
+      "manageVault": "管理",
+      "errors" : {
+        "errorWhileVaultManipulation": "Vault操作時に問題が発生しました。再度お試しください。"
+      }
     },
     "earn": {
       "cardTitle": "利息を得る",

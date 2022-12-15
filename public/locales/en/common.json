@@ -103,7 +103,10 @@
       "id": "Vault ID",
       "lockedCollateral": "Locked Collateral",
       "debt": "Debt",
-      "manageVault": "Manage Vault"
+      "manageVault": "Manage Vault",
+      "errors" : {
+        "errorWhileVaultManipulation": "An error occured while trying to manipulate vault. Please try again."
+      }
     },
     "earn": {
       "cardTitle": "Earn Savings",

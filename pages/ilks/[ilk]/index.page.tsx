@@ -103,17 +103,21 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
     return <InvalidIlk />;
   }
 
+  const openVault = (
+    <OpenVault
+      chainLog={chainLog}
+      ilkInfo={ilkCard.ilkInfo}
+      ilkStatus={ilkCard.ilkStatus}
+      liquidationRatio={ilkCard.liquidationRatio}
+      balance={balance}
+      address={provider.address}
+    />
+  );
+
   const openVaultFallBack = (props: FallbackProps) => (
     <>
       <ErrorDialog props={props} message={error('errorWhileOpeningVault')} />
-      <OpenVault
-        chainLog={chainLog}
-        ilkInfo={ilkCard.ilkInfo}
-        ilkStatus={ilkCard.ilkStatus}
-        liquidationRatio={ilkCard.liquidationRatio}
-        balance={balance}
-        address={provider.address}
-      />
+      {openVault}
     </>
   );
 
@@ -125,16 +129,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
         liquidationRatio={ilkCard.liquidationRatio}
         stabilityFee={ilkCard.stabilityFee}
       />
-      <ErrorBoundary fallbackRender={openVaultFallBack}>
-        <OpenVault
-          chainLog={chainLog}
-          ilkInfo={ilkCard.ilkInfo}
-          ilkStatus={ilkCard.ilkStatus}
-          liquidationRatio={ilkCard.liquidationRatio}
-          balance={balance}
-          address={provider.address}
-        />
-      </ErrorBoundary>
+      <ErrorBoundary fallbackRender={openVaultFallBack}>{openVault}</ErrorBoundary>
     </Stack>
   );
 };
