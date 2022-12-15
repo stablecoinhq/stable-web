@@ -11,7 +11,7 @@ import { InvalidGemAddress } from 'ethereum/contracts/ERC20Helper';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { useChainLog } from 'ethereum/react/ContractHooks';
 import IlkStatusCard, { useIlkStatusCardProps } from 'ethereum/react/cards/IlkStatusCard';
-import Error from 'pages/Error';
+import ErrorDialog from 'pages/ErrorDialog';
 import MintFormController from 'pages/forms/MintFormController';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
@@ -121,12 +121,21 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
 
 const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
-  const invalidIlk = useCallback((props: FallbackProps) => {
+  const fallBack = useCallback((props: FallbackProps) => {
     switch (props.error) {
       case InvalidGemAddress:
         return <InvalidIlk />;
       default:
-        return <Error props={props} />;
+        return <ErrorDialog props={props} />;
+    }
+  }, []);
+
+  const onError = useCallback((err: Error) => {
+    switch (err) {
+      case InvalidGemAddress:
+        break;
+      default:
+        throw err;
     }
   }, []);
 
@@ -141,7 +150,7 @@ const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
   }
 
   return (
-    <ErrorBoundary fallbackRender={invalidIlk} onError={(e_) => {}}>
+    <ErrorBoundary FallbackComponent={fallBack} onError={onError}>
       <Card elevation={0}>
         <CardHeader title={t('openLabel', { ilk: ilkType.inString })} />
         <CardContent>

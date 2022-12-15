@@ -132,7 +132,9 @@
     "title": "This page could not be found"
   },
   "error": {
-    "back": "戻る"
+    "close": "Close",
+    "title": "Error",
+    "errorOccured": "An error occured"
   },
   "terms": {
     "collateral": "collateral",

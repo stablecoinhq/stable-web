@@ -11,7 +11,7 @@ import 'styles/globals.scss';
 
 import nextI18NextConfig from '../next-i18next.config';
 
-import Error from './Error';
+import ErrorDialog from './ErrorDialog';
 import Header from './Header';
 import UnsupportedNetwork from './UnsupportedNetwork';
 import WithoutEthereum from './WithoutEthereum';
@@ -29,7 +29,7 @@ const RenderWithEthereum: FC<WithEthereum & AppProps> = ({ externalProvider, pro
           // eslint-disable-next-line react/jsx-props-no-spreading
           return <UnsupportedNetwork externalProvider={externalProvider} {...props} />;
         default:
-          return <Error props={props} />
+          return <ErrorDialog props={props} />;
       }
     },
     [externalProvider],
@@ -51,7 +51,7 @@ const RenderWithEthereum: FC<WithEthereum & AppProps> = ({ externalProvider, pro
 
   return (
     <Box padding={4}>
-      <ErrorBoundary fallbackRender={renderError} onError={onError} resetKeys={[provider, pageProps]}>
+      <ErrorBoundary FallbackComponent={renderError} onError={onError} resetKeys={[provider, pageProps]}>
         {/* eslint-disable-next-line react/jsx-props-no-spreading */}
         <Component externalProvider={externalProvider} provider={provider} {...pageProps} />
       </ErrorBoundary>

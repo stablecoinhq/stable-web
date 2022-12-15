@@ -135,7 +135,9 @@
     "title": "該当するページは見つかりませんでした"
   },
   "error": {
-    "back": "戻る"
+    "title": "エラー",
+    "close": "閉じる",
+    "errorOccured": "エラーが発生しました"
   },
   "terms": {
     "collateral": "担保",
