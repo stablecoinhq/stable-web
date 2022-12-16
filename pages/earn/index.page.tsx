@@ -2,14 +2,14 @@ import { Box, Card, CardContent, CircularProgress, Stack, Tab, Tabs } from '@mui
 import { FixedNumber } from 'ethers';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import useSWR from 'swr';
 
 import Savings from 'ethereum/Savings';
 import { UnitFormats } from 'ethereum/helpers/math';
-import { useChainLog } from 'ethereum/react/ContractHooks';
+import useChainLog from 'ethereum/react/useChainLog';
 import ErrorDialog from 'pages/ErrorDialog';
 import BalanceStatusCard from 'pages/earn/BalanceStatusCard';
 import getTranslationProps from 'pages/getTranslationProps';
-import usePromiseFactory from 'pages/usePromiseFactory';
 
 import SavingRateCard from './SavingRateCard';
 import DepositForm from './forms/DepositForm';
@@ -101,24 +101,26 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
 
   const { t: wallet } = useTranslation('common', { keyPrefix: 'cards.wallet' });
 
-  const [savingRate] = usePromiseFactory(useCallback(() => Savings.fromChainlog(chainLog), [chainLog]));
-  const [annualRate] = usePromiseFactory(useCallback(async () => savingRate && savingRate.getAnnualRate(), [savingRate]));
-  const [balance, updateBalance] = usePromiseFactory(
-    useCallback(async () => {
-      const dai = await chainLog.dai();
-      return dai.getBalance();
-    }, [chainLog]),
-  );
-  const [deposit, updateDeposit] = usePromiseFactory(
-    useCallback(async () => savingRate && savingRate.getDepositAmount(), [savingRate]),
-  );
+  const { data, mutate, isLoading } = useSWR('getSavingData', async () => {
+    const saving = await Savings.fromChainlog(chainLog);
+    const [annualRate, balance, deposit] = await Promise.all([
+      saving.getAnnualRate(),
+      chainLog.dai().then((dai) => dai.getBalance()),
+      saving.getDepositAmount(),
+    ]);
+    return {
+      saving,
+      annualRate,
+      balance,
+      deposit,
+    };
+  });
 
   const updateAllBalance = () => {
-    updateBalance();
-    updateDeposit();
+    mutate();
   };
 
-  if (!savingRate || !balance || !annualRate) {
+  if (isLoading || !data) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
         <CircularProgress />
@@ -126,6 +128,7 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
     );
   }
 
+  const { saving, annualRate, deposit, balance } = data;
   return (
     <Stack padding={2} spacing={2}>
       <SavingRateCard annualRate={annualRate} />
@@ -147,12 +150,7 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
         tooltipText={wallet('description')!}
         unit="DAI"
       />
-      <Controller
-        savingRate={savingRate}
-        updateAllBalance={updateAllBalance}
-        depositAmount={deposit?.amount}
-        balance={balance}
-      />
+      <Controller savingRate={saving} updateAllBalance={updateAllBalance} depositAmount={deposit?.amount} balance={balance} />
     </Stack>
   );
 };

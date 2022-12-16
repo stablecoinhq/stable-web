@@ -18,11 +18,11 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
+import useSWR from 'swr';
 
 import ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import { CENT, getAnnualFee, getTotalIssued, UnitFormats } from 'ethereum/helpers/math';
-import usePromiseFactory from 'pages/usePromiseFactory';
 import { useNumericDisplayContext } from 'store/NumericDisplayProvider';
 
 import getTranslationProps from '../getTranslationProps';
@@ -36,35 +36,33 @@ import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
 const useIlks = (provider: EthereumProvider) =>
-  usePromiseFactory(
-    useCallback(async () => {
-      const chainLog = new ChainLogHelper(provider);
-      const [ilkRegistry, vat, spot, jug] = await Promise.all([
-        chainLog.ilkRegistry(),
-        chainLog.vat(),
-        chainLog.spot(),
-        chainLog.jug(),
-      ]);
-      const list = await ilkRegistry.list();
-      return Promise.all(
-        list.map(async (ilk) => {
-          const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await Promise.all([
-            ilkRegistry.info(ilk),
-            vat.getIlkStatus(ilk),
-            spot.getLiquidationRatio(ilk),
-            jug.getStabilityFee(ilk),
-          ]);
-          return {
-            ilk,
-            ilkInfo,
-            ilkStatus,
-            liquidationRatio,
-            stabilityFee,
-          };
-        }),
-      );
-    }, [provider]),
-  )[0];
+  useSWR('getIlks', async () => {
+    const chainLog = new ChainLogHelper(provider);
+    const [ilkRegistry, vat, spot, jug] = await Promise.all([
+      chainLog.ilkRegistry(),
+      chainLog.vat(),
+      chainLog.spot(),
+      chainLog.jug(),
+    ]);
+    const list = await ilkRegistry.list();
+    return Promise.all(
+      list.map(async (ilk) => {
+        const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await Promise.all([
+          ilkRegistry.info(ilk),
+          vat.getIlkStatus(ilk),
+          spot.getLiquidationRatio(ilk),
+          jug.getStabilityFee(ilk),
+        ]);
+        return {
+          ilk,
+          ilkInfo,
+          ilkStatus,
+          liquidationRatio,
+          stabilityFee,
+        };
+      }),
+    );
+  });
 
 type RenderRowProps = {
   field: string;
@@ -185,7 +183,7 @@ const OpenVault: NextPageWithEthereum = ({ provider }) => {
     <Card elevation={0}>
       <CardHeader title={t('openLabel')} />
       <CardContent>
-        <Content ilks={ilks} />
+        <Content ilks={ilks.data} />
       </CardContent>
     </Card>
   );

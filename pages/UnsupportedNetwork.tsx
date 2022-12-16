@@ -8,9 +8,8 @@ import { isMetaMaskInPageProvider } from 'ethereum/react/useEthereumProvider';
 
 import type { ExternalProvider } from '@ethersproject/providers';
 import type { FC } from 'react';
-import type { FallbackProps } from 'react-error-boundary';
 
-export type UnsupportedNetworkProps = FallbackProps & {
+export type UnsupportedNetworkProps = {
   externalProvider: ExternalProvider;
 };
 
@@ -20,7 +19,7 @@ export const propagateError = (err: Error) => {
   }
 };
 
-const UnsupportedNetwork: FC<UnsupportedNetworkProps> = ({ error, externalProvider }) => {
+const UnsupportedNetwork: FC<UnsupportedNetworkProps> = ({ externalProvider }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.errors' });
 
   const changeNetwork = useCallback(() => {
@@ -35,8 +34,6 @@ const UnsupportedNetwork: FC<UnsupportedNetworkProps> = ({ error, externalProvid
       });
     }
   }, [externalProvider]);
-
-  propagateError(error);
 
   return (
     <Stack direction="column" alignItems="center" padding={2}>

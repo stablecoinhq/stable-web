@@ -3,18 +3,18 @@ import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import { useCallback, useMemo, useState } from 'react';
+import useSWR from 'swr';
 
 import IlkType from 'ethereum/IlkType';
 import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
-import { useChainLog } from 'ethereum/react/ContractHooks';
-import IlkStatusCard, { useIlkStatusCardProps } from 'ethereum/react/cards/IlkStatusCard';
+import IlkStatusCard from 'ethereum/react/cards/IlkStatusCard';
+import useChainLog from 'ethereum/react/useChainLog';
 import ErrorDialog from 'pages/ErrorDialog';
 import MintFormController from 'pages/forms/MintFormController';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
-import usePromiseFactory from 'pages/usePromiseFactory';
 
 import InvalidIlk from './InvalidIlk';
 
@@ -81,45 +81,43 @@ type ContentProps = {
 
 const Content: FC<ContentProps> = ({ provider, ilkType }) => {
   const chainLog = useChainLog(provider);
-  const ilkCard = useIlkStatusCardProps(chainLog, ilkType);
-  const [error, setError] = useState<Error | null>(null);
-  const [balance] = usePromiseFactory(
-    useCallback(async () => {
-      if (ilkCard) {
-        return ilkCard.ilkInfo.gem.getBalance().catch((e) => setError(e));
-      }
-    }, [ilkCard]),
-  );
+  const { data, isLoading, error } = useSWR('getData', async () => {
+    const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await Promise.all([
+      chainLog.ilkRegistry().then((ilkRegistry) => ilkRegistry.info(ilkType)),
+      chainLog.vat().then((vat) => vat.getIlkStatus(ilkType)),
+      chainLog.spot().then((spot) => spot.getLiquidationRatio(ilkType)),
+      chainLog.jug().then((jug) => jug.getStabilityFee(ilkType)),
+    ]);
+    const balance = await ilkInfo.gem.getBalance();
+    return {
+      ilkInfo,
+      ilkStatus,
+      liquidationRatio,
+      stabilityFee,
+      balance,
+    };
+  });
 
   if (error) {
     return <InvalidIlk />;
   }
 
-  if (!ilkCard || !balance) {
+  if (!data || isLoading) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
         <CircularProgress />
       </Box>
     );
   }
-
-  if (!ilkCard.ilkInfo.name) {
-    return <InvalidIlk />;
-  }
-
+  const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, balance } = data;
   return (
     <Stack padding={2} spacing={2}>
-      <IlkStatusCard
-        ilkInfo={ilkCard.ilkInfo}
-        ilkStatus={ilkCard.ilkStatus}
-        liquidationRatio={ilkCard.liquidationRatio}
-        stabilityFee={ilkCard.stabilityFee}
-      />
+      <IlkStatusCard ilkInfo={ilkInfo} ilkStatus={ilkStatus} liquidationRatio={liquidationRatio} stabilityFee={stabilityFee} />
       <OpenVault
         chainLog={chainLog}
-        ilkInfo={ilkCard.ilkInfo}
-        ilkStatus={ilkCard.ilkStatus}
-        liquidationRatio={ilkCard.liquidationRatio}
+        ilkInfo={ilkInfo}
+        ilkStatus={ilkStatus}
+        liquidationRatio={liquidationRatio}
         balance={balance}
         address={provider.address}
       />
