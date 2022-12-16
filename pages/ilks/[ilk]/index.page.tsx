@@ -3,7 +3,6 @@ import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import { useCallback, useMemo, useState } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 
 import IlkType from 'ethereum/IlkType';
 import Vault from 'ethereum/Vault';
@@ -83,13 +82,18 @@ type ContentProps = {
 const Content: FC<ContentProps> = ({ provider, ilkType }) => {
   const chainLog = useChainLog(provider);
   const ilkCard = useIlkStatusCardProps(chainLog, ilkType);
+  const [error, setError] = useState<Error | null>(null);
   const [balance] = usePromiseFactory(
     useCallback(async () => {
       if (ilkCard) {
-        return ilkCard.ilkInfo.gem.getBalance();
+        return ilkCard.ilkInfo.gem.getBalance().catch((e) => setError(e));
       }
     }, [ilkCard]),
   );
+
+  if (error) {
+    return <InvalidIlk />;
+  }
 
   if (!ilkCard || !balance) {
     return (
@@ -99,7 +103,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
     );
   }
 
-  if (!ilkCard.ilkInfo.name || !ilkCard) {
+  if (!ilkCard.ilkInfo.name) {
     return <InvalidIlk />;
   }
 
@@ -125,7 +129,6 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
 
 const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
-  const fallBack = useCallback(() => <InvalidIlk />, []);
 
   const router = useRouter();
   const ilkType = useMemo(() => {
@@ -138,14 +141,12 @@ const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
   }
 
   return (
-    <ErrorBoundary fallbackRender={fallBack}>
-      <Card elevation={0}>
-        <CardHeader title={t('openLabel', { ilk: ilkType.inString })} />
-        <CardContent>
-          <Content provider={provider} ilkType={ilkType} />
-        </CardContent>
-      </Card>
-    </ErrorBoundary>
+    <Card elevation={0}>
+      <CardHeader title={t('openLabel', { ilk: ilkType.inString })} />
+      <CardContent>
+        <Content provider={provider} ilkType={ilkType} />
+      </CardContent>
+    </Card>
   );
 };
 

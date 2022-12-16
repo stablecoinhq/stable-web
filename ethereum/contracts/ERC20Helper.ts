@@ -1,5 +1,3 @@
-import { ethers } from 'ethers';
-
 import { ERC20__factory } from 'generated/types';
 
 import { toBigNumber, toFixedNumber } from '../helpers/math';
@@ -52,12 +50,5 @@ export default class ERC20Helper {
     }
 
     await this.approve(spenderAddress, diff, wait);
-  }
-
-  static fromAddress(provider: EthereumProvider, address: string, format: FixedFormat) {
-    if (address === ethers.constants.AddressZero) {
-      throw InvalidGemAddress;
-    }
-    return new ERC20Helper(provider, address, format);
   }
 }

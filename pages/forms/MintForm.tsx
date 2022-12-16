@@ -127,13 +127,13 @@ const MintForm: FC<MintFormProps> = ({
           <Button
             variant="contained"
             fullWidth
-            // disabled={
-            //   !collateralAmount ||
-            //   !daiAmount ||
-            //   minting ||
-            //   formErrors.length !== 0 ||
-            //   (daiAmount && collateralAmount && daiAmount.isZero() && collateralAmount.isZero())
-            // }
+            disabled={
+              !collateralAmount ||
+              !daiAmount ||
+              minting ||
+              formErrors.length !== 0 ||
+              (daiAmount && collateralAmount && daiAmount.isZero() && collateralAmount.isZero())
+            }
             onClick={onButtonClick}
           >
             {minting ? <CircularProgress /> : buttonContent}
