@@ -5,7 +5,6 @@ import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCallback, useMemo, useState } from 'react';
-import { ErrorBoundary, useErrorHandler } from 'react-error-boundary';
 
 import Vault from 'ethereum/Vault';
 import { INT_FORMAT } from 'ethereum/helpers/math';
@@ -30,7 +29,6 @@ import type { NextPageWithEthereum } from 'next';
 import type { BurnFormProps } from 'pages/forms/BurnForm';
 import type { MintFormProps } from 'pages/forms/MintForm';
 import type { FC } from 'react';
-import type { FallbackProps } from 'react-error-boundary';
 
 const useCDP = (cdpManager: CDPManagerHelper | undefined, cdpId: FixedNumber) =>
   usePromiseFactory(useCallback(async () => cdpManager?.getCDP(cdpId), [cdpManager, cdpId]))[0];
@@ -84,6 +82,9 @@ const Controller: FC<ControllerProps> = ({
   address,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'terms' });
+  const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.vault.errors' });
+
+  const [error, setError] = useState<Error | null>(null);
 
   const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback(
@@ -92,15 +93,14 @@ const Controller: FC<ControllerProps> = ({
     },
     [setSelectedTab],
   );
-  const handleError = useErrorHandler();
 
   const mint: MintFormProps['onMint'] = useCallback(
     (collateralAmount, daiAmount) =>
       vault
         .mint(chainLog, collateralAmount, daiAmount)
         .then(() => updateAllBalance())
-        .catch((e) => handleError(e)),
-    [vault, chainLog, updateAllBalance, handleError],
+        .catch((e) => setError(e)),
+    [vault, chainLog, updateAllBalance],
   );
 
   const burn: BurnFormProps['onBurn'] = useCallback(
@@ -108,8 +108,8 @@ const Controller: FC<ControllerProps> = ({
       vault
         .burn(chainLog, col, dai)
         .then(() => updateAllBalance())
-        .catch((e) => handleError(e)),
-    [vault, chainLog, updateAllBalance, handleError],
+        .catch((e) => setError(e)),
+    [vault, chainLog, updateAllBalance],
   );
 
   const TabContent: FC = useCallback(() => {
@@ -160,7 +160,12 @@ const Controller: FC<ControllerProps> = ({
     daiBalance,
   ]);
 
-  return <TabContent />;
+  return (
+    <>
+      <ErrorDialog error={error} message={errorMessage('errorWhileVaultManipulation')} resetError={() => setError(null)} />
+      <TabContent />
+    </>
+  );
 };
 
 type ContentProps = {
@@ -171,7 +176,6 @@ type ContentProps = {
 
 const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
   const ilkCard = useIlkStatusCardProps(chainLog, cdp.ilk);
-  const { t: error } = useTranslation('common', { keyPrefix: 'pages.vault.errors' });
 
   const [urnStatus, updateUrnStatus] = usePromiseFactory(
     useCallback(() => chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)), [chainLog, cdp]),
@@ -207,26 +211,6 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
     );
   }
 
-  const controller = (
-    <Controller
-      chainLog={chainLog}
-      vault={vault}
-      urnStatus={urnStatus}
-      ilkStatus={ilkCard.ilkStatus}
-      liquidationRatio={ilkCard.liquidationRatio}
-      updateAllBalance={updateAllBalance}
-      tokenBalance={tokenBalance}
-      daiBalance={daiBalance}
-      address={address}
-    />
-  );
-
-  const fallback = (props: FallbackProps) => (
-    <>
-      <ErrorDialog props={props} message={error('errorWhileVaultManipulation')} />
-      {controller}
-    </>
-  );
   return (
     <Stack padding={2} spacing={2}>
       <IlkStatusCard
@@ -235,9 +219,17 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
         liquidationRatio={ilkCard.liquidationRatio}
         stabilityFee={ilkCard.stabilityFee}
       />
-      <ErrorBoundary fallbackRender={fallback} resetKeys={[controller]}>
-        {controller}
-      </ErrorBoundary>
+      <Controller
+        chainLog={chainLog}
+        vault={vault}
+        urnStatus={urnStatus}
+        ilkStatus={ilkCard.ilkStatus}
+        liquidationRatio={ilkCard.liquidationRatio}
+        updateAllBalance={updateAllBalance}
+        tokenBalance={tokenBalance}
+        daiBalance={daiBalance}
+        address={address}
+      />
     </Stack>
   );
 };

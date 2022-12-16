@@ -2,8 +2,8 @@ import { Box, Card, CardContent, CardHeader, CircularProgress, Stack } from '@mu
 import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
-import { useCallback, useMemo } from 'react';
-import { ErrorBoundary, useErrorHandler } from 'react-error-boundary';
+import { useCallback, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 
 import IlkType from 'ethereum/IlkType';
 import Vault from 'ethereum/Vault';
@@ -25,7 +25,6 @@ import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
-import type { FallbackProps } from 'react-error-boundary';
 
 type OpenVaultProps = {
   chainLog: ChainLogHelper;
@@ -38,17 +37,17 @@ type OpenVaultProps = {
 
 const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidationRatio, balance, address }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
-
+  const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.ilk.errors' });
+  const [error, setError] = useState<Error | null>(null);
   const router = useRouter();
-  const handleError = useErrorHandler();
 
   const openVault = useCallback(
     async (amount: FixedNumber, ratio: FixedNumber) => {
       await Vault.open(chainLog, ilkInfo, amount, ratio)
         .then(() => router.push('/vaults'))
-        .catch((e) => handleError(e));
+        .catch((e) => setError(e));
     },
-    [chainLog, handleError, ilkInfo, router],
+    [chainLog, ilkInfo, router],
   );
 
   const zero = FixedNumber.fromString('0', UnitFormats.WAD);
@@ -60,16 +59,19 @@ const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidati
   };
 
   return (
-    <MintFormController
-      ilkInfo={ilkInfo}
-      ilkStatus={ilkStatus}
-      urnStatus={urnStatus}
-      mint={openVault}
-      liquidationRatio={liquidationRatio}
-      balance={balance}
-      address={address}
-      buttonContent={t('openLabel')}
-    />
+    <>
+      <ErrorDialog error={error} message={errorMessage('errorWhileOpeningVault')} resetError={() => setError(null)} />
+      <MintFormController
+        ilkInfo={ilkInfo}
+        ilkStatus={ilkStatus}
+        urnStatus={urnStatus}
+        mint={openVault}
+        liquidationRatio={liquidationRatio}
+        balance={balance}
+        address={address}
+        buttonContent={t('openLabel')}
+      />
+    </>
   );
 };
 
@@ -79,8 +81,6 @@ type ContentProps = {
 };
 
 const Content: FC<ContentProps> = ({ provider, ilkType }) => {
-  const { t: error } = useTranslation('common', { keyPrefix: 'pages.ilk.errors' });
-
   const chainLog = useChainLog(provider);
   const ilkCard = useIlkStatusCardProps(chainLog, ilkType);
   const [balance] = usePromiseFactory(
@@ -103,24 +103,6 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
     return <InvalidIlk />;
   }
 
-  const openVault = (
-    <OpenVault
-      chainLog={chainLog}
-      ilkInfo={ilkCard.ilkInfo}
-      ilkStatus={ilkCard.ilkStatus}
-      liquidationRatio={ilkCard.liquidationRatio}
-      balance={balance}
-      address={provider.address}
-    />
-  );
-
-  const fallBack = (props: FallbackProps) => (
-    <>
-      <ErrorDialog props={props} message={error('errorWhileOpeningVault')} />
-      {openVault}
-    </>
-  );
-
   return (
     <Stack padding={2} spacing={2}>
       <IlkStatusCard
@@ -129,9 +111,14 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
         liquidationRatio={ilkCard.liquidationRatio}
         stabilityFee={ilkCard.stabilityFee}
       />
-      <ErrorBoundary fallbackRender={fallBack} resetKeys={[openVault]}>
-        {openVault}
-      </ErrorBoundary>
+      <OpenVault
+        chainLog={chainLog}
+        ilkInfo={ilkCard.ilkInfo}
+        ilkStatus={ilkCard.ilkStatus}
+        liquidationRatio={ilkCard.liquidationRatio}
+        balance={balance}
+        address={provider.address}
+      />
     </Stack>
   );
 };
