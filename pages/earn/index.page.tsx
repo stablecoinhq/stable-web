@@ -7,9 +7,9 @@ import useSWR from 'swr';
 import Savings from 'ethereum/Savings';
 import { UnitFormats } from 'ethereum/helpers/math';
 import useChainLog from 'ethereum/react/useChainLog';
-import ErrorDialog from 'pages/ErrorDialog';
 import BalanceStatusCard from 'pages/earn/BalanceStatusCard';
 import getTranslationProps from 'pages/getTranslationProps';
+import { useErrorDialog } from 'store/ErrorDialogProvider';
 
 import SavingRateCard from './SavingRateCard';
 import DepositForm from './forms/DepositForm';
@@ -35,8 +35,7 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, deposit
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn' });
   const [selectedTab, setSelectedTab] = useState<TabValue>('deposit');
   const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.earn.errors' });
-
-  const [error, setError] = useState<Error | null>(null);
+  const { openDialog } = useErrorDialog();
 
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {
     setSelectedTab(value);
@@ -51,8 +50,8 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, deposit
       savingRate
         .withdraw(amount)
         .then(() => updateAllBalance())
-        .catch((e) => setError(e)),
-    [savingRate, updateAllBalance],
+        .catch((_e) => openDialog(errorMessage('errorWhileEarn'))),
+    [errorMessage, openDialog, savingRate, updateAllBalance],
   );
 
   const withdrawAll: WithdrawFormProps['onWithdrawAll'] = useCallback(
@@ -60,8 +59,8 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, deposit
       savingRate
         .withdrawAll()
         .then(() => updateAllBalance())
-        .catch((e) => setError(e)),
-    [savingRate, updateAllBalance],
+        .catch((_e) => openDialog(errorMessage('errorWhileEarn'))),
+    [errorMessage, openDialog, savingRate, updateAllBalance],
   );
   const TabContent: FC = useCallback(() => {
     switch (selectedTab) {
@@ -81,7 +80,6 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, deposit
 
   return (
     <>
-      <ErrorDialog error={error} message={errorMessage('errorWhileEarn')} resetError={() => setError(null)} />
       <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
         <Tab label={t('depositTab')} value="deposit" />
         <Tab label={t('withdrawTab')} value="withdraw" disabled={!depositAmount || depositAmount?.isZero()} />

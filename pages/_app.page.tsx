@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import useEthereumProvider from 'ethereum/react/useEthereumProvider';
+import { ErrorDialogProvider } from 'store/ErrorDialogProvider';
 import { NumericDisplayProvider } from 'store/NumericDisplayProvider';
 import 'styles/globals.scss';
 
@@ -85,15 +86,17 @@ const MyApp = (appProps: AppProps) => {
 
   return (
     <ThemeProvider theme={theme}>
-      <NumericDisplayProvider>
-        <Header externalProvider={external} provider={provider} />
-        {external && provider ? (
-          // eslint-disable-next-line react/jsx-props-no-spreading
-          <RenderWithEthereum externalProvider={external} provider={provider} {...appProps} />
-        ) : (
-          <WithoutEthereum externalProvider={external} provider={provider} />
-        )}
-      </NumericDisplayProvider>
+      <ErrorDialogProvider>
+        <NumericDisplayProvider>
+          <Header externalProvider={external} provider={provider} />
+          {external && provider ? (
+            // eslint-disable-next-line react/jsx-props-no-spreading
+            <RenderWithEthereum externalProvider={external} provider={provider} {...appProps} />
+          ) : (
+            <WithoutEthereum externalProvider={external} provider={provider} />
+          )}
+        </NumericDisplayProvider>
+      </ErrorDialogProvider>
     </ThemeProvider>
   );
 };

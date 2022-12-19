@@ -12,10 +12,10 @@ import { INT_FORMAT } from 'ethereum/helpers/math';
 import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import IlkStatusCard from 'ethereum/react/cards/IlkStatusCard';
 import useChainLog from 'ethereum/react/useChainLog';
-import ErrorDialog from 'pages/ErrorDialog';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
+import { useErrorDialog } from 'store/ErrorDialogProvider';
 
 import BurnFormController from '../../forms/BurnFormController';
 import MintFormController from '../../forms/MintFormController';
@@ -72,8 +72,7 @@ const Controller: FC<ControllerProps> = ({
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'terms' });
   const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.vault.errors' });
-
-  const [error, setError] = useState<Error | null>(null);
+  const { openDialog } = useErrorDialog();
 
   const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback(
@@ -88,8 +87,8 @@ const Controller: FC<ControllerProps> = ({
       vault
         .mint(chainLog, collateralAmount, daiAmount)
         .then(() => updateAllBalance())
-        .catch((e) => setError(e)),
-    [vault, chainLog, updateAllBalance],
+        .catch((_e) => openDialog(errorMessage('errorWhileVaultManipulation'))),
+    [vault, chainLog, updateAllBalance, openDialog, errorMessage],
   );
 
   const burn: BurnFormProps['onBurn'] = useCallback(
@@ -97,8 +96,8 @@ const Controller: FC<ControllerProps> = ({
       vault
         .burn(chainLog, col, dai)
         .then(() => updateAllBalance())
-        .catch((e) => setError(e)),
-    [vault, chainLog, updateAllBalance],
+        .catch((_e) => openDialog(errorMessage('errorWhileVaultManipulation'))),
+    [vault, chainLog, updateAllBalance, openDialog, errorMessage],
   );
 
   const TabContent: FC = useCallback(() => {
@@ -149,12 +148,7 @@ const Controller: FC<ControllerProps> = ({
     daiBalance,
   ]);
 
-  return (
-    <>
-      <ErrorDialog error={error} message={errorMessage('errorWhileVaultManipulation')} resetError={() => setError(null)} />
-      <TabContent />
-    </>
-  );
+  return <TabContent />;
 };
 
 type ContentProps = {

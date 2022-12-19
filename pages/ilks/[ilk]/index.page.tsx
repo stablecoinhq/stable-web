@@ -2,7 +2,7 @@ import { Box, Card, CardContent, CardHeader, CircularProgress, Stack } from '@mu
 import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import useSWR from 'swr';
 
 import IlkType from 'ethereum/IlkType';
@@ -10,11 +10,11 @@ import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
 import IlkStatusCard from 'ethereum/react/cards/IlkStatusCard';
 import useChainLog from 'ethereum/react/useChainLog';
-import ErrorDialog from 'pages/ErrorDialog';
 import MintFormController from 'pages/forms/MintFormController';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
+import { useErrorDialog } from 'store/ErrorDialogProvider';
 
 import InvalidIlk from './InvalidIlk';
 
@@ -37,16 +37,16 @@ type OpenVaultProps = {
 const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidationRatio, balance, address }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
   const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.ilk.errors' });
-  const [error, setError] = useState<Error | null>(null);
+  const { openDialog } = useErrorDialog();
   const router = useRouter();
 
   const openVault = useCallback(
     async (amount: FixedNumber, ratio: FixedNumber) => {
       await Vault.open(chainLog, ilkInfo, amount, ratio)
         .then(() => router.push('/vaults'))
-        .catch((e) => setError(e));
+        .catch((_e) => openDialog(errorMessage('errorWhileOpeningVault')));
     },
-    [chainLog, ilkInfo, router],
+    [chainLog, errorMessage, ilkInfo, openDialog, router],
   );
 
   const zero = FixedNumber.fromString('0', UnitFormats.WAD);
@@ -58,19 +58,16 @@ const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidati
   };
 
   return (
-    <>
-      <ErrorDialog error={error} message={errorMessage('errorWhileOpeningVault')} resetError={() => setError(null)} />
-      <MintFormController
-        ilkInfo={ilkInfo}
-        ilkStatus={ilkStatus}
-        urnStatus={urnStatus}
-        mint={openVault}
-        liquidationRatio={liquidationRatio}
-        balance={balance}
-        address={address}
-        buttonContent={t('openLabel')}
-      />
-    </>
+    <MintFormController
+      ilkInfo={ilkInfo}
+      ilkStatus={ilkStatus}
+      urnStatus={urnStatus}
+      mint={openVault}
+      liquidationRatio={liquidationRatio}
+      balance={balance}
+      address={address}
+      buttonContent={t('openLabel')}
+    />
   );
 };
 
