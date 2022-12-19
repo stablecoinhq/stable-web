@@ -59,7 +59,8 @@
       "error": {
         "insufficientBalance": "残高不足です",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
-        "debtTooLow": "$t(terms.vault_one)の負債額が下限値を下回っています。"
+        "debtTooLow": "$t(terms.vault_one)の負債額が下限値を下回っています。",
+        "issuingTooMuchCoins": "$t(units.stableToken)の発行量が上限値を上回っています。"
       }
     }
   },
@@ -87,7 +88,7 @@
       "currentPrice": "1 {{collateral}}あたりの価格",
       "unableToLoadCollateral": "該当の担保情報を読み込むことができませんでした",
       "errors": {
-        "errorWhileOpeningVault": "Vault作成時にエラーが発生しました。再度お試しください。"
+        "errorWhileOpeningVault": "Vault作成時にエラーが発生しました。$t(terms.retry)"
       }
     },
     "vault": {
@@ -104,8 +105,9 @@
       "lockedCollateral": "ロックされた担保",
       "debt": "負債",
       "manageVault": "管理",
-      "errors" : {
-        "errorWhileVaultManipulation": "Vault操作時に問題が発生しました。再度お試しください。"
+      "errors": {
+        "errorWhileMinting": "$t(units.stableToken)発行時に問題が発生しました。$t(terms.retry)",
+        "errorWhileRepaying": "返済時に問題が発生しました。$t(terms.retry)"
       }
     },
     "earn": {
@@ -135,8 +137,9 @@
           }
         }
       },
-      "errors" : {
-        "errorWhileEarn": "予期せぬエラーが発生しました。再度お試しください。"
+      "errors": {
+        "errorWhileDeposit": "預け入れ時に問題が発生しました。$t(terms.retry)",
+        "errorWhileWithdraw": "引き出し時に問題が発生しました。$t(terms.retry)"
       }
     }
   },
@@ -146,7 +149,7 @@
   "error": {
     "title": "エラー",
     "close": "閉じる",
-    "unexpectedError": "予期せぬエラーが発生しました。再度お試しください。"
+    "unexpectedError": "予期せぬエラーが発生しました。$t(terms.retry)"
   },
   "terms": {
     "collateral": "担保",
@@ -161,6 +164,7 @@
     "maxLiquidity": "負債額上限",
     "liqRatio": "最低担保率",
     "liquidationPrice": "精算価格",
+    "retry": "時間をおいてから再度お試しください。",
     "savings": "JSR"
   },
   "units": {

@@ -8,7 +8,7 @@ import useSWR from 'swr';
 import IlkType from 'ethereum/IlkType';
 import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
-import IlkStatusCard from 'ethereum/react/cards/IlkStatusCard';
+import IlkStatusCard, { getIlkStatusProps } from 'ethereum/react/cards/IlkStatusCard';
 import useChainLog from 'ethereum/react/useChainLog';
 import MintFormController from 'pages/forms/MintFormController';
 import getEmptyPaths from 'pages/getEmptyPaths';
@@ -44,7 +44,7 @@ const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidati
     async (amount: FixedNumber, ratio: FixedNumber) => {
       await Vault.open(chainLog, ilkInfo, amount, ratio)
         .then(() => router.push('/vaults'))
-        .catch((_e) => openDialog(errorMessage('errorWhileOpeningVault')));
+        .catch((e) => openDialog(errorMessage('errorWhileOpeningVault'), e));
     },
     [chainLog, errorMessage, ilkInfo, openDialog, router],
   );
@@ -79,12 +79,7 @@ type ContentProps = {
 const Content: FC<ContentProps> = ({ provider, ilkType }) => {
   const chainLog = useChainLog(provider);
   const { data, isLoading, error } = useSWR('getData', async () => {
-    const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await Promise.all([
-      chainLog.ilkRegistry().then((ilkRegistry) => ilkRegistry.info(ilkType)),
-      chainLog.vat().then((vat) => vat.getIlkStatus(ilkType)),
-      chainLog.spot().then((spot) => spot.getLiquidationRatio(ilkType)),
-      chainLog.jug().then((jug) => jug.getStabilityFee(ilkType)),
-    ]);
+    const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, ilkType);
     const balance = await ilkInfo.gem.getBalance();
     return {
       ilkInfo,
@@ -95,16 +90,16 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
     };
   });
 
+  if (error) {
+    return <InvalidIlk />;
+  }
+
   if (!data || isLoading) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
         <CircularProgress />
       </Box>
     );
-  }
-
-  if (error) {
-    return <InvalidIlk />;
   }
 
   const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, balance } = data;

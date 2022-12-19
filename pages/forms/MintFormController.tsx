@@ -53,15 +53,6 @@ const MintFormController: FC<MintFormControllerProps> = ({
     [],
   );
 
-  const onMint = useCallback(
-    (amount: FixedNumber, ratio: FixedNumber) =>
-      mint(amount, ratio).finally(() => {
-        setAmountText('');
-        setDaiAmountText('');
-      }),
-    [mint],
-  );
-
   const current: CurrentVaultStatus | undefined = useMemo(() => {
     const collateralAmount = toFixedNumberOrUndefined(amountText, ilkInfo.gem.format);
     const daiAmount = toFixedNumberOrUndefined(daiAmountText, UnitFormats.WAD);
@@ -116,7 +107,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
         ilkInfo={ilkInfo}
         ilkStatus={ilkStatus}
         buttonContent={buttonContent}
-        onMint={onMint}
+        onMint={mint}
         balance={balance}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
@@ -133,9 +124,9 @@ const MintFormController: FC<MintFormControllerProps> = ({
       daiAmountText,
       ilkInfo,
       ilkStatus,
+      mint,
       onAmountChange,
       onDaiAmountChange,
-      onMint,
       urnStatus.debt,
       urnStatus.lockedBalance,
     ],

@@ -50,7 +50,7 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, deposit
       savingRate
         .withdraw(amount)
         .then(() => updateAllBalance())
-        .catch((_e) => openDialog(errorMessage('errorWhileEarn'))),
+        .catch((err) => openDialog(errorMessage('errorWhileWithdraw'), err)),
     [errorMessage, openDialog, savingRate, updateAllBalance],
   );
 
@@ -59,7 +59,7 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, deposit
       savingRate
         .withdrawAll()
         .then(() => updateAllBalance())
-        .catch((_e) => openDialog(errorMessage('errorWhileEarn'))),
+        .catch((err) => openDialog(errorMessage('errorWhileDeposit'), err)),
     [errorMessage, openDialog, savingRate, updateAllBalance],
   );
   const TabContent: FC = useCallback(() => {

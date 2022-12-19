@@ -10,7 +10,7 @@ import useSWR from 'swr';
 import Vault from 'ethereum/Vault';
 import { INT_FORMAT } from 'ethereum/helpers/math';
 import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
-import IlkStatusCard from 'ethereum/react/cards/IlkStatusCard';
+import IlkStatusCard, { getIlkStatusProps } from 'ethereum/react/cards/IlkStatusCard';
 import useChainLog from 'ethereum/react/useChainLog';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
@@ -87,7 +87,7 @@ const Controller: FC<ControllerProps> = ({
       vault
         .mint(chainLog, collateralAmount, daiAmount)
         .then(() => updateAllBalance())
-        .catch((_e) => openDialog(errorMessage('errorWhileVaultManipulation'))),
+        .catch((err) => openDialog(errorMessage('errorWhileMinting'), err)),
     [vault, chainLog, updateAllBalance, openDialog, errorMessage],
   );
 
@@ -96,7 +96,7 @@ const Controller: FC<ControllerProps> = ({
       vault
         .burn(chainLog, col, dai)
         .then(() => updateAllBalance())
-        .catch((_e) => openDialog(errorMessage('errorWhileVaultManipulation'))),
+        .catch((err) => openDialog(errorMessage('errorWhileRepaying'), err)),
     [vault, chainLog, updateAllBalance, openDialog, errorMessage],
   );
 
@@ -159,15 +159,12 @@ type ContentProps = {
 
 const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
   const { data, mutate, isLoading } = useSWR('getVaultData', async () => {
-    const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee, daiBalance, urnStatus] = await Promise.all([
-      chainLog.ilkRegistry().then((ilkRegistry) => ilkRegistry.info(cdp.ilk)),
-      chainLog.vat().then((vat) => vat.getIlkStatus(cdp.ilk)),
-      chainLog.spot().then((spot) => spot.getLiquidationRatio(cdp.ilk)),
-      chainLog.jug().then((jug) => jug.getStabilityFee(cdp.ilk)),
+    const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, cdp.ilk);
+    const [daiBalance, urnStatus, tokenBalance] = await Promise.all([
       chainLog.dai().then((dai) => dai.getBalance()),
       chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)),
+      ilkInfo.gem.getBalance(),
     ]);
-    const tokenBalance = await ilkInfo.gem.getBalance();
     return {
       ilkInfo,
       ilkStatus,

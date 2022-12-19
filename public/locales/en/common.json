@@ -1,4 +1,3 @@
-
 {
   "cards": {
     "ilk": {
@@ -86,7 +85,7 @@
       "currency": "Currency",
       "currentPrice": "Current Price per {{collateral}}",
       "unableToLoadCollateral": "Unable to load collateral",
-      "errors" : {
+      "errors": {
         "errorWhileOpeningVault": "An error occured while opening vault. Please try again."
       }
     },
@@ -104,8 +103,9 @@
       "lockedCollateral": "Locked Collateral",
       "debt": "Debt",
       "manageVault": "Manage Vault",
-      "errors" : {
-        "errorWhileVaultManipulation": "An error occured while trying to manipulate vault. Please try again."
+      "errors": {
+        "errorWhileMinting": "An error occured while trying to mint $t(units.stableToken). Please try again.",
+        "errorWhileRepaying": "An error occured while trying to repay debt. Please try again."
       }
     },
     "earn": {
@@ -129,8 +129,9 @@
           "submit": "Withdraw"
         }
       },
-      "errors" : {
-        "errorWhileEarn": "An unexpected error occured. Please try again."
+      "errors": {
+        "errorWhileDeposit": "An unexpected error occured. Please try again.",
+        "errorWhileWithdraw": "An unexpected error occured. Please try again."
       }
     }
   },

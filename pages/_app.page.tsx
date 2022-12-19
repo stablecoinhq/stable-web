@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Box, createTheme, ThemeProvider } from '@mui/material';
-import { appWithTranslation } from 'next-i18next';
+import { appWithTranslation, useTranslation } from 'next-i18next';
 import { useMemo, useState } from 'react';
 import { SWRConfig } from 'swr/_internal';
 
@@ -30,6 +30,8 @@ const RenderWithEthereum: FC<WithEthereum & AppProps> = ({ externalProvider, pro
 
 const Content: FC<{ appProps: AppProps }> = ({ appProps }) => {
   const [external, provider] = useEthereumProvider();
+  const { t } = useTranslation('common', { keyPrefix: 'error' });
+
   const [displayUnsupportedNetwork, setDisplayUnsupportedNetwork] = useState(false);
   const { openDialog } = useErrorDialog();
   const content = useMemo(() => {
@@ -47,14 +49,14 @@ const Content: FC<{ appProps: AppProps }> = ({ appProps }) => {
     <SWRConfig
       value={{
         onError: (err: Error) => {
-          // これは別の方法で処理する
-          if (err === InvalidGemAddress) {
+          // これらの例外は別途処理する
+          if (err === InvalidGemAddress || err.message.startsWith('underlying network changed')) {
             return;
           }
           if (err === UnsupportedNetworkError && !displayUnsupportedNetwork) {
             setDisplayUnsupportedNetwork(true);
           } else {
-            openDialog(err.toString());
+            openDialog(t('unexpectedError'), err);
           }
         },
       }}

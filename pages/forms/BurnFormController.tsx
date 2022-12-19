@@ -55,15 +55,6 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
     [ilkInfo.gem.format.decimals],
   );
 
-  const onBurn = useCallback(
-    (daiAmount: FixedNumber, colAmount: FixedNumber) =>
-      burn(daiAmount, colAmount).finally(() => {
-        setDaiText('');
-        setColText('');
-      }),
-    [burn],
-  );
-
   const burnForm = useMemo(
     () => (
       <BurnForm
@@ -73,7 +64,7 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         daiBalance={balance}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
-        onBurn={onBurn}
+        onBurn={burn}
         onAmountChange={onAmountChange}
         onColChange={onColChange}
         daiText={daiText}
@@ -82,13 +73,13 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
     ),
     [
       balance,
+      burn,
       buttonContent,
       colText,
       daiText,
       ilkInfo,
       ilkStatus,
       onAmountChange,
-      onBurn,
       onColChange,
       urnStatus.debt,
       urnStatus.lockedBalance,

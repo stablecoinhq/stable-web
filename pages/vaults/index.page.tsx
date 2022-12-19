@@ -6,29 +6,16 @@ import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import useSWR from 'swr';
 
-import ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
+import useChainLog from 'ethereum/react/useChainLog';
 
 import getTranslationProps from '../getTranslationProps';
 
 import VaultTable from './[id]/VaultTable';
 
-import type EthereumProvider from 'ethereum/EthereumProvider';
 import type { CDP } from 'ethereum/contracts/GetCDPsHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 import type { SWRResponse } from 'swr';
-
-const useCDPs = (provider: EthereumProvider) => {
-  const chainLog = new ChainLogHelper(provider);
-  const cdps = useSWR('getCPDS', async () => {
-    const getCDPs = await chainLog.getCDPs();
-    const proxyRegistry = await chainLog.proxyRegistry();
-    const proxy = await proxyRegistry.getDSProxy();
-    const cpds = proxy ? await getCDPs.getCDPs(proxy) : undefined;
-    return cpds;
-  });
-  return cdps;
-};
 
 type ContentProps = {
   cdps: SWRResponse<CDP[] | undefined, Error>;
@@ -58,8 +45,14 @@ const Content: FC<ContentProps> = ({ cdps }) => {
 
 const Page: NextPageWithEthereum = ({ provider }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.vault' });
-
-  const cdps = useCDPs(provider);
+  const chainLog = useChainLog(provider);
+  const cdps = useSWR('getCPDS', async () => {
+    const getCDPs = await chainLog.getCDPs();
+    const proxyRegistry = await chainLog.proxyRegistry();
+    const proxy = await proxyRegistry.getDSProxy();
+    const cpds = proxy ? await getCDPs.getCDPs(proxy) : undefined;
+    return cpds;
+  });
 
   return (
     <Card elevation={0}>
