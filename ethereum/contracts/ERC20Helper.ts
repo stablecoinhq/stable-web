@@ -1,3 +1,5 @@
+import { ethers } from 'ethers';
+
 import { ERC20__factory } from 'generated/types';
 
 import { toBigNumber, toFixedNumber } from '../helpers/math';
@@ -15,6 +17,9 @@ export default class ERC20Helper {
   readonly format: FixedFormat;
 
   constructor(provider: EthereumProvider, address: string, format: FixedFormat) {
+    if (address === ethers.constants.AddressZero) {
+      throw InvalidGemAddress;
+    }
     this.provider = provider;
     this.contract = ERC20__factory.connect(address, provider.getSigner());
     this.format = format;

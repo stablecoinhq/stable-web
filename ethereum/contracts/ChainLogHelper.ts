@@ -21,6 +21,7 @@ import type { ChainLog, DSProxy } from 'generated/types';
 import type PromiseConstructor from 'types/promise';
 
 export const UnsupportedNetworkError = new Error('This network seems to be unsupported. ChainLog not found.');
+export const UnderlyingNetworkChanged = new Error('underlying network changed');
 
 export default class ChainLogHelper {
   private readonly provider: EthereumProvider;

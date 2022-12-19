@@ -11,6 +11,7 @@ import type { FC } from 'react';
 
 export type UnsupportedNetworkProps = {
   externalProvider: ExternalProvider;
+  onChange: () => void;
 };
 
 export const propagateError = (err: Error) => {
@@ -19,21 +20,23 @@ export const propagateError = (err: Error) => {
   }
 };
 
-const UnsupportedNetwork: FC<UnsupportedNetworkProps> = ({ externalProvider }) => {
+const UnsupportedNetwork: FC<UnsupportedNetworkProps> = ({ externalProvider, onChange }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.errors' });
 
   const changeNetwork = useCallback(() => {
     if (isMetaMaskInPageProvider(externalProvider)) {
-      void externalProvider.request({
-        method: 'wallet_switchEthereumChain',
-        params: [
-          {
-            chainId: '0x5', // TODO: change to MainNet
-          },
-        ],
-      });
+      void externalProvider
+        .request({
+          method: 'wallet_switchEthereumChain',
+          params: [
+            {
+              chainId: '0x5', // TODO: change to MainNet
+            },
+          ],
+        })
+        .then(() => onChange());
     }
-  }, [externalProvider]);
+  }, [externalProvider, onChange]);
 
   return (
     <Stack direction="column" alignItems="center" padding={2}>

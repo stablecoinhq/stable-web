@@ -142,7 +142,8 @@
   },
   "error": {
     "close": "Close",
-    "title": "Error"
+    "title": "Error",
+    "unexpectedError": "An unexpected error occured. Please try again."
   },
   "terms": {
     "collateral": "collateral",

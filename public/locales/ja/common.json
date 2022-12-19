@@ -145,7 +145,8 @@
   },
   "error": {
     "title": "エラー",
-    "close": "閉じる"
+    "close": "閉じる",
+    "unexpectedError": "予期せぬエラーが発生しました。再度お試しください。"
   },
   "terms": {
     "collateral": "担保",

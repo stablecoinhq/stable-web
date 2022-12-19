@@ -24,13 +24,19 @@ export const ErrorDialogProvider: FC<{ children: ReactNode }> = ({ children }) =
   const [dialogMessage, setDialogMessage] = useState('');
   const { t } = useTranslation('common', { keyPrefix: 'error' });
 
-  const openDialog = useCallback((message: string, onClose?: () => void) => {
-    setDisplayDialog(true);
-    setDialogMessage(message);
-    if (onClose !== undefined) {
-      setRunOnClosed(() => onClose);
-    }
-  }, []);
+  const openDialog = useCallback(
+    (message: string, onClose?: () => void) => {
+      if (!displayDialog) {
+        setDisplayDialog(true);
+        setDialogMessage(message);
+        if (onClose !== undefined) {
+          setRunOnClosed(() => onClose);
+        }
+      }
+    },
+    [displayDialog],
+  );
+
   const closeModal = useCallback(() => {
     setDisplayDialog(false);
     setDialogMessage('');

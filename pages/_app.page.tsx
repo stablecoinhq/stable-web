@@ -1,56 +1,71 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Box, createTheme, ThemeProvider } from '@mui/material';
 import { appWithTranslation } from 'next-i18next';
-import { useCallback } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
+import { useMemo, useState } from 'react';
+import { SWRConfig } from 'swr/_internal';
 
+import { UnsupportedNetworkError } from 'ethereum/contracts/ChainLogHelper';
+import { InvalidGemAddress } from 'ethereum/contracts/ERC20Helper';
 import useEthereumProvider from 'ethereum/react/useEthereumProvider';
-import { ErrorDialogProvider } from 'store/ErrorDialogProvider';
+import { ErrorDialogProvider, useErrorDialog } from 'store/ErrorDialogProvider';
 import { NumericDisplayProvider } from 'store/NumericDisplayProvider';
 import 'styles/globals.scss';
 
 import nextI18NextConfig from '../next-i18next.config';
 
 import Header from './Header';
-import UnsupportedNetwork, { propagateError } from './UnsupportedNetwork';
+import UnsupportedNetwork from './UnsupportedNetwork';
 import WithoutEthereum from './WithoutEthereum';
 
 import type { AppProps } from 'next/app';
 import type { FC } from 'react';
-import type { FallbackProps } from 'react-error-boundary';
 import type { WithEthereum } from 'types/next';
 
-const RenderWithEthereum: FC<WithEthereum & AppProps> = ({ externalProvider, provider, Component, pageProps }) => {
-  const renderUnsupportedNetwork = useCallback(
-    (props: FallbackProps) => (
-      // eslint-disable-next-line react/jsx-props-no-spreading
-      <UnsupportedNetwork externalProvider={externalProvider} {...props} />
-    ),
-    [externalProvider],
-  );
+const RenderWithEthereum: FC<WithEthereum & AppProps> = ({ externalProvider, provider, Component, pageProps }) => (
+  <Box padding={4}>
+    {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+    <Component externalProvider={externalProvider} provider={provider} {...pageProps} />
+  </Box>
+);
 
-  /**
-   * Since using `handleError` as an error handler of async functions,
-   * sometimes `handleError` will be called after a fallback component rendered.
-   * To prevent unexpected crash, we have to filter errors which should have already been fallen back.
-   */
-  const onError = useCallback((err: Error) => {
-    propagateError(err);
-  }, []);
+const Content: FC<{ appProps: AppProps }> = ({ appProps }) => {
+  const [external, provider] = useEthereumProvider();
+  const [displayUnsupportedNetwork, setDisplayUnsupportedNetwork] = useState(false);
+  const { openDialog } = useErrorDialog();
+  const content = useMemo(() => {
+    if (external && displayUnsupportedNetwork) {
+      return <UnsupportedNetwork externalProvider={external} onChange={() => setDisplayUnsupportedNetwork(false)} />;
+    }
+    if (external && provider) {
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      return <RenderWithEthereum externalProvider={external} provider={provider} {...appProps} />;
+    }
+    return <WithoutEthereum externalProvider={external} provider={provider} />;
+  }, [appProps, displayUnsupportedNetwork, external, provider]);
 
   return (
-    <Box padding={4}>
-      <ErrorBoundary fallbackRender={renderUnsupportedNetwork} onError={onError} resetKeys={[provider]}>
-        {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-        <Component externalProvider={externalProvider} provider={provider} {...pageProps} />
-      </ErrorBoundary>
-    </Box>
+    <SWRConfig
+      value={{
+        onError: (err: Error) => {
+          // これは別の方法で処理する
+          if (err === InvalidGemAddress) {
+            return;
+          }
+          if (err === UnsupportedNetworkError && !displayUnsupportedNetwork) {
+            setDisplayUnsupportedNetwork(true);
+          } else {
+            openDialog(err.toString());
+          }
+        },
+      }}
+    >
+      <Header externalProvider={external} provider={provider} />
+      {content}
+    </SWRConfig>
   );
 };
 
 const MyApp = (appProps: AppProps) => {
-  const [external, provider] = useEthereumProvider();
-
   const theme = createTheme({
     components: {
       MuiButton: {
@@ -88,13 +103,7 @@ const MyApp = (appProps: AppProps) => {
     <ThemeProvider theme={theme}>
       <ErrorDialogProvider>
         <NumericDisplayProvider>
-          <Header externalProvider={external} provider={provider} />
-          {external && provider ? (
-            // eslint-disable-next-line react/jsx-props-no-spreading
-            <RenderWithEthereum externalProvider={external} provider={provider} {...appProps} />
-          ) : (
-            <WithoutEthereum externalProvider={external} provider={provider} />
-          )}
+          <Content appProps={appProps} />
         </NumericDisplayProvider>
       </ErrorDialogProvider>
     </ThemeProvider>

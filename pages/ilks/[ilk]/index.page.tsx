@@ -95,10 +95,6 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
     };
   });
 
-  if (error) {
-    return <InvalidIlk />;
-  }
-
   if (!data || isLoading) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
@@ -106,6 +102,11 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
       </Box>
     );
   }
+
+  if (error) {
+    return <InvalidIlk />;
+  }
+
   const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, balance } = data;
   return (
     <Stack padding={2} spacing={2}>
