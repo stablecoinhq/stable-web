@@ -42,9 +42,14 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, deposit
   }, []);
 
   const deposit: DepositFormProps['onDeposit'] = useCallback(
-    (amount) => savingRate.deposit(amount).then(() => updateAllBalance()),
-    [savingRate, updateAllBalance],
+    (amount) =>
+      savingRate
+        .deposit(amount)
+        .then(() => updateAllBalance())
+        .catch((err) => openDialog(errorMessage('errorWhileDeposit'), err)),
+    [errorMessage, openDialog, savingRate, updateAllBalance],
   );
+
   const withdraw: WithdrawFormProps['onWithdraw'] = useCallback(
     (amount) =>
       savingRate
@@ -59,7 +64,7 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, deposit
       savingRate
         .withdrawAll()
         .then(() => updateAllBalance())
-        .catch((err) => openDialog(errorMessage('errorWhileDeposit'), err)),
+        .catch((err) => openDialog(errorMessage('errorWhileWithdraw'), err)),
     [errorMessage, openDialog, savingRate, updateAllBalance],
   );
   const TabContent: FC = useCallback(() => {
@@ -114,9 +119,7 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
     };
   });
 
-  const updateAllBalance = () => {
-    mutate();
-  };
+  const updateAllBalance = mutate;
 
   if (isLoading || !data) {
     return (

@@ -101,8 +101,12 @@ const Controller: FC<ControllerProps> = ({
   );
 
   const burnAll: BurnFormProps['onBurnAll'] = useCallback(
-    (dai, col) => vault.burnAll(chainLog, col, dai).then(() => updateAllBalance()),
-    [chainLog, vault, updateAllBalance],
+    (dai, col) =>
+      vault
+        .burnAll(chainLog, col, dai)
+        .then(() => updateAllBalance())
+        .catch((err) => openDialog(errorMessage('errorWhileRepaying'), err)),
+    [vault, chainLog, updateAllBalance, openDialog, errorMessage],
   );
 
   const TabContent: FC = useCallback(() => {
@@ -184,9 +188,7 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
   });
   const vault = useMemo(() => data && new Vault(data.ilkInfo, cdp.id), [cdp.id, data]);
 
-  const updateAllBalance = () => {
-    mutate();
-  };
+  const updateAllBalance = mutate;
 
   if (!data || isLoading || !vault) {
     return (
