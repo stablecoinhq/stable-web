@@ -79,11 +79,7 @@ export class BurnFormValidation {
   // 有効小数点18桁にしてから計算する
   static isOverRepaying(debt: FixedNumber, daiToRepay: FixedNumber, debtMultiplier: FixedNumber): boolean {
     // ここのroundは繰上げだから大丈夫
-    const normalizedDebt = debtMultiplier
-      .toFormat(format)
-      .mulUnsafe(debt.toFormat(format))
-      .round(UnitFormats.WAD.decimals)
-      .toFormat(UnitFormats.WAD);
+    const normalizedDebt = Vault.getDebt(debt, debtMultiplier);
     return normalizedDebt.subUnsafe(daiToRepay.toFormat(UnitFormats.WAD)).isNegative();
   }
 
@@ -107,6 +103,10 @@ export class BurnFormValidation {
 
   // 0 < currentDebt < debtFloor
   static isBelowDebtFloor(currentDebt: FixedNumber, debtFloor: FixedNumber) {
-    return !currentDebt.isNegative() && currentDebt.toFormat(format).subUnsafe(debtFloor.toFormat(format)).isNegative();
+    return (
+      !currentDebt.isNegative() &&
+      !currentDebt.isZero() &&
+      currentDebt.toFormat(format).subUnsafe(debtFloor.toFormat(format)).isNegative()
+    );
   }
 }

@@ -43,6 +43,7 @@
     "burn": {
       "redeemAmount": "Amount of $t(units.stableToken) to redeem",
       "freeAmount": "Amount of {{gem}} to free",
+      "repayAll": "Repay all",
       "error": {
         "insufficientBalance": "Insufficient amount of $t(units.stableToken).",
         "collateralTooLow": "The vault's collateralization ratio is too low.",

@@ -1,7 +1,19 @@
-import { Button, Card, Grid, InputAdornment, TextField, CircularProgress, FormHelperText } from '@mui/material';
+import {
+  Button,
+  Card,
+  Grid,
+  InputAdornment,
+  TextField,
+  CircularProgress,
+  FormHelperText,
+  FormControlLabel,
+  FormGroup,
+  Checkbox,
+} from '@mui/material';
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
+import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 
@@ -20,15 +32,19 @@ export type BurnFormProps = {
   ilkInfo: IlkInfo;
   buttonContent: ReactNode;
   onBurn: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
+  onBurnAll: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
   onAmountChange: (s: string) => void;
   onColChange: (s: string) => void;
   daiText: string;
   colText: string;
 };
 
+type BurnFormState = 'burn' | 'burnAll' | 'neutral';
+
 const BurnForm: FC<BurnFormProps> = ({
   ilkInfo,
   onBurn,
+  onBurnAll,
   buttonContent,
   daiBalance,
   lockedBalance,
@@ -43,26 +59,69 @@ const BurnForm: FC<BurnFormProps> = ({
   const daiAmount = useMemo(() => toFixedNumberOrUndefined(daiText, UnitFormats.WAD), [daiText]);
   const colAmount = useMemo(() => toFixedNumberOrUndefined(colText, ilkInfo.gem.format), [colText, ilkInfo.gem.format]);
   const [burning, setBurning] = useState(false);
+  const [burnFormState, setBurnFormState] = useState<BurnFormState>('neutral');
 
   const handleDaiChange: ChangeEventHandler<HTMLInputElement> = useCallback(
-    (event) => onAmountChange(event.target.value),
+    (event) => {
+      onAmountChange(event.target.value);
+      if (event.target.value === '') {
+        setBurnFormState('neutral');
+      } else {
+        setBurnFormState('burn');
+      }
+    },
     [onAmountChange],
   );
   const handleColChange: ChangeEventHandler<HTMLInputElement> = useCallback(
-    (event) => onColChange(event.target.value),
+    (event) => {
+      onColChange(event.target.value);
+      if (event.target.value === '') {
+        setBurnFormState('neutral');
+      } else {
+        setBurnFormState('burn');
+      }
+    },
     [onColChange],
   );
 
-  const onButtonClick: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
-    if (!daiAmount || !colAmount) {
-      return;
+  const handleBurnAllChange: ChangeEventHandler<HTMLInputElement> = () => {
+    if (burnFormState !== 'burnAll') {
+      setBurnFormState('burnAll');
+      const currentDebt = Vault.getDebt(debt, ilkStatus.debtMultiplier);
+      onAmountChange(currentDebt.toString());
+      onColChange(lockedBalance.toString());
+    } else {
+      setBurnFormState('neutral');
+      onAmountChange('');
+      onColChange('');
     }
+  };
 
-    setBurning(true);
-    onBurn(daiAmount, colAmount).finally(() => {
-      setBurning(false);
-    });
-  }, [colAmount, daiAmount, onBurn]);
+  const onButtonClick: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
+    switch (burnFormState) {
+      case 'burnAll': {
+        setBurning(true);
+        onBurnAll(Vault.getDebt(debt, ilkStatus.debtMultiplier), lockedBalance).finally(() => {
+          setBurning(false);
+          setBurnFormState('neutral');
+        });
+        break;
+      }
+      case 'burn': {
+        if (!daiAmount || !colAmount) {
+          return;
+        }
+        setBurning(true);
+        onBurn(daiAmount, colAmount).finally(() => {
+          setBurning(false);
+          setBurnFormState('neutral');
+        });
+        break;
+      }
+      case 'neutral':
+        break;
+    }
+  }, [burnFormState, colAmount, daiAmount, debt, ilkStatus.debtMultiplier, lockedBalance, onBurn, onBurnAll]);
 
   const isInvalidRepayAmount = useMemo(
     () => daiAmount && BurnFormValidation.isInsufficientBalance(daiBalance, daiAmount),
@@ -105,6 +164,7 @@ const BurnForm: FC<BurnFormProps> = ({
           <TextField
             fullWidth
             label={t('redeemAmount')}
+            disabled={burnFormState === 'burnAll' || burning}
             value={daiText}
             error={isInvalidRepayAmount || isOverRepaying}
             onChange={handleDaiChange}
@@ -116,6 +176,7 @@ const BurnForm: FC<BurnFormProps> = ({
         <Grid item xs={6}>
           <TextField
             fullWidth
+            disabled={burnFormState === 'burnAll' || burning}
             error={isInvalidCollateralFreeAmount}
             label={t('freeAmount', { gem: ilkInfo.name })}
             value={colText}
@@ -125,7 +186,15 @@ const BurnForm: FC<BurnFormProps> = ({
             }}
           />
         </Grid>
-
+        <Grid item xs={12}>
+          <FormGroup>
+            <FormControlLabel
+              disabled={burnFormState === 'burn'}
+              control={<Checkbox checked={burnFormState === 'burnAll'} onChange={handleBurnAllChange} />}
+              label={t('repayAll')}
+            />
+          </FormGroup>
+        </Grid>
         <Grid item xs={12}>
           <Button
             variant="contained"
@@ -135,7 +204,8 @@ const BurnForm: FC<BurnFormProps> = ({
               !colAmount ||
               burning ||
               formErrors.length !== 0 ||
-              (daiAmount && colAmount && daiAmount.isZero() && colAmount.isZero())
+              (daiAmount && colAmount && daiAmount.isZero() && colAmount.isZero()) ||
+              !(burnFormState !== 'neutral')
             }
             onClick={onButtonClick}
           >

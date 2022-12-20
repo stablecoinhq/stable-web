@@ -48,6 +48,19 @@ export default class Vault {
     await actions.wipeAndFreeGem(cdpManager, daiJoin, this.ilkInfo, this.cdpId, colAmount, daiAmount).then((tx) => tx.wait());
   }
 
+  async burnAll(chainLog: ChainLogHelper, colAmount: FixedNumber, daiAmount: FixedNumber) {
+    const [actions, cdpManager, daiJoin] = await Promise.all([
+      Promise.all([chainLog.proxyRegistry().then((proxyRegistry) => proxyRegistry.ensureDSProxy()), chainLog.dai()]).then(
+        ([proxy, dai]) =>
+          Promise.all([chainLog.proxyActions(proxy), dai.ensureAllowance(proxy.address, daiAmount)]).then(([x, _]) => x),
+      ),
+      chainLog.dssCDPManager(),
+      chainLog.daiJoin(),
+    ]);
+
+    await actions.wipeAllAndFreeGem(cdpManager, daiJoin, this.ilkInfo, this.cdpId, colAmount).then((tx) => tx.wait());
+  }
+
   static async open(chainLog: ChainLogHelper, ilkInfo: IlkInfo, colAmount: FixedNumber, daiAmount: FixedNumber) {
     const [actions, cdpManager, jug, daiJoin] = await Promise.all([
       chainLog
@@ -98,10 +111,15 @@ export default class Vault {
   // Urn debt = Vat.urn.art * Vat.ilk.rate + daiAmount
   static getDebt(urnDebt: FixedNumber, debtMultiplier: FixedNumber, daiAmount?: FixedNumber) {
     const calcFormat = getBiggestDecimalsFormat(urnDebt.format, debtMultiplier.format);
+    const factor = FixedNumber.from(`1${'0'.repeat(UnitFormats.WAD.decimals)}`, calcFormat);
     return urnDebt
       .toFormat(calcFormat)
       .mulUnsafe(debtMultiplier.toFormat(calcFormat))
-      .addUnsafe(daiAmount?.toFormat(calcFormat) || FixedNumber.fromString('0', calcFormat));
+      .addUnsafe(daiAmount?.toFormat(calcFormat) || FixedNumber.fromString('0', calcFormat))
+      .mulUnsafe(factor)
+      .ceiling()
+      .divUnsafe(factor)
+      .toFormat(UnitFormats.WAD);
   }
 
   // liquidation price = Spot.ilks.mat * Vat.urn.art * Vat.ilk.rate / Vat.urn.ink

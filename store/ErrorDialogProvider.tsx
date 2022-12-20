@@ -59,6 +59,7 @@ export const ErrorDialogProvider: FC<{ children: ReactNode }> = ({ children }) =
     (message: string, error: Error, onClose?: () => void) => {
       if (!displayDialog) {
         setDisplayDialog(true);
+        setExpandCollapse(false);
         setErrorMessage(error);
         setDialogMessage(message);
         if (onClose !== undefined) {
@@ -69,13 +70,17 @@ export const ErrorDialogProvider: FC<{ children: ReactNode }> = ({ children }) =
     [displayDialog],
   );
   const handleClose = useCallback(() => {
-    setDialogMessage('');
-    setExpandCollapse(false);
-    setErrorMessage(null);
-    if (runOnClosed) {
-      runOnClosed();
-    }
-    setRunOnClosed(() => {});
+    setDisplayDialog(false);
+    // 一定時間後に初期化しないと、空のDialogが一瞬表示される
+    setTimeout(() => {
+      setDialogMessage('');
+      setExpandCollapse(false);
+      setErrorMessage(null);
+      if (runOnClosed) {
+        runOnClosed();
+      }
+      setRunOnClosed(() => {});
+    }, 1000);
   }, [runOnClosed]);
 
   const value: ErrorDialogContextType = useMemo(() => ({ openDialog }), [openDialog]);
@@ -91,7 +96,7 @@ export const ErrorDialogProvider: FC<{ children: ReactNode }> = ({ children }) =
           <ExpandMore expand={expandCollapse} onClick={() => setExpandCollapse((prev) => !prev)} aria-label="show more">
             <ExpandMoreIcon />
           </ExpandMore>
-          <Button variant="contained" onClick={() => setDisplayDialog(false)}>
+          <Button variant="contained" onClick={handleClose}>
             {t('close')}
           </Button>
         </DialogActions>
