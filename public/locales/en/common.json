@@ -1,4 +1,3 @@
-
 {
   "cards": {
     "ilk": {
@@ -84,7 +83,11 @@
       "openLabel": "Create new $t(terms.vault_one)",
       "openDesc": "Open new $t(terms.vault_one)",
       "currency": "Currency",
-      "currentPrice": "Current Price per {{collateral}}"
+      "currentPrice": "Current Price per {{collateral}}",
+      "unableToLoadCollateral": "Unable to load collateral",
+      "errors": {
+        "errorWhileOpeningVault": "An error occured while opening vault. Please try again."
+      }
     },
     "vault": {
       "backToList": "$t(pages.errors.backToList)",
@@ -99,7 +102,11 @@
       "id": "Vault ID",
       "lockedCollateral": "Locked Collateral",
       "debt": "Debt",
-      "manageVault": "Manage Vault"
+      "manageVault": "Manage Vault",
+      "errors": {
+        "errorWhileMinting": "An error occured while trying to mint $t(units.stableToken). Please try again.",
+        "errorWhileRepaying": "An error occured while trying to repay debt. Please try again."
+      }
     },
     "earn": {
       "cardTitle": "Earn Savings",
@@ -121,11 +128,23 @@
           "withdrawAll": "Withdraw all",
           "submit": "Withdraw"
         }
+      },
+      "errors": {
+        "errorWhileDeposit": "An unexpected error occured. Please try again.",
+        "errorWhileWithdraw": "An unexpected error occured. Please try again."
       }
     }
   },
   "site": {
     "title": "stable-web"
+  },
+  "notFound": {
+    "title": "This page could not be found"
+  },
+  "error": {
+    "close": "Close",
+    "title": "Error",
+    "unexpectedError": "An unexpected error occured. Please try again."
   },
   "terms": {
     "collateral": "collateral",

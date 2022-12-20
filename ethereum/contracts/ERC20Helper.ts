@@ -1,3 +1,5 @@
+import { ethers } from 'ethers';
+
 import { ERC20__factory } from 'generated/types';
 
 import { toBigNumber, toFixedNumber } from '../helpers/math';
@@ -7,12 +9,17 @@ import type { FixedFormat } from '@ethersproject/bignumber';
 import type { FixedNumber } from 'ethers';
 import type { ERC20 } from 'generated/types';
 
+export const InvalidGemAddress = new Error('Invalid gem address');
+
 export default class ERC20Helper {
   private readonly provider: EthereumProvider;
   private readonly contract: ERC20;
   readonly format: FixedFormat;
 
   constructor(provider: EthereumProvider, address: string, format: FixedFormat) {
+    if (address === ethers.constants.AddressZero) {
+      throw InvalidGemAddress;
+    }
     this.provider = provider;
     this.contract = ERC20__factory.connect(address, provider.getSigner());
     this.format = format;

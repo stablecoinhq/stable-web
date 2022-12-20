@@ -1,9 +1,8 @@
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
 import { useTranslation } from 'next-i18next';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { UnitFormats, CENT, getAnnualFee, getTotalIssued } from 'ethereum/helpers/math';
-import usePromiseFactory from 'pages/usePromiseFactory';
 
 import BNText from './BNText';
 
@@ -21,24 +20,17 @@ export type IlkStatusCardProps = {
   stabilityFee: FixedNumber;
 };
 
-export const useIlkStatusCardProps = (chainLog: ChainLogHelper, type: IlkType): IlkStatusCardProps | undefined =>
-  usePromiseFactory(
-    useCallback(
-      () =>
-        Promise.all([
-          chainLog.ilkRegistry().then((ilkRegistry) => ilkRegistry.info(type)),
-          chainLog.vat().then((vat) => vat.getIlkStatus(type)),
-          chainLog.spot().then((spot) => spot.getLiquidationRatio(type)),
-          chainLog.jug().then((jug) => jug.getStabilityFee(type)),
-        ]).then(([ilkInfo, ilkStatus, liquidationRatio, stabilityFee]) => ({
-          ilkInfo,
-          ilkStatus,
-          liquidationRatio,
-          stabilityFee,
-        })),
-      [chainLog, type],
-    ),
-  )[0];
+export function getIlkStatusProps(
+  chainLog: ChainLogHelper,
+  type: IlkType,
+): Promise<[IlkInfo, IlkStatus, FixedNumber, FixedNumber]> {
+  return Promise.all([
+    chainLog.ilkRegistry().then((ilkRegistry) => ilkRegistry.info(type)),
+    chainLog.vat().then((vat) => vat.getIlkStatus(type)),
+    chainLog.spot().then((spot) => spot.getLiquidationRatio(type)),
+    chainLog.jug().then((jug) => jug.getStabilityFee(type)),
+  ]);
+}
 
 const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidationRatio, stabilityFee }) => {
   const { t } = useTranslation('common', { keyPrefix: 'cards.ilk' });

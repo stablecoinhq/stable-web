@@ -59,7 +59,8 @@
       "error": {
         "insufficientBalance": "残高不足です",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
-        "debtTooLow": "$t(terms.vault_one)の負債額が下限値を下回っています。"
+        "debtTooLow": "$t(terms.vault_one)の負債額が下限値を下回っています。",
+        "issuingTooMuchCoins": "$t(units.stableToken)の発行量が上限値を上回っています。"
       }
     }
   },
@@ -84,7 +85,11 @@
       "openLabel": "$t(terms.vault_one)を新規作成",
       "openDesc": "新規作成",
       "currency": "通貨",
-      "currentPrice": "1 {{collateral}}あたりの価格"
+      "currentPrice": "1 {{collateral}}あたりの価格",
+      "unableToLoadCollateral": "該当の担保情報を読み込むことができませんでした",
+      "errors": {
+        "errorWhileOpeningVault": "Vault作成時にエラーが発生しました。$t(terms.retry)"
+      }
     },
     "vault": {
       "backToList": "$t(pages.errors.backToList)",
@@ -99,7 +104,11 @@
       "id": "Vault ID",
       "lockedCollateral": "ロックされた担保",
       "debt": "負債",
-      "manageVault": "管理"
+      "manageVault": "管理",
+      "errors": {
+        "errorWhileMinting": "$t(units.stableToken)発行時に問題が発生しました。$t(terms.retry)",
+        "errorWhileRepaying": "返済時に問題が発生しました。$t(terms.retry)"
+      }
     },
     "earn": {
       "cardTitle": "利息を得る",
@@ -127,8 +136,20 @@
             "insufficientWithdrawAmount": "預金引き出し額が無効な値です"
           }
         }
+      },
+      "errors": {
+        "errorWhileDeposit": "預け入れ時に問題が発生しました。$t(terms.retry)",
+        "errorWhileWithdraw": "引き出し時に問題が発生しました。$t(terms.retry)"
       }
     }
+  },
+  "notFound": {
+    "title": "該当するページは見つかりませんでした"
+  },
+  "error": {
+    "title": "エラー",
+    "close": "閉じる",
+    "unexpectedError": "予期せぬエラーが発生しました。$t(terms.retry)"
   },
   "terms": {
     "collateral": "担保",
@@ -143,6 +164,7 @@
     "maxLiquidity": "負債額上限",
     "liqRatio": "最低担保率",
     "liquidationPrice": "精算価格",
+    "retry": "時間をおいてから再度お試しください。",
     "savings": "JSR"
   },
   "units": {

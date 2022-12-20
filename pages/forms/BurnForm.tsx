@@ -130,7 +130,13 @@ const BurnForm: FC<BurnFormProps> = ({
           <Button
             variant="contained"
             fullWidth
-            disabled={!daiAmount || !colAmount || burning || formErrors.length !== 0}
+            disabled={
+              !daiAmount ||
+              !colAmount ||
+              burning ||
+              formErrors.length !== 0 ||
+              (daiAmount && colAmount && daiAmount.isZero() && colAmount.isZero())
+            }
             onClick={onButtonClick}
           >
             {burning ? <CircularProgress /> : buttonContent}
