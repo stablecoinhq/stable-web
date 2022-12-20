@@ -8,22 +8,6 @@ import type { IlkStatus } from './contracts/VatHelper';
 // eslint-disable-next-line unused-imports/no-unused-imports
 import type PromiseConstructor from 'types/promise';
 
-export const roundUp = (num: FixedNumber, decimals: number): FixedNumber => {
-  const comps = num.toString().split('.');
-  if (comps.length === 1) {
-    comps.push('0');
-  }
-  if (comps[1]!.length <= decimals) {
-    return num;
-  }
-
-  const factor = FixedNumber.from(`1${'0'.repeat(decimals)}`, num.format);
-  const n = comps[1]!.slice(decimals).search(/[^0]/) === -1 ? '0' : '1';
-  const bump = FixedNumber.from(n, num.format);
-
-  return num.mulUnsafe(factor).addUnsafe(bump).floor().divUnsafe(factor);
-};
-
 export default class Vault {
   readonly ilkInfo: IlkInfo;
   private readonly cdpId: FixedNumber;
@@ -127,13 +111,15 @@ export default class Vault {
   // Urn debt = Vat.urn.art * Vat.ilk.rate + daiAmount
   static getDebt(urnDebt: FixedNumber, debtMultiplier: FixedNumber, daiAmount?: FixedNumber) {
     const calcFormat = getBiggestDecimalsFormat(urnDebt.format, debtMultiplier.format);
-    return roundUp(
-      urnDebt
-        .toFormat(calcFormat)
-        .mulUnsafe(debtMultiplier.toFormat(calcFormat))
-        .addUnsafe(daiAmount?.toFormat(calcFormat) || FixedNumber.fromString('0', calcFormat)),
-      UnitFormats.WAD.decimals,
-    ).toFormat(UnitFormats.WAD);
+    const factor = FixedNumber.from(`1${'0'.repeat(UnitFormats.WAD.decimals)}`, calcFormat);
+    return urnDebt
+      .toFormat(calcFormat)
+      .mulUnsafe(debtMultiplier.toFormat(calcFormat))
+      .addUnsafe(daiAmount?.toFormat(calcFormat) || FixedNumber.fromString('0', calcFormat))
+      .mulUnsafe(factor)
+      .ceiling()
+      .divUnsafe(factor)
+      .toFormat(UnitFormats.WAD);
   }
 
   // liquidation price = Spot.ilks.mat * Vat.urn.art * Vat.ilk.rate / Vat.urn.ink
