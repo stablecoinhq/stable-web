@@ -13,7 +13,6 @@ export type WalletStatusCardProps = {
   unit: string;
 };
 
-// 共通コンポーネントなので移動させた方がいいかも？
 const WalletStatusCard: FC<WalletStatusCardProps> = ({ label, balance, address, unit }) => {
   const { t } = useTranslation('common', { keyPrefix: 'cards.wallet' });
 

@@ -14,10 +14,6 @@ export default class ProxyActionsDsrHelper {
     this.actions = DssProxyActionsDsr__factory.connect(address, provider.getSigner());
   }
 
-  get proxyAddress() {
-    return this.proxy.address;
-  }
-
   private get encodeFunctionData() {
     return this.actions.interface.encodeFunctionData.bind(this.actions.interface);
   }

@@ -19,34 +19,34 @@ import { useErrorDialog } from 'store/ErrorDialogProvider';
 import InvalidIlk from './InvalidIlk';
 
 import type EthereumProvider from 'ethereum/EthereumProvider';
-import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
 type OpenVaultProps = {
-  chainLog: ChainLogHelper;
   ilkInfo: IlkInfo;
+  vault: Vault;
   ilkStatus: IlkStatus;
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
   address: string;
 };
 
-const OpenVault: FC<OpenVaultProps> = ({ chainLog, ilkInfo, ilkStatus, liquidationRatio, balance, address }) => {
+const OpenVault: FC<OpenVaultProps> = ({ ilkInfo, vault, ilkStatus, liquidationRatio, balance, address }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
   const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.ilk.errors' });
   const { openDialog } = useErrorDialog();
   const router = useRouter();
 
   const openVault = useCallback(
-    async (amount: FixedNumber, ratio: FixedNumber) => {
-      await Vault.open(chainLog, ilkInfo, amount, ratio)
+    async (colAmount: FixedNumber, daiAmount: FixedNumber) => {
+      await vault
+        .open(colAmount, daiAmount)
         .then(() => router.push('/vaults'))
         .catch((e) => openDialog(errorMessage('errorWhileOpeningVault'), e));
     },
-    [chainLog, errorMessage, ilkInfo, openDialog, router],
+    [errorMessage, openDialog, router, vault],
   );
 
   const zero = FixedNumber.fromString('0', UnitFormats.WAD);
@@ -80,13 +80,14 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
   const chainLog = useChainLog(provider);
   const { data, isLoading, error } = useSWR('getData', async () => {
     const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, ilkType);
-    const balance = await ilkInfo.gem.getBalance();
+    const [balance, vault] = await Promise.all([ilkInfo.gem.getBalance(), Vault.fromChainlog(chainLog, ilkInfo)]);
     return {
       ilkInfo,
       ilkStatus,
       liquidationRatio,
       stabilityFee,
       balance,
+      vault,
     };
   });
 
@@ -102,14 +103,14 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
     );
   }
 
-  const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, balance } = data;
+  const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, balance, vault } = data;
   return (
     <Stack padding={2} spacing={2}>
       <IlkStatusCard ilkInfo={ilkInfo} ilkStatus={ilkStatus} liquidationRatio={liquidationRatio} stabilityFee={stabilityFee} />
       <OpenVault
-        chainLog={chainLog}
         ilkInfo={ilkInfo}
         ilkStatus={ilkStatus}
+        vault={vault}
         liquidationRatio={liquidationRatio}
         balance={balance}
         address={provider.address}

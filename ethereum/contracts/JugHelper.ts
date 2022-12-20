@@ -9,12 +9,10 @@ import type { Jug } from 'generated/types';
 import type PromiseConstructor from 'types/promise';
 
 export default class JugHelper {
-  private readonly provider: EthereumProvider;
   readonly address: string;
   private readonly contract: Jug;
 
   constructor(provider: EthereumProvider, address: string) {
-    this.provider = provider;
     this.address = address;
     this.contract = Jug__factory.connect(address, provider);
   }

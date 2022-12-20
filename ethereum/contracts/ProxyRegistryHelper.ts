@@ -14,13 +14,12 @@ export default class ProxyRegistryHelper {
     this.contract = ProxyRegistry__factory.connect(address, provider.getSigner());
   }
 
-  getDSProxy() {
-    return this.contract.proxies(this.provider.address).then((address) => {
-      if (address === AddressZero) {
-        return undefined;
-      }
-      return DSProxy__factory.connect(address, this.provider.getSigner());
-    });
+  async getDSProxy() {
+    const address = await this.contract.proxies(this.provider.address);
+    if (address === AddressZero) {
+      return undefined;
+    }
+    return DSProxy__factory.connect(address, this.provider.getSigner());
   }
 
   private async createDSProxy() {

@@ -44,20 +44,24 @@ export default class ChainLogHelper {
     return this.contract.getAddress(formatBytes32String(key));
   }
 
-  ilkRegistry() {
-    return this.getAddress('ILK_REGISTRY').then((address) => new IlkRegistryHelper(this.provider, address));
+  async ilkRegistry() {
+    const address = await this.getAddress('ILK_REGISTRY');
+    return new IlkRegistryHelper(this.provider, address);
   }
 
-  vat() {
-    return this.getAddress('MCD_VAT').then((address) => new VatHelper(this.provider, address));
+  async vat() {
+    const address = await this.getAddress('MCD_VAT');
+    return new VatHelper(this.provider, address);
   }
 
-  jug() {
-    return this.getAddress('MCD_JUG').then((address) => new JugHelper(this.provider, address));
+  async jug() {
+    const address = await this.getAddress('MCD_JUG');
+    return new JugHelper(this.provider, address);
   }
 
-  spot() {
-    return this.getAddress('MCD_SPOT').then((address) => new SpotHelper(this.provider, address));
+  async spot() {
+    const address = await this.getAddress('MCD_SPOT');
+    return new SpotHelper(this.provider, address);
   }
 
   async dssCDPManager() {
@@ -75,27 +79,33 @@ export default class ChainLogHelper {
     return new GetCDPsHelper(this.provider, address, dssCDPManager, vat, spot);
   }
 
-  proxyRegistry() {
-    return this.getAddress('PROXY_REGISTRY').then((address) => new ProxyRegistryHelper(this.provider, address));
+  async proxyRegistry() {
+    const address = await this.getAddress('PROXY_REGISTRY');
+    return new ProxyRegistryHelper(this.provider, address);
   }
 
-  proxyActions(proxy: DSProxy) {
-    return this.getAddress('PROXY_ACTIONS').then((address) => new ProxyActionsHelper(this.provider, address, proxy));
+  async proxyActions(proxy: DSProxy) {
+    const address = await this.getAddress('PROXY_ACTIONS');
+    return new ProxyActionsHelper(this.provider, address, proxy);
   }
 
-  proxyActionsDsr(proxy: DSProxy) {
-    return this.getAddress('PROXY_ACTIONS_DSR').then((address) => new ProxyActionsDsrHelper(this.provider, address, proxy));
+  async proxyActionsDsr(proxy: DSProxy) {
+    const address = await this.getAddress('PROXY_ACTIONS_DSR');
+    return new ProxyActionsDsrHelper(this.provider, address, proxy);
   }
 
-  dai() {
-    return this.getAddress('MCD_DAI').then((address) => new ERC20Helper(this.provider, address, UnitFormats.WAD));
+  async dai() {
+    const address = await this.getAddress('MCD_DAI');
+    return new ERC20Helper(this.provider, address, UnitFormats.WAD);
   }
 
-  daiJoin() {
-    return this.getAddress('MCD_JOIN_DAI').then((address) => DaiJoin__factory.connect(address, this.provider.getSigner()));
+  async daiJoin() {
+    const address = await this.getAddress('MCD_JOIN_DAI');
+    return DaiJoin__factory.connect(address, this.provider.getSigner());
   }
 
-  pot() {
-    return this.getAddress('MCD_POT').then((address) => Pot__factory.connect(address, this.provider));
+  async pot() {
+    const address = await this.getAddress('MCD_POT');
+    return Pot__factory.connect(address, this.provider);
   }
 }
