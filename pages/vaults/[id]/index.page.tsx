@@ -48,7 +48,7 @@ const NotFound: FC = () => {
 };
 
 type ControllerProps = {
-  chainLog: ChainLogHelper;
+  cdp: CDP;
   vault: Vault;
   ilkStatus: IlkStatus;
   urnStatus: UrnStatus;
@@ -60,7 +60,7 @@ type ControllerProps = {
 };
 
 const Controller: FC<ControllerProps> = ({
-  chainLog,
+  cdp,
   vault,
   urnStatus,
   ilkStatus,
@@ -85,28 +85,28 @@ const Controller: FC<ControllerProps> = ({
   const mint: MintFormProps['onMint'] = useCallback(
     (collateralAmount, daiAmount) =>
       vault
-        .mint(chainLog, collateralAmount, daiAmount)
+        .mint(cdp.id, collateralAmount, daiAmount)
         .then(() => updateAllBalance())
         .catch((err) => openDialog(errorMessage('errorWhileMinting'), err)),
-    [vault, chainLog, updateAllBalance, openDialog, errorMessage],
+    [vault, cdp.id, updateAllBalance, openDialog, errorMessage],
   );
 
   const burn: BurnFormProps['onBurn'] = useCallback(
     (dai, col) =>
       vault
-        .burn(chainLog, col, dai)
+        .burn(cdp.id, col, dai)
         .then(() => updateAllBalance())
         .catch((err) => openDialog(errorMessage('errorWhileRepaying'), err)),
-    [vault, chainLog, updateAllBalance, openDialog, errorMessage],
+    [vault, cdp.id, updateAllBalance, openDialog, errorMessage],
   );
 
   const burnAll: BurnFormProps['onBurnAll'] = useCallback(
     (dai, col) =>
       vault
-        .burnAll(chainLog, col, dai)
+        .burnAll(cdp.id, col, dai)
         .then(() => updateAllBalance())
         .catch((err) => openDialog(errorMessage('errorWhileRepaying'), err)),
-    [vault, chainLog, updateAllBalance, openDialog, errorMessage],
+    [vault, cdp.id, updateAllBalance, openDialog, errorMessage],
   );
 
   const TabContent: FC = useCallback(() => {
@@ -171,10 +171,11 @@ type ContentProps = {
 const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
   const { data, mutate, isLoading } = useSWR('getVaultData', async () => {
     const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, cdp.ilk);
-    const [daiBalance, urnStatus, tokenBalance] = await Promise.all([
+    const [daiBalance, urnStatus, tokenBalance, vault] = await Promise.all([
       chainLog.dai().then((dai) => dai.getBalance()),
       chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)),
       ilkInfo.gem.getBalance(),
+      Vault.fromChainlog(chainLog, ilkInfo),
     ]);
     return {
       ilkInfo,
@@ -184,13 +185,13 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
       tokenBalance,
       daiBalance,
       urnStatus,
+      vault,
     };
   });
-  const vault = useMemo(() => data && new Vault(data.ilkInfo, cdp.id), [cdp.id, data]);
 
   const updateAllBalance = mutate;
 
-  if (!data || isLoading || !vault) {
+  if (!data || isLoading) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
         <CircularProgress />
@@ -198,13 +199,13 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
     );
   }
 
-  const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, urnStatus, tokenBalance, daiBalance } = data;
+  const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, urnStatus, tokenBalance, daiBalance, vault } = data;
 
   return (
     <Stack padding={2} spacing={2}>
       <IlkStatusCard ilkInfo={ilkInfo} ilkStatus={ilkStatus} liquidationRatio={liquidationRatio} stabilityFee={stabilityFee} />
       <Controller
-        chainLog={chainLog}
+        cdp={cdp}
         vault={vault}
         urnStatus={urnStatus}
         ilkStatus={ilkStatus}

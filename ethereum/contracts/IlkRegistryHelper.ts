@@ -25,8 +25,9 @@ export default class IlkRegistryHelper {
     this.contract = IlkRegistry__factory.connect(address, provider.getSigner());
   }
 
-  list(): Promise<IlkType[]> {
-    return this.contract['list()']().then((ilks) => ilks.map((ilk) => IlkType.fromBytes32(ilk)));
+  async list(): Promise<IlkType[]> {
+    const ilks = await this.contract['list()']();
+    return ilks.map((ilk) => IlkType.fromBytes32(ilk));
   }
 
   info(ilkType: IlkType): Promise<IlkInfo> {

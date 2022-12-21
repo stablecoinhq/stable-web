@@ -29,24 +29,27 @@ export default class VatHelper {
     this.contract = Vat__factory.connect(address, provider.getSigner());
   }
 
-  getIlkStatus(ilkType: IlkType): Promise<IlkStatus> {
-    return this.contract.ilks(ilkType.inBytes32).then(({ Art: art, rate, spot, line, dust }) => ({
+  async getIlkStatus(ilkType: IlkType): Promise<IlkStatus> {
+    const { Art: art, rate, spot, line, dust } = await this.contract.ilks(ilkType.inBytes32);
+    return {
       normalizedDebt: toFixedNumber(art, UnitFormats.WAD),
       debtMultiplier: toFixedNumber(rate, UnitFormats.RAY),
       price: toFixedNumber(spot, UnitFormats.RAY),
       debtCeiling: toFixedNumber(line, UnitFormats.RAD),
       debtFloor: toFixedNumber(dust, UnitFormats.RAD),
-    }));
+    };
   }
 
-  getUrnStatus(ilkType: IlkType, urn: string): Promise<UrnStatus> {
-    return Promise.all([this.contract.urns(ilkType.inBytes32, urn), this.contract.gem(ilkType.inBytes32, urn)]).then(
-      ([{ art, ink }, gem]) => ({
-        urn,
-        freeBalance: toFixedNumber(gem, UnitFormats.WAD),
-        lockedBalance: toFixedNumber(ink, UnitFormats.WAD),
-        debt: toFixedNumber(art, UnitFormats.WAD),
-      }),
-    );
+  async getUrnStatus(ilkType: IlkType, urn: string): Promise<UrnStatus> {
+    const [{ art, ink }, gem] = await Promise.all([
+      this.contract.urns(ilkType.inBytes32, urn),
+      this.contract.gem(ilkType.inBytes32, urn),
+    ]);
+    return {
+      urn,
+      freeBalance: toFixedNumber(gem, UnitFormats.WAD),
+      lockedBalance: toFixedNumber(ink, UnitFormats.WAD),
+      debt: toFixedNumber(art, UnitFormats.WAD),
+    };
   }
 }

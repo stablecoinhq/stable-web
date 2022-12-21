@@ -2,77 +2,106 @@ import { BigNumber, FixedNumber } from 'ethers';
 
 import { assertFixedFormat, getBiggestDecimalsFormat, UnitFormats, COL_RATIO_FORMAT } from './helpers/math';
 
+import type CDPManagerHelper from './contracts/CDPManagerHelper';
 import type ChainLogHelper from './contracts/ChainLogHelper';
+import type ERC20Helper from './contracts/ERC20Helper';
 import type { IlkInfo } from './contracts/IlkRegistryHelper';
-import type { IlkStatus } from './contracts/VatHelper';
 // eslint-disable-next-line unused-imports/no-unused-imports
-import type PromiseConstructor from 'types/promise';
+import type JugHelper from './contracts/JugHelper';
+import type ProxyActionsHelper from './contracts/ProxyActionsHelper';
+import type ProxyRegistryHelper from './contracts/ProxyRegistryHelper';
+import type { IlkStatus } from './contracts/VatHelper';
+import type { DaiJoin, DSProxy } from 'generated/types';
 
 export default class Vault {
   readonly ilkInfo: IlkInfo;
-  private readonly cdpId: FixedNumber;
+  private readonly cdpManager: CDPManagerHelper;
+  private readonly chainLog: ChainLogHelper;
+  private readonly jug: JugHelper;
+  private readonly daiJoin: DaiJoin;
+  private readonly dai: ERC20Helper;
+  private readonly proxyRegistry: ProxyRegistryHelper;
+  private actions?: ProxyActionsHelper;
+  private proxy?: DSProxy;
 
-  constructor(ilkInfo: IlkInfo, cdpId: FixedNumber) {
+  constructor(
+    chainLog: ChainLogHelper,
+    ilkInfo: IlkInfo,
+    cdpManager: CDPManagerHelper,
+    jug: JugHelper,
+    daiJoin: DaiJoin,
+    dai: ERC20Helper,
+    proxyRegistry: ProxyRegistryHelper,
+    actions?: ProxyActionsHelper,
+    proxy?: DSProxy,
+  ) {
     this.ilkInfo = ilkInfo;
-    this.cdpId = cdpId;
+    this.chainLog = chainLog;
+    this.cdpManager = cdpManager;
+    this.jug = jug;
+    this.daiJoin = daiJoin;
+    this.dai = dai;
+    this.actions = actions;
+    this.proxy = proxy;
+    this.proxyRegistry = proxyRegistry;
   }
 
-  async mint(chainLog: ChainLogHelper, colAmount: FixedNumber, daiAmount: FixedNumber) {
-    const [actions, cdpManager, jug, daiJoin] = await Promise.all([
-      chainLog
-        .proxyRegistry()
-        .then((proxyRegistry) => proxyRegistry.ensureDSProxy())
-        .then((proxy) =>
-          Promise.all([chainLog.proxyActions(proxy), this.ilkInfo.gem.ensureAllowance(proxy.address, colAmount)]),
-        )
-        .then(([x, _]) => x),
+  private async getProxyAndActions() {
+    if (this.proxy && this.actions) {
+      return {
+        proxy: this.proxy,
+        actions: this.actions,
+      };
+    }
+    this.proxy = await this.proxyRegistry.ensureDSProxy();
+    this.actions = await this.chainLog.proxyActions(this.proxy);
+    return {
+      proxy: this.proxy,
+      actions: this.actions,
+    };
+  }
+
+  async mint(cdpId: FixedNumber, colAmount: FixedNumber, daiAmount: FixedNumber) {
+    const { actions, proxy } = await this.getProxyAndActions();
+    await this.ilkInfo.gem.ensureAllowance(proxy.address, colAmount, 3);
+    const tx = await actions.lockGemAndDraw(this.cdpManager, this.jug, this.daiJoin, this.ilkInfo, cdpId, colAmount, daiAmount);
+    await tx.wait();
+  }
+
+  async burn(cdpId: FixedNumber, colAmount: FixedNumber, daiAmount: FixedNumber) {
+    const { actions, proxy } = await this.getProxyAndActions();
+    await this.dai.ensureAllowance(proxy.address, daiAmount);
+    const tx = await actions.wipeAndFreeGem(this.cdpManager, this.daiJoin, this.ilkInfo, cdpId, colAmount, daiAmount);
+    await tx.wait();
+  }
+
+  async burnAll(cdpId: FixedNumber, colAmount: FixedNumber, daiAmount: FixedNumber) {
+    const { actions, proxy } = await this.getProxyAndActions();
+    await this.dai.ensureAllowance(proxy.address, daiAmount);
+    const tx = await actions.wipeAllAndFreeGem(this.cdpManager, this.daiJoin, this.ilkInfo, cdpId, colAmount);
+    await tx.wait();
+  }
+
+  async open(colAmount: FixedNumber, daiAmount: FixedNumber) {
+    const { actions, proxy } = await this.getProxyAndActions();
+    await this.dai.ensureAllowance(proxy.address, daiAmount);
+    const tx = await actions.openLockGemAndDraw(this.cdpManager, this.jug, this.daiJoin, this.ilkInfo, colAmount, daiAmount);
+    await tx.wait();
+  }
+
+  static async fromChainlog(chainLog: ChainLogHelper, ilkInfo: IlkInfo) {
+    const [proxyRegistry, cdpManager, jug, daiJoin, dai] = await Promise.all([
+      chainLog.proxyRegistry(),
       chainLog.dssCDPManager(),
       chainLog.jug(),
       chainLog.daiJoin(),
+      chainLog.dai(),
     ]);
-    await actions
-      .lockGemAndDraw(cdpManager, jug, daiJoin, this.ilkInfo, this.cdpId, colAmount, daiAmount)
-      .then((tx) => tx.wait());
-  }
+    const proxy = await proxyRegistry.getDSProxy();
 
-  async burn(chainLog: ChainLogHelper, colAmount: FixedNumber, daiAmount: FixedNumber) {
-    const [actions, cdpManager, daiJoin] = await Promise.all([
-      Promise.all([chainLog.proxyRegistry().then((proxyRegistry) => proxyRegistry.ensureDSProxy()), chainLog.dai()]).then(
-        ([proxy, dai]) =>
-          Promise.all([chainLog.proxyActions(proxy), dai.ensureAllowance(proxy.address, daiAmount)]).then(([x, _]) => x),
-      ),
-      chainLog.dssCDPManager(),
-      chainLog.daiJoin(),
-    ]);
+    const actions = proxy ? await chainLog.proxyActions(proxy) : undefined;
 
-    await actions.wipeAndFreeGem(cdpManager, daiJoin, this.ilkInfo, this.cdpId, colAmount, daiAmount).then((tx) => tx.wait());
-  }
-
-  async burnAll(chainLog: ChainLogHelper, colAmount: FixedNumber, daiAmount: FixedNumber) {
-    const [actions, cdpManager, daiJoin] = await Promise.all([
-      Promise.all([chainLog.proxyRegistry().then((proxyRegistry) => proxyRegistry.ensureDSProxy()), chainLog.dai()]).then(
-        ([proxy, dai]) =>
-          Promise.all([chainLog.proxyActions(proxy), dai.ensureAllowance(proxy.address, daiAmount)]).then(([x, _]) => x),
-      ),
-      chainLog.dssCDPManager(),
-      chainLog.daiJoin(),
-    ]);
-
-    await actions.wipeAllAndFreeGem(cdpManager, daiJoin, this.ilkInfo, this.cdpId, colAmount).then((tx) => tx.wait());
-  }
-
-  static async open(chainLog: ChainLogHelper, ilkInfo: IlkInfo, colAmount: FixedNumber, daiAmount: FixedNumber) {
-    const [actions, cdpManager, jug, daiJoin] = await Promise.all([
-      chainLog
-        .proxyRegistry()
-        .then((proxyRegistry) => proxyRegistry.ensureDSProxy())
-        .then((proxy) => Promise.all([chainLog.proxyActions(proxy), ilkInfo.gem.ensureAllowance(proxy.address, colAmount)]))
-        .then(([x, _]) => x),
-      chainLog.dssCDPManager(),
-      chainLog.jug(),
-      chainLog.daiJoin(),
-    ]);
-    await actions.openLockGemAndDraw(cdpManager, jug, daiJoin, ilkInfo, colAmount, daiAmount).then((tx) => tx.wait());
+    return new Vault(chainLog, ilkInfo, cdpManager, jug, daiJoin, dai, proxyRegistry, actions, proxy);
   }
 
   static getDaiAmount(colAmount: FixedNumber, colRatio: FixedNumber, liqRatio: FixedNumber, price: FixedNumber): FixedNumber {

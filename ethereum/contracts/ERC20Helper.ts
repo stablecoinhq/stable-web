@@ -41,8 +41,9 @@ export default class ERC20Helper {
     return toFixedNumber(value, this.format);
   }
 
-  private approve(spenderAddress: string, amount: FixedNumber, wait?: number) {
-    return this.contract.approve(spenderAddress, toBigNumber(amount, this.format)).then((tx) => tx.wait(wait));
+  private async approve(spenderAddress: string, amount: FixedNumber, wait?: number) {
+    const tx = await this.contract.approve(spenderAddress, toBigNumber(amount, this.format));
+    return tx.wait(wait);
   }
 
   async ensureAllowance(spenderAddress: string, amount: FixedNumber, wait?: number) {

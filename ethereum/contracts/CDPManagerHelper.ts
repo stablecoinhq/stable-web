@@ -27,18 +27,18 @@ export default class CDPManagerHelper {
     return this.contract.address;
   }
 
-  private getIlkType(cdpId: FixedNumber) {
-    return this.contract.ilks(toBigNumber(cdpId, INT_FORMAT)).then((typeBytes32) => IlkType.fromBytes32(typeBytes32));
+  private async getIlkType(cdpId: FixedNumber) {
+    const typeBytes32 = await this.contract.ilks(toBigNumber(cdpId, INT_FORMAT));
+    return IlkType.fromBytes32(typeBytes32);
   }
 
   private getUrn(cdpId: FixedNumber) {
     return this.contract.urns(toBigNumber(cdpId, INT_FORMAT));
   }
 
-  private getOwner(cdpId: FixedNumber) {
-    return this.contract
-      .owns(toBigNumber(cdpId, INT_FORMAT))
-      .then((address) => DSProxy__factory.connect(address, this.provider.getSigner()));
+  private async getOwner(cdpId: FixedNumber) {
+    const address = await this.contract.owns(toBigNumber(cdpId, INT_FORMAT));
+    return DSProxy__factory.connect(address, this.provider.getSigner());
   }
 
   async getCDP(cdpId: FixedNumber): Promise<CDP> {

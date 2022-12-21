@@ -13,7 +13,8 @@ export default class SpotHelper {
     this.contract = Spotter__factory.connect(address, provider.getSigner());
   }
 
-  getLiquidationRatio(ilkType: IlkType) {
-    return this.contract.ilks(ilkType.inBytes32).then(({ mat }) => toFixedNumber(mat, UnitFormats.RAY));
+  async getLiquidationRatio(ilkType: IlkType) {
+    const { mat } = await this.contract.ilks(ilkType.inBytes32);
+    return toFixedNumber(mat, UnitFormats.RAY);
   }
 }
