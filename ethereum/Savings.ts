@@ -9,13 +9,13 @@ import type ProxyRegistryHelper from './contracts/ProxyRegistryHelper';
 import type { DaiJoin, DSProxy, Pot } from 'generated/types';
 
 export default class Savings {
-  chainLog: ChainLogHelper;
-  daiJoin: DaiJoin;
-  pot: Pot;
-  dai: ERC20Helper;
-  proxyRegistry: ProxyRegistryHelper;
-  actions?: ProxyActionsDsrHelper;
-  proxy?: DSProxy;
+  private readonly chainLog: ChainLogHelper;
+  private readonly daiJoin: DaiJoin;
+  private readonly pot: Pot;
+  private readonly dai: ERC20Helper;
+  private readonly proxyRegistry: ProxyRegistryHelper;
+  private actions?: ProxyActionsDsrHelper;
+  private proxy?: DSProxy;
 
   constructor(
     chainLog: ChainLogHelper,
@@ -42,11 +42,11 @@ export default class Savings {
         actions: this.actions,
       };
     }
-    const proxy = await this.proxyRegistry.ensureDSProxy();
-    const actions = await this.chainLog.proxyActionsDsr(proxy);
+    this.proxy = await this.proxyRegistry.ensureDSProxy();
+    this.actions = await this.chainLog.proxyActionsDsr(this.proxy);
     return {
-      proxy,
-      actions,
+      proxy: this.proxy,
+      actions: this.actions,
     };
   }
 

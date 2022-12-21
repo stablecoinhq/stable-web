@@ -18,7 +18,7 @@ import type { FC } from 'react';
 import type { SWRResponse } from 'swr';
 
 type ContentProps = {
-  cdps: SWRResponse<CDP[] | undefined, Error>;
+  cdps: SWRResponse<CDP[], Error>;
 };
 
 const Content: FC<ContentProps> = ({ cdps }) => {
@@ -51,7 +51,7 @@ const Page: NextPageWithEthereum = ({ provider }) => {
     const proxyRegistry = await chainLog.proxyRegistry();
     const proxy = await proxyRegistry.getDSProxy();
     const cpds = proxy ? await getCDPs.getCDPs(proxy) : undefined;
-    return cpds;
+    return cpds || [];
   });
 
   return (

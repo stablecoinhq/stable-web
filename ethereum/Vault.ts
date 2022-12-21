@@ -20,9 +20,9 @@ export default class Vault {
   private readonly jug: JugHelper;
   private readonly daiJoin: DaiJoin;
   private readonly dai: ERC20Helper;
-  private readonly actions?: ProxyActionsHelper;
-  private readonly proxy?: DSProxy;
   private readonly proxyRegistry: ProxyRegistryHelper;
+  private actions?: ProxyActionsHelper;
+  private proxy?: DSProxy;
 
   constructor(
     chainLog: ChainLogHelper,
@@ -53,11 +53,11 @@ export default class Vault {
         actions: this.actions,
       };
     }
-    const proxy = await this.proxyRegistry.ensureDSProxy();
-    const actions = await this.chainLog.proxyActions(proxy);
+    this.proxy = await this.proxyRegistry.ensureDSProxy();
+    this.actions = await this.chainLog.proxyActions(this.proxy);
     return {
-      proxy,
-      actions,
+      proxy: this.proxy,
+      actions: this.actions,
     };
   }
 
