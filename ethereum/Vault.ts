@@ -84,7 +84,7 @@ export default class Vault {
 
   async open(colAmount: FixedNumber, daiAmount: FixedNumber) {
     const { actions, proxy } = await this.getProxyAndActions();
-    await this.dai.ensureAllowance(proxy.address, daiAmount);
+    await this.ilkInfo.gem.ensureAllowance(proxy.address, colAmount);
     const tx = await actions.openLockGemAndDraw(this.cdpManager, this.jug, this.daiJoin, this.ilkInfo, colAmount, daiAmount);
     await tx.wait();
   }

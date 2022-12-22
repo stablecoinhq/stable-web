@@ -4,10 +4,12 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { UnitFormats } from 'ethereum/helpers/math';
 import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
+import SubmitForm from 'ethereum/react/form/SubmitForm';
 
 import { MintFormValidation, MintError } from './MintFormValidation';
 
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
+import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
 import type { FixedNumber } from 'ethers';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
@@ -15,8 +17,10 @@ import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react
 export type MintFormProps = {
   ilkInfo: IlkInfo;
   ilkStatus: IlkStatus;
+  proxyRegistry: ProxyRegistryHelper;
   buttonContent: ReactNode;
   balance: FixedNumber;
+  allowance: FixedNumber;
   lockedBalance: FixedNumber;
   debt: FixedNumber;
   onMint: (colAmount: FixedNumber, daiAmount: FixedNumber) => Promise<void>;
@@ -32,12 +36,14 @@ const MintForm: FC<MintFormProps> = ({
   onMint,
   buttonContent,
   balance,
+  allowance,
   lockedBalance,
   debt,
   onAmountChange,
   onDaiAmountChange,
   amountText,
   daiAmountText,
+  proxyRegistry,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms.mint' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
@@ -83,6 +89,16 @@ const MintForm: FC<MintFormProps> = ({
     [balance, collateralAmount],
   );
 
+  const isInvalid = useMemo(
+    () =>
+      !collateralAmount ||
+      !daiAmount ||
+      minting ||
+      formErrors.length !== 0 ||
+      (daiAmount && collateralAmount && daiAmount.isZero() && collateralAmount.isZero()),
+    [collateralAmount, daiAmount, formErrors.length, minting],
+  );
+
   const showErrorMessage = (e: MintError) => {
     switch (e) {
       case MintError.insufficientBalance:
@@ -124,20 +140,11 @@ const MintForm: FC<MintFormProps> = ({
           />
         </Grid>
         <Grid item xs={12}>
-          <Button
-            variant="contained"
-            fullWidth
-            disabled={
-              !collateralAmount ||
-              !daiAmount ||
-              minting ||
-              formErrors.length !== 0 ||
-              (daiAmount && collateralAmount && daiAmount.isZero() && collateralAmount.isZero())
-            }
-            onClick={onButtonClick}
-          >
-            {minting ? <CircularProgress /> : buttonContent}
-          </Button>
+          <SubmitForm proxyRegistry={proxyRegistry} erc20={ilkInfo.gem} spendingAmount={collateralAmount} allowance={allowance} isInvalid={isInvalid}>
+            <Button variant="contained" fullWidth disabled={isInvalid} onClick={onButtonClick}>
+              {minting ? <CircularProgress /> : buttonContent}
+            </Button>
+          </SubmitForm>
         </Grid>
         <Grid item xs={12}>
           {formErrors.map((e) => (

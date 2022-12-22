@@ -10,6 +10,7 @@ import FormLayout from './FormLayout';
 
 import type { TabValue } from './FormLayout';
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
+import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { CurrentVaultStatus } from 'ethereum/react/cards/VaultStatusCard';
 import type { FixedNumber } from 'ethers';
@@ -19,8 +20,10 @@ type MintFormControllerProps = {
   ilkInfo: IlkInfo;
   ilkStatus: IlkStatus;
   urnStatus: UrnStatus;
+  proxyRegistry: ProxyRegistryHelper;
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
+  allowance: FixedNumber;
   address: string;
   buttonContent: string;
   selectedTab?: TabValue;
@@ -31,8 +34,10 @@ type MintFormControllerProps = {
 const MintFormController: FC<MintFormControllerProps> = ({
   ilkInfo,
   ilkStatus,
+  proxyRegistry,
   liquidationRatio,
   balance,
+  allowance,
   urnStatus,
   selectedTab,
   onSelectTab,
@@ -106,9 +111,11 @@ const MintFormController: FC<MintFormControllerProps> = ({
       <MintForm
         ilkInfo={ilkInfo}
         ilkStatus={ilkStatus}
+        proxyRegistry={proxyRegistry}
         buttonContent={buttonContent}
         onMint={mint}
         balance={balance}
+        allowance={allowance}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
         onAmountChange={onAmountChange}
@@ -117,19 +124,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
         onDaiAmountChange={onDaiAmountChange}
       />
     ),
-    [
-      amountText,
-      balance,
-      buttonContent,
-      daiAmountText,
-      ilkInfo,
-      ilkStatus,
-      mint,
-      onAmountChange,
-      onDaiAmountChange,
-      urnStatus.debt,
-      urnStatus.lockedBalance,
-    ],
+    [allowance, amountText, balance, buttonContent, daiAmountText, ilkInfo, ilkStatus, mint, onAmountChange, onDaiAmountChange, proxyRegistry, urnStatus.debt, urnStatus.lockedBalance],
   );
   return (
     <FormLayout

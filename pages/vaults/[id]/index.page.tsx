@@ -23,6 +23,7 @@ import MintFormController from '../../forms/MintFormController';
 import type { TabValue } from '../../forms/FormLayout';
 import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type { CDP } from 'ethereum/contracts/GetCDPsHelper';
+import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { BurnFormProps } from 'pages/forms/BurnForm';
@@ -50,13 +51,15 @@ const NotFound: FC = () => {
 type ControllerProps = {
   cdp: CDP;
   vault: Vault;
+  proxyRegistry: ProxyRegistryHelper;
   ilkStatus: IlkStatus;
   urnStatus: UrnStatus;
   liquidationRatio: FixedNumber;
   tokenBalance: FixedNumber;
+  tokenAllowance: FixedNumber;
   daiBalance: FixedNumber;
   address: string;
-  updateAllBalance: () => void;
+  update: () => void;
 };
 
 const Controller: FC<ControllerProps> = ({
@@ -65,10 +68,12 @@ const Controller: FC<ControllerProps> = ({
   urnStatus,
   ilkStatus,
   liquidationRatio,
-  updateAllBalance,
+  update,
   tokenBalance,
+  tokenAllowance,
   daiBalance,
   address,
+  proxyRegistry,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'terms' });
   const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.vault.errors' });
@@ -86,27 +91,27 @@ const Controller: FC<ControllerProps> = ({
     (collateralAmount, daiAmount) =>
       vault
         .mint(cdp.id, collateralAmount, daiAmount)
-        .then(() => updateAllBalance())
+        .then(() => update())
         .catch((err) => openDialog(errorMessage('errorWhileMinting'), err)),
-    [vault, cdp.id, updateAllBalance, openDialog, errorMessage],
+    [vault, cdp.id, update, openDialog, errorMessage],
   );
 
   const burn: BurnFormProps['onBurn'] = useCallback(
     (dai, col) =>
       vault
         .burn(cdp.id, col, dai)
-        .then(() => updateAllBalance())
+        .then(() => update())
         .catch((err) => openDialog(errorMessage('errorWhileRepaying'), err)),
-    [vault, cdp.id, updateAllBalance, openDialog, errorMessage],
+    [vault, cdp.id, update, openDialog, errorMessage],
   );
 
   const burnAll: BurnFormProps['onBurnAll'] = useCallback(
     (dai, col) =>
       vault
         .burnAll(cdp.id, col, dai)
-        .then(() => updateAllBalance())
+        .then(() => update())
         .catch((err) => openDialog(errorMessage('errorWhileRepaying'), err)),
-    [vault, cdp.id, updateAllBalance, openDialog, errorMessage],
+    [vault, cdp.id, update, openDialog, errorMessage],
   );
 
   const TabContent: FC = useCallback(() => {
@@ -114,12 +119,14 @@ const Controller: FC<ControllerProps> = ({
       case 'mint':
         return (
           <MintFormController
+            proxyRegistry={proxyRegistry}
             ilkInfo={vault.ilkInfo}
             ilkStatus={ilkStatus}
             urnStatus={urnStatus}
             mint={mint}
             liquidationRatio={liquidationRatio}
             balance={tokenBalance}
+            allowance={tokenAllowance}
             address={address}
             buttonContent={t('mint')}
             selectedTab={selectedTab}
@@ -143,21 +150,7 @@ const Controller: FC<ControllerProps> = ({
           />
         );
     }
-  }, [
-    selectedTab,
-    vault.ilkInfo,
-    ilkStatus,
-    urnStatus,
-    mint,
-    liquidationRatio,
-    tokenBalance,
-    address,
-    t,
-    onSelectTab,
-    burn,
-    burnAll,
-    daiBalance,
-  ]);
+  }, [selectedTab, proxyRegistry, vault.ilkInfo, ilkStatus, urnStatus, mint, liquidationRatio, tokenBalance, tokenAllowance, address, t, onSelectTab, burn, burnAll, daiBalance]);
 
   return <TabContent />;
 };
@@ -171,10 +164,13 @@ type ContentProps = {
 const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
   const { data, mutate, isLoading } = useSWR('getVaultData', async () => {
     const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, cdp.ilk);
-    const [daiBalance, urnStatus, tokenBalance, vault] = await Promise.all([
+    const proxyRegistry = await chainLog.proxyRegistry();
+    const proxy = await proxyRegistry.getDSProxy();
+    const [daiBalance, urnStatus, tokenBalance, tokenAllowance, vault] = await Promise.all([
       chainLog.dai().then((dai) => dai.getBalance()),
       chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)),
       ilkInfo.gem.getBalance(),
+      proxy ? ilkInfo.gem.getAllowance(proxy.address) : FixedNumber.from('0', ilkInfo.gem.format),
       Vault.fromChainlog(chainLog, ilkInfo),
     ]);
     return {
@@ -183,9 +179,12 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
       liquidationRatio,
       stabilityFee,
       tokenBalance,
+      tokenAllowance,
       daiBalance,
       urnStatus,
       vault,
+      proxyRegistry,
+      proxyAddress: proxy ? proxy.address : undefined,
     };
   });
 
@@ -199,7 +198,18 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
     );
   }
 
-  const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, urnStatus, tokenBalance, daiBalance, vault } = data;
+  const {
+    ilkInfo,
+    ilkStatus,
+    liquidationRatio,
+    stabilityFee,
+    urnStatus,
+    tokenBalance,
+    tokenAllowance,
+    daiBalance,
+    vault,
+    proxyRegistry,
+  } = data;
 
   return (
     <Stack padding={2} spacing={2}>
@@ -209,9 +219,11 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
         vault={vault}
         urnStatus={urnStatus}
         ilkStatus={ilkStatus}
+        proxyRegistry={proxyRegistry}
         liquidationRatio={liquidationRatio}
-        updateAllBalance={updateAllBalance}
+        update={updateAllBalance}
         tokenBalance={tokenBalance}
+        tokenAllowance={tokenAllowance}
         daiBalance={daiBalance}
         address={address}
       />

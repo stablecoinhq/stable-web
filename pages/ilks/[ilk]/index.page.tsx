@@ -20,20 +20,23 @@ import InvalidIlk from './InvalidIlk';
 
 import type EthereumProvider from 'ethereum/EthereumProvider';
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
+import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
 type OpenVaultProps = {
   ilkInfo: IlkInfo;
+  proxyRegistry: ProxyRegistryHelper;
   vault: Vault;
   ilkStatus: IlkStatus;
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
+  allowance: FixedNumber;
   address: string;
 };
 
-const OpenVault: FC<OpenVaultProps> = ({ ilkInfo, vault, ilkStatus, liquidationRatio, balance, address }) => {
+const OpenVault: FC<OpenVaultProps> = ({ ilkInfo, proxyRegistry, vault, ilkStatus, liquidationRatio, balance, address, allowance }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
   const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.ilk.errors' });
   const { openDialog } = useErrorDialog();
@@ -59,12 +62,14 @@ const OpenVault: FC<OpenVaultProps> = ({ ilkInfo, vault, ilkStatus, liquidationR
 
   return (
     <MintFormController
+      proxyRegistry={proxyRegistry}
       ilkInfo={ilkInfo}
       ilkStatus={ilkStatus}
       urnStatus={urnStatus}
       mint={openVault}
       liquidationRatio={liquidationRatio}
       balance={balance}
+      allowance={allowance}
       address={address}
       buttonContent={t('openLabel')}
     />
@@ -80,14 +85,22 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
   const chainLog = useChainLog(provider);
   const { data, isLoading, error } = useSWR('getData', async () => {
     const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, ilkType);
-    const [balance, vault] = await Promise.all([ilkInfo.gem.getBalance(), Vault.fromChainlog(chainLog, ilkInfo)]);
+    const proxyRegistry = await chainLog.proxyRegistry();
+    const proxy = await proxyRegistry.getDSProxy();
+    const [balance, vault, allowance] = await Promise.all([
+      ilkInfo.gem.getBalance(),
+      Vault.fromChainlog(chainLog, ilkInfo),
+      proxy ? ilkInfo.gem.getAllowance(proxy.address) : FixedNumber.from('0', ilkInfo.gem.format),
+    ]);
     return {
       ilkInfo,
       ilkStatus,
       liquidationRatio,
       stabilityFee,
       balance,
+      allowance,
       vault,
+      proxyRegistry,
     };
   });
 
@@ -103,7 +116,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
     );
   }
 
-  const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, balance, vault } = data;
+  const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, balance, allowance, vault, proxyRegistry } = data;
   return (
     <Stack padding={2} spacing={2}>
       <IlkStatusCard ilkInfo={ilkInfo} ilkStatus={ilkStatus} liquidationRatio={liquidationRatio} stabilityFee={stabilityFee} />
@@ -113,7 +126,9 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
         vault={vault}
         liquidationRatio={liquidationRatio}
         balance={balance}
+        allowance={allowance}
         address={provider.address}
+        proxyRegistry={proxyRegistry}
       />
     </Stack>
   );
