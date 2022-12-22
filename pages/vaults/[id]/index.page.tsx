@@ -8,7 +8,7 @@ import { useCallback, useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 import Vault from 'ethereum/Vault';
-import { INT_FORMAT } from 'ethereum/helpers/math';
+import { INT_FORMAT, UnitFormats } from 'ethereum/helpers/math';
 import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import IlkStatusCard, { getIlkStatusProps } from 'ethereum/react/cards/IlkStatusCard';
 import useChainLog from 'ethereum/react/useChainLog';
@@ -22,9 +22,11 @@ import MintFormController from '../../forms/MintFormController';
 
 import type { TabValue } from '../../forms/FormLayout';
 import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
+import type ERC20Helper from 'ethereum/contracts/ERC20Helper';
 import type { CDP } from 'ethereum/contracts/GetCDPsHelper';
 import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
+import type { SubmitFormProps } from 'ethereum/react/form/SubmitForm';
 import type { NextPageWithEthereum } from 'next';
 import type { BurnFormProps } from 'pages/forms/BurnForm';
 import type { MintFormProps } from 'pages/forms/MintForm';
@@ -51,6 +53,7 @@ const NotFound: FC = () => {
 type ControllerProps = {
   cdp: CDP;
   vault: Vault;
+  dai: ERC20Helper;
   proxyRegistry: ProxyRegistryHelper;
   proxyAddress: string | undefined;
   ilkStatus: IlkStatus;
@@ -59,6 +62,7 @@ type ControllerProps = {
   tokenBalance: FixedNumber;
   tokenAllowance: FixedNumber;
   daiBalance: FixedNumber;
+  daiAllowance: FixedNumber;
   address: string;
   update: () => void;
 };
@@ -73,9 +77,11 @@ const Controller: FC<ControllerProps> = ({
   tokenBalance,
   tokenAllowance,
   daiBalance,
+  daiAllowance,
   address,
   proxyRegistry,
   proxyAddress,
+  dai,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'terms' });
   const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.vault.errors' });
@@ -99,9 +105,9 @@ const Controller: FC<ControllerProps> = ({
   );
 
   const burn: BurnFormProps['onBurn'] = useCallback(
-    (dai, col) =>
+    (d, col) =>
       vault
-        .burn(cdp.id, col, dai)
+        .burn(cdp.id, col, d)
         .then(() => update())
         .catch((err) => openDialog(errorMessage('errorWhileRepaying'), err)),
     [vault, cdp.id, update, openDialog, errorMessage],
@@ -118,15 +124,32 @@ const Controller: FC<ControllerProps> = ({
     [vault.ilkInfo, proxyAddress, update],
   );
 
+  const increaseDaiAllowance = useCallback(
+    async (n: FixedNumber) => {
+      if (proxyAddress) {
+        await dai.ensureAllowance(proxyAddress, n, 5).then(() => update());
+      }
+    },
+    [dai, proxyAddress, update],
+  );
   const burnAll: BurnFormProps['onBurnAll'] = useCallback(
-    (dai, col) =>
+    (d, col) =>
       vault
-        .burnAll(cdp.id, col, dai)
+        .burnAll(cdp.id, col, d)
         .then(() => update())
         .catch((err) => openDialog(errorMessage('errorWhileRepaying'), err)),
     [vault, cdp.id, update, openDialog, errorMessage],
   );
 
+  const burnSubmitFormProps: SubmitFormProps = useMemo(
+    () => ({
+      createProxy,
+      proxyAddress,
+      allowance: daiAllowance,
+      increaseAllowance: increaseDaiAllowance,
+    }),
+    [createProxy, daiAllowance, increaseDaiAllowance, proxyAddress],
+  );
   const formContent = useMemo(() => {
     switch (selectedTab) {
       case 'mint':
@@ -162,28 +185,11 @@ const Controller: FC<ControllerProps> = ({
             ilkStatus={ilkStatus}
             selectedTab={selectedTab}
             onSelectTab={onSelectTab}
+            submitFormProps={burnSubmitFormProps}
           />
         );
     }
-  }, [
-    selectedTab,
-    proxyAddress,
-    createProxy,
-    vault.ilkInfo,
-    ilkStatus,
-    urnStatus,
-    increateTokenAllowance,
-    mint,
-    liquidationRatio,
-    tokenBalance,
-    tokenAllowance,
-    address,
-    t,
-    onSelectTab,
-    burn,
-    burnAll,
-    daiBalance,
-  ]);
+  }, [selectedTab, proxyAddress, createProxy, vault.ilkInfo, ilkStatus, urnStatus, increateTokenAllowance, mint, liquidationRatio, tokenBalance, tokenAllowance, address, t, onSelectTab, burn, burnAll, daiBalance, burnSubmitFormProps]);
 
   return formContent;
 };
@@ -201,8 +207,10 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
       const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, cdp.ilk);
       const proxyRegistry = await chainLog.proxyRegistry();
       const proxy = await proxyRegistry.getDSProxy();
-      const [daiBalance, urnStatus, tokenBalance, tokenAllowance, vault] = await Promise.all([
-        chainLog.dai().then((dai) => dai.getBalance()),
+      const dai = await chainLog.dai();
+      const [daiBalance, daiAllowance, urnStatus, tokenBalance, tokenAllowance, vault] = await Promise.all([
+        dai.getBalance(),
+        proxy ? dai.getAllowance(proxy.address) : FixedNumber.from('0', UnitFormats.WAD),
         chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)),
         ilkInfo.gem.getBalance(),
         proxy ? ilkInfo.gem.getAllowance(proxy.address) : FixedNumber.from('0', ilkInfo.gem.format),
@@ -211,11 +219,13 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
       return {
         ilkInfo,
         ilkStatus,
+        dai,
         liquidationRatio,
         stabilityFee,
         tokenBalance,
         tokenAllowance,
         daiBalance,
+        daiAllowance,
         urnStatus,
         vault,
         proxyRegistry,
@@ -244,9 +254,11 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
     tokenBalance,
     tokenAllowance,
     daiBalance,
+    daiAllowance,
     vault,
     proxyRegistry,
     proxyAddress,
+    dai,
   } = data;
 
   return (
@@ -264,7 +276,9 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
         tokenBalance={tokenBalance}
         tokenAllowance={tokenAllowance}
         daiBalance={daiBalance}
+        daiAllowance={daiAllowance}
         address={address}
+        dai={dai}
       />
     </Stack>
   );

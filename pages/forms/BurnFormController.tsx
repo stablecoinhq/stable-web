@@ -12,6 +12,7 @@ import FormLayout from './FormLayout';
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { CurrentVaultStatus } from 'ethereum/react/cards/VaultStatusCard';
+import type { SubmitFormProps } from 'ethereum/react/form/SubmitForm';
 import type { FC } from 'react';
 
 type TabValue = 'mint' | 'burn';
@@ -30,6 +31,7 @@ type BurnFormControllerProps = {
   onSelectTab: (_: unknown, value: TabValue) => void;
   burn: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
   burnAll: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
+  submitFormProps: SubmitFormProps;
 };
 
 const BurnFormController: FC<BurnFormControllerProps> = ({
@@ -44,10 +46,30 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
   onSelectTab,
   burn,
   burnAll,
+  submitFormProps,
 }) => {
   const [daiText, setDaiText] = useState('');
   const [colText, setColText] = useState('');
 
+  const onBurn = useCallback(
+    async (daiAmount: FixedNumber, colAmount: FixedNumber) => {
+      await burn(daiAmount, colAmount).then(() => {
+        setColText('');
+        setDaiText('');
+      });
+    },
+    [burn],
+  );
+
+  const onBurnAll = useCallback(
+    async (daiAmount: FixedNumber, colAmount: FixedNumber) => {
+      await burnAll(daiAmount, colAmount).then(() => {
+        setColText('');
+        setDaiText('');
+      });
+    },
+    [burnAll],
+  );
   const onAmountChange = useCallback(
     (value: string) => setDaiText(cutDecimals(pickNumbers(value), UnitFormats.WAD.decimals)),
     [],
@@ -66,28 +88,16 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         daiBalance={balance}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
-        onBurn={burn}
-        onBurnAll={burnAll}
+        onBurn={onBurn}
+        onBurnAll={onBurnAll}
         onAmountChange={onAmountChange}
         onColChange={onColChange}
         daiText={daiText}
         colText={colText}
+        submitFormProps={submitFormProps}
       />
     ),
-    [
-      balance,
-      burn,
-      burnAll,
-      buttonContent,
-      colText,
-      daiText,
-      ilkInfo,
-      ilkStatus,
-      onAmountChange,
-      onColChange,
-      urnStatus.debt,
-      urnStatus.lockedBalance,
-    ],
+    [balance, buttonContent, colText, daiText, ilkInfo, ilkStatus, onAmountChange, onBurn, onBurnAll, onColChange, submitFormProps, urnStatus.debt, urnStatus.lockedBalance],
   );
 
   const current: CurrentVaultStatus | undefined = useMemo(() => {

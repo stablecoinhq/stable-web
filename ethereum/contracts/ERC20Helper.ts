@@ -49,13 +49,12 @@ export default class ERC20Helper {
   async ensureAllowance(spenderAddress: string, amount: FixedNumber, wait?: number) {
     const current = await this.getAllowance(spenderAddress);
     const diff = amount.subUnsafe(current);
-    console.log(`spenderAddress ${spenderAddress}, current ${current}, diff: ${diff}`);
 
     // requested amount <= current
     if (diff.isNegative() || diff.isZero()) {
       return;
     }
 
-    await this.approve(spenderAddress, diff, wait);
+    await this.approve(spenderAddress, amount, wait);
   }
 }

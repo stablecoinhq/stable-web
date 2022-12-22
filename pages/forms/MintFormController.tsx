@@ -138,23 +138,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
         onDaiAmountChange={onDaiAmountChange}
       />
     ),
-    [
-      allowance,
-      amountText,
-      balance,
-      buttonContent,
-      createProxy,
-      daiAmountText,
-      ilkInfo,
-      ilkStatus,
-      increaseAllowance,
-      mint,
-      onAmountChange,
-      onDaiAmountChange,
-      proxyAddress,
-      urnStatus.debt,
-      urnStatus.lockedBalance,
-    ],
+    [allowance, amountText, balance, buttonContent, createProxy, daiAmountText, ilkInfo, ilkStatus, increaseAllowance, onAmountChange, onDaiAmountChange, onMint, proxyAddress, urnStatus.debt, urnStatus.lockedBalance],
   );
   return (
     <FormLayout

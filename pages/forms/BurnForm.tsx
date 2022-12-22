@@ -16,11 +16,13 @@ import { useCallback, useMemo, useState } from 'react';
 import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
+import SubmitForm from 'ethereum/react/form/SubmitForm';
 
 import { BurnFormValidation, BurnError } from './BurnFormValidation';
 
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
+import type { SubmitFormProps } from 'ethereum/react/form/SubmitForm';
 import type { FixedNumber } from 'ethers';
 import type { FC, ChangeEventHandler, MouseEventHandler, ReactNode } from 'react';
 
@@ -37,6 +39,7 @@ export type BurnFormProps = {
   onColChange: (s: string) => void;
   daiText: string;
   colText: string;
+  submitFormProps: SubmitFormProps;
 };
 
 type BurnFormState = 'burn' | 'burnAll' | 'neutral';
@@ -54,6 +57,7 @@ const BurnForm: FC<BurnFormProps> = ({
   colText,
   onAmountChange,
   onColChange,
+  submitFormProps,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms.burn' });
   const daiAmount = useMemo(() => toFixedNumberOrUndefined(daiText, UnitFormats.WAD), [daiText]);
@@ -143,6 +147,17 @@ const BurnForm: FC<BurnFormProps> = ({
     }
     return [];
   }, [colAmount, daiAmount, lockedBalance, ilkStatus, debt, daiBalance]);
+
+  const isInvalid = useMemo(
+    () =>
+      !daiAmount ||
+      !colAmount ||
+      burning ||
+      formErrors.length !== 0 ||
+      (daiAmount && colAmount && daiAmount.isZero() && colAmount.isZero()) ||
+      !(burnFormState !== 'neutral'),
+    [burnFormState, burning, colAmount, daiAmount, formErrors.length],
+  );
   const showErrorMessage = (e: BurnError) => {
     switch (e) {
       case BurnError.insufficientBalance:
@@ -196,21 +211,18 @@ const BurnForm: FC<BurnFormProps> = ({
           </FormGroup>
         </Grid>
         <Grid item xs={12}>
-          <Button
-            variant="contained"
-            fullWidth
-            disabled={
-              !daiAmount ||
-              !colAmount ||
-              burning ||
-              formErrors.length !== 0 ||
-              (daiAmount && colAmount && daiAmount.isZero() && colAmount.isZero()) ||
-              !(burnFormState !== 'neutral')
-            }
-            onClick={onButtonClick}
+          <SubmitForm
+            proxyAddress={submitFormProps.proxyAddress}
+            increaseAllowance={submitFormProps.increaseAllowance}
+            spendingAmount={daiAmount}
+            allowance={submitFormProps.allowance}
+            isInvalid={isInvalid}
+            createProxy={submitFormProps.createProxy}
           >
-            {burning ? <CircularProgress /> : buttonContent}
-          </Button>
+            <Button variant="contained" fullWidth disabled={isInvalid} onClick={onButtonClick}>
+              {burning ? <CircularProgress /> : buttonContent}
+            </Button>
+          </SubmitForm>
           {formErrors.map((e) => (
             <FormHelperText key={e} error>
               {showErrorMessage(e)}

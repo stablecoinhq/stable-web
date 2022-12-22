@@ -7,6 +7,13 @@ import type { FixedNumber } from 'ethers';
 import type { FC, MouseEventHandler, ReactNode } from 'react';
 
 export type SubmitFormProps = {
+  createProxy: () => Promise<void>;
+  proxyAddress: string | undefined;
+  allowance: FixedNumber;
+  increaseAllowance: (n: FixedNumber) => Promise<void>;
+}
+
+type SubmitFormProp = {
   children: NonNullable<ReactNode>;
   createProxy: () => Promise<void>;
   proxyAddress: string | undefined;
@@ -21,7 +28,7 @@ type SubmitState = 'createProxy' | 'increaseAllowance' | 'neutral';
 // 1. Proxyが必要な場合にはProxy作成ボタンを表示する
 // 2. Allowanceを引き上げるにはAllowance許可ボタンを表示する
 // 3. 1,2がクリアできているならchildrenを表示する
-const SubmitForm: FC<SubmitFormProps> = ({
+const SubmitForm: FC<SubmitFormProp> = ({
   children,
   proxyAddress,
   createProxy,
@@ -43,7 +50,6 @@ const SubmitForm: FC<SubmitFormProps> = ({
   const onIncreaseAllowance: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
     if (spendingAmount) {
       setSubmitState('increaseAllowance');
-
       increaseAllowance(spendingAmount).finally(() => setSubmitState('neutral'));
     }
   }, [increaseAllowance, spendingAmount]);
