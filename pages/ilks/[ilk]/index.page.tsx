@@ -28,15 +28,28 @@ import type { FC } from 'react';
 type OpenVaultProps = {
   ilkInfo: IlkInfo;
   proxyRegistry: ProxyRegistryHelper;
+  proxyAddress: string | undefined;
   vault: Vault;
   ilkStatus: IlkStatus;
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
   allowance: FixedNumber;
   address: string;
+  update: () => void;
 };
 
-const OpenVault: FC<OpenVaultProps> = ({ ilkInfo, proxyRegistry, vault, ilkStatus, liquidationRatio, balance, address, allowance }) => {
+const OpenVault: FC<OpenVaultProps> = ({
+  ilkInfo,
+  proxyRegistry,
+  vault,
+  proxyAddress,
+  ilkStatus,
+  liquidationRatio,
+  balance,
+  address,
+  allowance,
+  update,
+}) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
   const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.ilk.errors' });
   const { openDialog } = useErrorDialog();
@@ -52,6 +65,16 @@ const OpenVault: FC<OpenVaultProps> = ({ ilkInfo, proxyRegistry, vault, ilkStatu
     [errorMessage, openDialog, router, vault],
   );
 
+  const increaseAllowance = useCallback(
+    async (n: FixedNumber) => {
+      if (proxyAddress) {
+        await ilkInfo.gem.ensureAllowance(proxyAddress, n, 5).then(() => update());
+      }
+    },
+    [ilkInfo.gem, proxyAddress, update],
+  );
+  const createProxy = useCallback(() => proxyRegistry.ensureDSProxy().then(() => update()), [proxyRegistry, update]);
+
   const zero = FixedNumber.fromString('0', UnitFormats.WAD);
   const urnStatus: UrnStatus = {
     urn: `0x${'0'.repeat(40)}`,
@@ -62,11 +85,13 @@ const OpenVault: FC<OpenVaultProps> = ({ ilkInfo, proxyRegistry, vault, ilkStatu
 
   return (
     <MintFormController
-      proxyRegistry={proxyRegistry}
+      proxyAddress={proxyAddress}
+      createProxy={createProxy}
       ilkInfo={ilkInfo}
       ilkStatus={ilkStatus}
       urnStatus={urnStatus}
       mint={openVault}
+      increaseAllowance={increaseAllowance}
       liquidationRatio={liquidationRatio}
       balance={balance}
       allowance={allowance}
@@ -83,7 +108,7 @@ type ContentProps = {
 
 const Content: FC<ContentProps> = ({ provider, ilkType }) => {
   const chainLog = useChainLog(provider);
-  const { data, isLoading, error } = useSWR('getData', async () => {
+  const { data, isLoading, error, mutate } = useSWR('getData', async () => {
     const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, ilkType);
     const proxyRegistry = await chainLog.proxyRegistry();
     const proxy = await proxyRegistry.getDSProxy();
@@ -101,6 +126,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
       allowance,
       vault,
       proxyRegistry,
+      proxy: proxy?.address,
     };
   });
 
@@ -116,7 +142,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
     );
   }
 
-  const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, balance, allowance, vault, proxyRegistry } = data;
+  const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, balance, allowance, vault, proxyRegistry, proxy } = data;
   return (
     <Stack padding={2} spacing={2}>
       <IlkStatusCard ilkInfo={ilkInfo} ilkStatus={ilkStatus} liquidationRatio={liquidationRatio} stabilityFee={stabilityFee} />
@@ -128,6 +154,8 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
         balance={balance}
         allowance={allowance}
         address={provider.address}
+        update={() => mutate()}
+        proxyAddress={proxy}
         proxyRegistry={proxyRegistry}
       />
     </Stack>

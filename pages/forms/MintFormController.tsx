@@ -10,7 +10,6 @@ import FormLayout from './FormLayout';
 
 import type { TabValue } from './FormLayout';
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
-import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { CurrentVaultStatus } from 'ethereum/react/cards/VaultStatusCard';
 import type { FixedNumber } from 'ethers';
@@ -20,7 +19,6 @@ type MintFormControllerProps = {
   ilkInfo: IlkInfo;
   ilkStatus: IlkStatus;
   urnStatus: UrnStatus;
-  proxyRegistry: ProxyRegistryHelper;
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
   allowance: FixedNumber;
@@ -28,16 +26,21 @@ type MintFormControllerProps = {
   buttonContent: string;
   selectedTab?: TabValue;
   onSelectTab?: (_: unknown, value: TabValue) => void;
-  mint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
+  mint: (amount: FixedNumber, daiAmount: FixedNumber) => Promise<void>;
+  increaseAllowance: (n: FixedNumber) => Promise<void>;
+  proxyAddress: string | undefined;
+  createProxy: () => Promise<void>;
 };
 
 const MintFormController: FC<MintFormControllerProps> = ({
   ilkInfo,
   ilkStatus,
-  proxyRegistry,
   liquidationRatio,
   balance,
   allowance,
+  increaseAllowance,
+  proxyAddress,
+  createProxy,
   urnStatus,
   selectedTab,
   onSelectTab,
@@ -51,6 +54,15 @@ const MintFormController: FC<MintFormControllerProps> = ({
   const onAmountChange = useCallback(
     (value: string) => setAmountText(cutDecimals(pickNumbers(value), ilkInfo.gem.format.decimals)),
     [ilkInfo.gem.format.decimals],
+  );
+
+  const onMint = useCallback(
+    (amount: FixedNumber, daiAmount: FixedNumber) =>
+      mint(amount, daiAmount).finally(() => {
+        setAmountText('');
+        setDaiAmountText('');
+      }),
+    [mint],
   );
 
   const onDaiAmountChange = useCallback(
@@ -111,11 +123,13 @@ const MintFormController: FC<MintFormControllerProps> = ({
       <MintForm
         ilkInfo={ilkInfo}
         ilkStatus={ilkStatus}
-        proxyRegistry={proxyRegistry}
+        proxyAddress={proxyAddress}
         buttonContent={buttonContent}
-        onMint={mint}
+        onMint={onMint}
         balance={balance}
         allowance={allowance}
+        increaseAllowance={increaseAllowance}
+        createProxy={createProxy}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
         onAmountChange={onAmountChange}
@@ -124,7 +138,23 @@ const MintFormController: FC<MintFormControllerProps> = ({
         onDaiAmountChange={onDaiAmountChange}
       />
     ),
-    [allowance, amountText, balance, buttonContent, daiAmountText, ilkInfo, ilkStatus, mint, onAmountChange, onDaiAmountChange, proxyRegistry, urnStatus.debt, urnStatus.lockedBalance],
+    [
+      allowance,
+      amountText,
+      balance,
+      buttonContent,
+      createProxy,
+      daiAmountText,
+      ilkInfo,
+      ilkStatus,
+      increaseAllowance,
+      mint,
+      onAmountChange,
+      onDaiAmountChange,
+      proxyAddress,
+      urnStatus.debt,
+      urnStatus.lockedBalance,
+    ],
   );
   return (
     <FormLayout

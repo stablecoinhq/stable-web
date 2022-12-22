@@ -40,6 +40,14 @@
     }
   },
   "forms": {
+    "createProxy": {
+      "submit": "Create Proxy",
+      "helperText": "Creating Proxy"
+    },
+    "increaseAllowance": {
+      "submit": "Increase Allowance",
+      "helperText": "Increasing allowance for Proxy"
+    },
     "burn": {
       "redeemAmount": "Amount of $t(units.stableToken) to redeem",
       "freeAmount": "Amount of {{gem}} to free",

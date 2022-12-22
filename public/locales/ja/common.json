@@ -40,6 +40,14 @@
     }
   },
   "forms": {
+    "createProxy": {
+      "submit": "Proxyを作成",
+      "helperText": "Proxyを作成中です"
+    },
+    "increaseAllowance": {
+      "submit": "支給額を増額",
+      "helperText": "Proxyが利用可能な残高を増額中です"
+    },
     "burn": {
       "redeemAmount": "返済する$t(units.stableToken)の数量",
       "freeAmount": "引き出す{{gem}}の数量",

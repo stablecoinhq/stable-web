@@ -52,6 +52,7 @@ type ControllerProps = {
   cdp: CDP;
   vault: Vault;
   proxyRegistry: ProxyRegistryHelper;
+  proxyAddress: string | undefined;
   ilkStatus: IlkStatus;
   urnStatus: UrnStatus;
   liquidationRatio: FixedNumber;
@@ -74,6 +75,7 @@ const Controller: FC<ControllerProps> = ({
   daiBalance,
   address,
   proxyRegistry,
+  proxyAddress,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'terms' });
   const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.vault.errors' });
@@ -105,6 +107,17 @@ const Controller: FC<ControllerProps> = ({
     [vault, cdp.id, update, openDialog, errorMessage],
   );
 
+  const createProxy = useCallback(() => proxyRegistry.ensureDSProxy().then(() => update()), [proxyRegistry, update]);
+
+  const increateTokenAllowance = useCallback(
+    async (n: FixedNumber) => {
+      if (proxyAddress) {
+        await vault.ilkInfo.gem.ensureAllowance(proxyAddress, n, 5).then(() => update());
+      }
+    },
+    [vault.ilkInfo, proxyAddress, update],
+  );
+
   const burnAll: BurnFormProps['onBurnAll'] = useCallback(
     (dai, col) =>
       vault
@@ -114,15 +127,17 @@ const Controller: FC<ControllerProps> = ({
     [vault, cdp.id, update, openDialog, errorMessage],
   );
 
-  const TabContent: FC = useCallback(() => {
+  const formContent = useMemo(() => {
     switch (selectedTab) {
       case 'mint':
         return (
           <MintFormController
-            proxyRegistry={proxyRegistry}
+            proxyAddress={proxyAddress}
+            createProxy={createProxy}
             ilkInfo={vault.ilkInfo}
             ilkStatus={ilkStatus}
             urnStatus={urnStatus}
+            increaseAllowance={increateTokenAllowance}
             mint={mint}
             liquidationRatio={liquidationRatio}
             balance={tokenBalance}
@@ -150,9 +165,27 @@ const Controller: FC<ControllerProps> = ({
           />
         );
     }
-  }, [selectedTab, proxyRegistry, vault.ilkInfo, ilkStatus, urnStatus, mint, liquidationRatio, tokenBalance, tokenAllowance, address, t, onSelectTab, burn, burnAll, daiBalance]);
+  }, [
+    selectedTab,
+    proxyAddress,
+    createProxy,
+    vault.ilkInfo,
+    ilkStatus,
+    urnStatus,
+    increateTokenAllowance,
+    mint,
+    liquidationRatio,
+    tokenBalance,
+    tokenAllowance,
+    address,
+    t,
+    onSelectTab,
+    burn,
+    burnAll,
+    daiBalance,
+  ]);
 
-  return <TabContent />;
+  return formContent;
 };
 
 type ContentProps = {
@@ -162,31 +195,35 @@ type ContentProps = {
 };
 
 const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
-  const { data, mutate, isLoading } = useSWR('getVaultData', async () => {
-    const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, cdp.ilk);
-    const proxyRegistry = await chainLog.proxyRegistry();
-    const proxy = await proxyRegistry.getDSProxy();
-    const [daiBalance, urnStatus, tokenBalance, tokenAllowance, vault] = await Promise.all([
-      chainLog.dai().then((dai) => dai.getBalance()),
-      chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)),
-      ilkInfo.gem.getBalance(),
-      proxy ? ilkInfo.gem.getAllowance(proxy.address) : FixedNumber.from('0', ilkInfo.gem.format),
-      Vault.fromChainlog(chainLog, ilkInfo),
-    ]);
-    return {
-      ilkInfo,
-      ilkStatus,
-      liquidationRatio,
-      stabilityFee,
-      tokenBalance,
-      tokenAllowance,
-      daiBalance,
-      urnStatus,
-      vault,
-      proxyRegistry,
-      proxyAddress: proxy ? proxy.address : undefined,
-    };
-  });
+  const { data, mutate, isLoading } = useSWR(
+    'getVaultData',
+    async () => {
+      const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, cdp.ilk);
+      const proxyRegistry = await chainLog.proxyRegistry();
+      const proxy = await proxyRegistry.getDSProxy();
+      const [daiBalance, urnStatus, tokenBalance, tokenAllowance, vault] = await Promise.all([
+        chainLog.dai().then((dai) => dai.getBalance()),
+        chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)),
+        ilkInfo.gem.getBalance(),
+        proxy ? ilkInfo.gem.getAllowance(proxy.address) : FixedNumber.from('0', ilkInfo.gem.format),
+        Vault.fromChainlog(chainLog, ilkInfo),
+      ]);
+      return {
+        ilkInfo,
+        ilkStatus,
+        liquidationRatio,
+        stabilityFee,
+        tokenBalance,
+        tokenAllowance,
+        daiBalance,
+        urnStatus,
+        vault,
+        proxyRegistry,
+        proxyAddress: proxy?.address,
+      };
+    },
+    { revalidateOnFocus: false, revalidateIfStale: false },
+  );
 
   const updateAllBalance = mutate;
 
@@ -209,6 +246,7 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
     daiBalance,
     vault,
     proxyRegistry,
+    proxyAddress,
   } = data;
 
   return (
@@ -220,6 +258,7 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
         urnStatus={urnStatus}
         ilkStatus={ilkStatus}
         proxyRegistry={proxyRegistry}
+        proxyAddress={proxyAddress}
         liquidationRatio={liquidationRatio}
         update={updateAllBalance}
         tokenBalance={tokenBalance}
