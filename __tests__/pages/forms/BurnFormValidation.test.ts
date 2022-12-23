@@ -92,7 +92,31 @@ describe('BurnFormValidation', () => {
   });
 
   describe('isCollateralizationRatioTooLow', () => {
-    // TODO
+    const zero = FixedNumber.fromString('0', UnitFormats.WAD);
+    const value1 = FixedNumber.fromString('0.12', UnitFormats.WAD);
+    const value2 = FixedNumber.fromString('1.12', UnitFormats.WAD);
+    const value3 = FixedNumber.fromString('3', UnitFormats.WAD);
+    const value4 = FixedNumber.fromString('4.12', UnitFormats.WAD);
+    const zeroRAY = FixedNumber.fromString('0', UnitFormats.RAY);
+    const oneRAY = FixedNumber.fromString('1', UnitFormats.RAY);
+    const twoRAY = FixedNumber.fromString('2', UnitFormats.RAY);
+
+    it('returns true when current > new debt', () => {
+      expect(BurnFormValidation.isCollateralizationRatioTooLow(value1, value3, zero, twoRAY)).toBeTruthy();
+      expect(BurnFormValidation.isCollateralizationRatioTooLow(value2, value1, value3, oneRAY)).toBeTruthy();
+      expect(BurnFormValidation.isCollateralizationRatioTooLow(value4, value2, value1, zeroRAY)).toBeTruthy();
+    });
+
+    it('returns false when current = new debt', () => {
+      expect(BurnFormValidation.isCollateralizationRatioTooLow(value4, value1, zero, zeroRAY)).toBeFalsy();
+      expect(BurnFormValidation.isCollateralizationRatioTooLow(value4, value3, value2, oneRAY)).toBeFalsy();
+    });
+
+    it('returns false when current < new debt', () => {
+      expect(BurnFormValidation.isCollateralizationRatioTooLow(value4, value1, value2, twoRAY)).toBeFalsy();
+      expect(BurnFormValidation.isCollateralizationRatioTooLow(value3, zero, value1, oneRAY)).toBeFalsy();
+      expect(BurnFormValidation.isCollateralizationRatioTooLow(value2, value1, zero, oneRAY)).toBeFalsy();
+    });
   });
 
   describe('isBelowDebtFloor', () => {
