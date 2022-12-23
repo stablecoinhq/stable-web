@@ -45,8 +45,8 @@
       "helperText": "Proxyを作成中です"
     },
     "increaseAllowance": {
-      "submit": "支給額を増額",
-      "helperText": "Proxyが利用可能な残高を増額中です"
+      "submit": "アクセス権限を付与",
+      "helperText": "Proxyに資金のアクセス権限を付与しています"
     },
     "burn": {
       "redeemAmount": "返済する$t(units.stableToken)の数量",
@@ -134,6 +134,7 @@
         "form": {
           "label": "預け入れる$t(units.stableToken)の数量",
           "submit": "預け入れる",
+          "helperText": "$t(terms.savings)に$t(units.stableToken)を預け入れます",
           "errors": {
             "insufficientBalance": "残高不足です"
           }
@@ -144,6 +145,7 @@
           "label": "引き出す$t(units.stableToken)の数量",
           "withdrawAll": "預金から全額引き出す",
           "submit": "引き出す",
+          "helperText": "$t(terms.savings)から$t(units.stableToken)を引き出します",
           "errors": {
             "insufficientWithdrawAmount": "預金引き出し額が無効な値です"
           }
@@ -151,9 +153,7 @@
       },
       "errors": {
         "errorWhileDeposit": "$t(units.stableToken)を預け入れる際に問題が発生しました。$t(terms.retry)",
-        "errorWhileWithdraw": "$t(units.stableToken)を引き出す際に問題が発生しました。$t(terms.retry)",
-        "errorWhileIncreasingAllowance": "支給額を増額中に問題が発生しました。$t(terms.retry)",
-        "errorWhileCreatingProxy": "Proxy作成中に問題が発生しました。$t(terms.retry)."
+        "errorWhileWithdraw": "$t(units.stableToken)を引き出す際に問題が発生しました。$t(terms.retry)"
       }
     }
   },
@@ -163,7 +163,9 @@
   "error": {
     "title": "エラー",
     "close": "閉じる",
-    "unexpectedError": "予期せぬエラーが発生しました。$t(terms.retry)"
+    "unexpectedError": "予期せぬエラーが発生しました。$t(terms.retry)",
+    "errorWhileIncreasingAllowance": "アクセス権限を付与中に問題が発生しました。$t(terms.retry)",
+    "errorWhileCreatingProxy": "Proxy作成中に問題が発生しました。$t(terms.retry)"
   },
   "terms": {
     "collateral": "担保",

@@ -53,6 +53,8 @@ const OpenVault: FC<OpenVaultProps> = ({
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
   const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.ilk.errors' });
+  const { t: common } = useTranslation('common');
+
   const { openDialog } = useErrorDialog();
   const router = useRouter();
 
@@ -72,18 +74,18 @@ const OpenVault: FC<OpenVaultProps> = ({
         await ilkInfo.gem
           .ensureAllowance(proxyAddress, n, 5)
           .then(() => update())
-          .catch((err) => openDialog(errorMessage('errorWhileIncreasingAllowance'), err));
+          .catch((err) => openDialog(common('error.errorWhileIncreasingAllowance'), err));
       }
     },
-    [errorMessage, ilkInfo.gem, openDialog, proxyAddress, update],
+    [common, ilkInfo.gem, openDialog, proxyAddress, update],
   );
   const createProxy = useCallback(
     () =>
       proxyRegistry
         .ensureDSProxy()
         .then(() => update())
-        .catch((err) => openDialog(errorMessage('errorWhileCreatingProxy'), err)),
-    [errorMessage, openDialog, proxyRegistry, update],
+        .catch((err) => openDialog(common('error.errorWhileCreatingProxy'), err)),
+    [common, openDialog, proxyRegistry, update],
   );
 
   const zero = FixedNumber.fromString('0', UnitFormats.WAD);

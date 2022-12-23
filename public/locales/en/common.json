@@ -122,30 +122,33 @@
     },
     "earn": {
       "cardTitle": "Earn Savings",
-      "cardDesc": "Deposit your $t(terms.stableToken) to $t(terms.savings) and earn savings.",
+      "cardDesc": "Deposit your $t(units.stableToken) to $t(terms.savings) and earn savings.",
       "depositTab": "Deposit",
       "withdrawTab": "Withdraw",
       "deposit": {
         "title": "Deposit Status",
         "label": "Deposit Balance",
-        "description": "Amount of $t(terms.stableToken) currently being deposited at $t(terms.savings)",
+        "description": "Amount of $t(units.stableToken) currently being deposited at $t(terms.savings)",
         "form": {
-          "label": "Amount of $t(terms.stableToken) to deposit",
-          "submit": "Deposit"
+          "label": "Amount of $t(units.stableToken) to deposit",
+          "submit": "Deposit",
+          "helperText": "Depositing $t(units.stableToken) to $t(terms.savings)",
+          "errors": {
+            "insufficientBalance": "Insufficient balance."
+          }
         }
       },
       "withdraw": {
         "form": {
-          "label": "Amount of $t(terms.stableToken) to withdraw",
+          "label": "Amount of $t(units.stableToken) to withdraw",
+          "helperText": "Withdrawing $t(units.stableToken) from $t(terms.savings)",
           "withdrawAll": "Withdraw all",
           "submit": "Withdraw"
         }
       },
       "errors": {
         "errorWhileDeposit": "An unexpected error occured while depositing. Please try again.",
-        "errorWhileWithdraw": "An unexpected error occured while withdraw. Please try again.",
-        "errorWhileIncreasingAllowance": "An unexpected error occured while increasing allowance. Please try again.",
-        "errorWhileCreatingProxy": "An unexpected error occured while creating Proxy. Please try again."
+        "errorWhileWithdraw": "An unexpected error occured while withdraw. Please try again."
       }
     }
   },
@@ -158,7 +161,9 @@
   "error": {
     "close": "Close",
     "title": "Error",
-    "unexpectedError": "An unexpected error occured. Please try again."
+    "unexpectedError": "An unexpected error occured. Please try again.",
+    "errorWhileIncreasingAllowance": "An unexpected error occured while increasing allowance. Please try again.",
+    "errorWhileCreatingProxy": "An unexpected error occured while creating Proxy. Please try again."
   },
   "terms": {
     "collateral": "collateral",

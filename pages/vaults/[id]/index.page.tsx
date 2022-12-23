@@ -86,6 +86,8 @@ const Controller: FC<ControllerProps> = ({
   const { t } = useTranslation('common', { keyPrefix: 'terms' });
   const { t: forms } = useTranslation('common', { keyPrefix: 'forms' });
   const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.vault.errors' });
+  const { t: common } = useTranslation('common');
+
   const { openDialog } = useErrorDialog();
 
   const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
@@ -119,8 +121,8 @@ const Controller: FC<ControllerProps> = ({
       proxyRegistry
         .ensureDSProxy()
         .then(() => update())
-        .catch((err) => openDialog(errorMessage('errorWhileCreatingProxy'), err)),
-    [errorMessage, openDialog, proxyRegistry, update],
+        .catch((err) => openDialog(common('error.errorWhileCreatingProxy'), err)),
+    [common, openDialog, proxyRegistry, update],
   );
 
   const increateTokenAllowance = useCallback(
@@ -129,10 +131,10 @@ const Controller: FC<ControllerProps> = ({
         await vault.ilkInfo.gem
           .ensureAllowance(proxyAddress, n, 5)
           .then(() => update())
-          .catch((err) => openDialog(errorMessage('errorWhileIncreasingAllowance'), err));
+          .catch((err) => openDialog(common('error.errorWhileIncreasingAllowance'), err));
       }
     },
-    [proxyAddress, vault.ilkInfo.gem, update, openDialog, errorMessage],
+    [proxyAddress, vault.ilkInfo.gem, update, openDialog, common],
   );
 
   const increaseDaiAllowance = useCallback(
@@ -141,18 +143,18 @@ const Controller: FC<ControllerProps> = ({
         await dai
           .ensureAllowance(proxyAddress, n, 5)
           .then(() => update())
-          .catch((err) => openDialog(errorMessage('errorWhileIncreasingAllowance'), err));
+          .catch((err) => openDialog(common('error.errorWhileIncreasingAllowance'), err));
       }
     },
-    [dai, errorMessage, openDialog, proxyAddress, update],
+    [common, dai, openDialog, proxyAddress, update],
   );
   const burnAll: BurnFormProps['onBurnAll'] = useCallback(
     (d, col) =>
       vault
         .burnAll(cdp.id, col, d)
         .then(() => update())
-        .catch((err) => openDialog(errorMessage('errorWhileRepaying'), err)),
-    [vault, cdp.id, update, openDialog, errorMessage],
+        .catch((err) => openDialog(common('error.errorWhileRepaying'), err)),
+    [vault, cdp.id, update, openDialog, common],
   );
 
   const burnSubmitFormProps: SubmitFormProps = useMemo(
@@ -212,7 +214,24 @@ const Controller: FC<ControllerProps> = ({
           />
         );
     }
-  }, [selectedTab, vault.ilkInfo, ilkStatus, urnStatus, mint, liquidationRatio, tokenBalance, mintSubmitFormProps, address, t, forms, onSelectTab, burn, burnAll, daiBalance, burnSubmitFormProps]);
+  }, [
+    selectedTab,
+    vault.ilkInfo,
+    ilkStatus,
+    urnStatus,
+    mint,
+    liquidationRatio,
+    tokenBalance,
+    mintSubmitFormProps,
+    address,
+    t,
+    forms,
+    onSelectTab,
+    burn,
+    burnAll,
+    daiBalance,
+    burnSubmitFormProps,
+  ]);
 
   return formContent;
 };

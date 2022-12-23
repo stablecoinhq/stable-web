@@ -133,7 +133,21 @@ const MintFormController: FC<MintFormControllerProps> = ({
         onDaiAmountChange={onDaiAmountChange}
       />
     ),
-    [amountText, balance, buttonContent, daiAmountText, helperText, ilkInfo, ilkStatus, onAmountChange, onDaiAmountChange, onMint, submitFormProps, urnStatus.debt, urnStatus.lockedBalance],
+    [
+      amountText,
+      balance,
+      buttonContent,
+      daiAmountText,
+      helperText,
+      ilkInfo,
+      ilkStatus,
+      onAmountChange,
+      onDaiAmountChange,
+      onMint,
+      submitFormProps,
+      urnStatus.debt,
+      urnStatus.lockedBalance,
+    ],
   );
   return (
     <FormLayout

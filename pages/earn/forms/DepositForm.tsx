@@ -4,17 +4,21 @@ import { useTranslation } from 'react-i18next';
 
 import { UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
+import SubmitForm from 'ethereum/react/form/SubmitForm';
 
+import type { SubmitFormProps } from 'ethereum/react/form/SubmitForm';
 import type { FixedNumber } from 'ethers';
-import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
+import type { ChangeEventHandler, FC, MouseEventHandler } from 'react';
 
 export type DepositFormProps = {
   balance: FixedNumber;
-  buttonContent: ReactNode;
+  submitFormProps: SubmitFormProps;
   onDeposit: (amount: FixedNumber) => Promise<void>;
 };
 
-const DepositForm: FC<DepositFormProps> = ({ onDeposit, buttonContent, balance }) => {
+const DepositForm: FC<DepositFormProps> = ({ onDeposit, balance, submitFormProps }) => {
+  const { t: units } = useTranslation('common', { keyPrefix: 'units' });
+
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn.deposit.form' });
   const { t: error } = useTranslation('common', { keyPrefix: 'pages.earn.deposit.form.errors' });
 
@@ -38,8 +42,14 @@ const DepositForm: FC<DepositFormProps> = ({ onDeposit, buttonContent, balance }
     setDepositing(true);
     onDeposit(amount).finally(() => {
       setDepositing(false);
+      setAmountText('');
     });
   }, [amount, onDeposit, isInvalidDepositAmount]);
+
+  const isInvalid = useMemo(
+    () => !amount || depositing || isInvalidDepositAmount || false,
+    [amount, depositing, isInvalidDepositAmount],
+  );
 
   return (
     <Card component="form" elevation={0}>
@@ -52,20 +62,25 @@ const DepositForm: FC<DepositFormProps> = ({ onDeposit, buttonContent, balance }
             error={isInvalidDepositAmount}
             onChange={onAmountChange}
             InputProps={{
-              endAdornment: <InputAdornment position="end">DAI</InputAdornment>,
+              endAdornment: <InputAdornment position="end">{units('stableToken')}</InputAdornment>,
             }}
           />
         </Grid>
 
         <Grid item xs={12}>
-          <Button
-            variant="contained"
-            fullWidth
-            disabled={!amount || depositing || isInvalidDepositAmount}
-            onClick={onButtonClick}
+          <SubmitForm
+            proxyAddress={submitFormProps.proxyAddress}
+            increaseAllowance={submitFormProps.increaseAllowance}
+            spendingAmount={amount}
+            allowance={submitFormProps.allowance}
+            isInvalid={isInvalid}
+            createProxy={submitFormProps.createProxy}
           >
-            {depositing ? <CircularProgress /> : buttonContent}
-          </Button>
+            <Button variant="contained" fullWidth disabled={isInvalid} onClick={onButtonClick}>
+              {depositing ? <CircularProgress /> : t('submit')}
+            </Button>
+            {depositing && <FormHelperText>{t('helperText')}</FormHelperText>}
+          </SubmitForm>
         </Grid>
         <Grid item xs={12}>
           {isInvalidDepositAmount && <FormHelperText error>{error('insufficientBalance')}</FormHelperText>}

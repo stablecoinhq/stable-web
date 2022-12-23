@@ -17,18 +17,17 @@ import { UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 
 import type { FixedNumber } from 'ethers';
-import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
+import type { ChangeEventHandler, FC, MouseEventHandler } from 'react';
 
 export type WithdrawFormProps = {
   depositAmount: FixedNumber;
-  buttonContent: ReactNode;
   onWithdraw: (amount: FixedNumber) => Promise<void>;
   onWithdrawAll: () => Promise<void>;
 };
 
 type WithdrawState = 'withdraw' | 'withdrawAll' | 'neutral';
 
-const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onWithdraw, onWithdrawAll }) => {
+const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, onWithdraw, onWithdrawAll }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn.withdraw.form' });
   const { t: error } = useTranslation('common', { keyPrefix: 'pages.earn.withdraw.form.errors' });
 
@@ -73,6 +72,8 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
         setWithdrawing(true);
         onWithdrawAll().finally(() => {
           setWithdrawing(false);
+          setAmountText('');
+          setWithdrawState('neutral');
         });
         break;
       case 'withdraw':
@@ -82,6 +83,8 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
         setWithdrawing(true);
         onWithdraw(amount).finally(() => {
           setWithdrawing(false);
+          setAmountText('');
+          setWithdrawState('neutral');
         });
         break;
       case 'neutral':
@@ -119,8 +122,9 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
             disabled={withdrawing || !(withdrawState !== 'neutral') || isInvalidWithdrawAmount}
             onClick={onButtonClick}
           >
-            {withdrawing ? <CircularProgress /> : buttonContent}
+            {withdrawing ? <CircularProgress /> : t('submit')}
           </Button>
+          {withdrawing && <FormHelperText>{t('helperText')}</FormHelperText>}
         </Grid>
         <Grid item xs={12}>
           {isInvalidWithdrawAmount && <FormHelperText error>{error('insufficientWithdrawAmount')}</FormHelperText>}
