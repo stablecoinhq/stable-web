@@ -22,6 +22,7 @@ import type EthereumProvider from 'ethereum/EthereumProvider';
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
+import type { SubmitFormProps } from 'ethereum/react/form/SubmitForm';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
@@ -68,12 +69,22 @@ const OpenVault: FC<OpenVaultProps> = ({
   const increaseAllowance = useCallback(
     async (n: FixedNumber) => {
       if (proxyAddress) {
-        await ilkInfo.gem.ensureAllowance(proxyAddress, n, 5).then(() => update());
+        await ilkInfo.gem
+          .ensureAllowance(proxyAddress, n, 5)
+          .then(() => update())
+          .catch((err) => openDialog(errorMessage('errorWhileIncreasingAllowance'), err));
       }
     },
-    [ilkInfo.gem, proxyAddress, update],
+    [errorMessage, ilkInfo.gem, openDialog, proxyAddress, update],
   );
-  const createProxy = useCallback(() => proxyRegistry.ensureDSProxy().then(() => update()), [proxyRegistry, update]);
+  const createProxy = useCallback(
+    () =>
+      proxyRegistry
+        .ensureDSProxy()
+        .then(() => update())
+        .catch((err) => openDialog(errorMessage('errorWhileCreatingProxy'), err)),
+    [errorMessage, openDialog, proxyRegistry, update],
+  );
 
   const zero = FixedNumber.fromString('0', UnitFormats.WAD);
   const urnStatus: UrnStatus = {
@@ -83,18 +94,25 @@ const OpenVault: FC<OpenVaultProps> = ({
     debt: zero,
   };
 
+  const submitFormProps: SubmitFormProps = useMemo(
+    () => ({
+      createProxy,
+      increaseAllowance,
+      allowance,
+      proxyAddress,
+    }),
+    [allowance, createProxy, increaseAllowance, proxyAddress],
+  );
+
   return (
     <MintFormController
-      proxyAddress={proxyAddress}
-      createProxy={createProxy}
+      submitFormProps={submitFormProps}
       ilkInfo={ilkInfo}
       ilkStatus={ilkStatus}
       urnStatus={urnStatus}
       mint={openVault}
-      increaseAllowance={increaseAllowance}
       liquidationRatio={liquidationRatio}
       balance={balance}
-      allowance={allowance}
       address={address}
       buttonContent={t('openLabel')}
     />

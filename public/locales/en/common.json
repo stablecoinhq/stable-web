@@ -139,8 +139,10 @@
         }
       },
       "errors": {
-        "errorWhileDeposit": "An unexpected error occured. Please try again.",
-        "errorWhileWithdraw": "An unexpected error occured. Please try again."
+        "errorWhileDeposit": "An unexpected error occured while depositing. Please try again.",
+        "errorWhileWithdraw": "An unexpected error occured while withdraw. Please try again.",
+        "errorWhileIncreasingAllowance": "An unexpected error occured while increasing allowance. Please try again.",
+        "errorWhileCreatingProxy": "An unexpected error occured while creating Proxy. Please try again."
       }
     }
   },

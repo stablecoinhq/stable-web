@@ -113,24 +113,37 @@ const Controller: FC<ControllerProps> = ({
     [vault, cdp.id, update, openDialog, errorMessage],
   );
 
-  const createProxy = useCallback(() => proxyRegistry.ensureDSProxy().then(() => update()), [proxyRegistry, update]);
+  const createProxy = useCallback(
+    () =>
+      proxyRegistry
+        .ensureDSProxy()
+        .then(() => update())
+        .catch((err) => openDialog(errorMessage('errorWhileCreatingProxy'), err)),
+    [errorMessage, openDialog, proxyRegistry, update],
+  );
 
   const increateTokenAllowance = useCallback(
     async (n: FixedNumber) => {
       if (proxyAddress) {
-        await vault.ilkInfo.gem.ensureAllowance(proxyAddress, n, 5).then(() => update());
+        await vault.ilkInfo.gem
+          .ensureAllowance(proxyAddress, n, 5)
+          .then(() => update())
+          .catch((err) => openDialog(errorMessage('errorWhileIncreasingAllowance'), err));
       }
     },
-    [vault.ilkInfo, proxyAddress, update],
+    [proxyAddress, vault.ilkInfo.gem, update, openDialog, errorMessage],
   );
 
   const increaseDaiAllowance = useCallback(
     async (n: FixedNumber) => {
       if (proxyAddress) {
-        await dai.ensureAllowance(proxyAddress, n, 5).then(() => update());
+        await dai
+          .ensureAllowance(proxyAddress, n, 5)
+          .then(() => update())
+          .catch((err) => openDialog(errorMessage('errorWhileIncreasingAllowance'), err));
       }
     },
-    [dai, proxyAddress, update],
+    [dai, errorMessage, openDialog, proxyAddress, update],
   );
   const burnAll: BurnFormProps['onBurnAll'] = useCallback(
     (d, col) =>
@@ -150,21 +163,28 @@ const Controller: FC<ControllerProps> = ({
     }),
     [createProxy, daiAllowance, increaseDaiAllowance, proxyAddress],
   );
+
+  const mintSubmitFormProps: SubmitFormProps = useMemo(
+    () => ({
+      createProxy,
+      proxyAddress,
+      allowance: tokenAllowance,
+      increaseAllowance: increateTokenAllowance,
+    }),
+    [createProxy, increateTokenAllowance, proxyAddress, tokenAllowance],
+  );
   const formContent = useMemo(() => {
     switch (selectedTab) {
       case 'mint':
         return (
           <MintFormController
-            proxyAddress={proxyAddress}
-            createProxy={createProxy}
             ilkInfo={vault.ilkInfo}
             ilkStatus={ilkStatus}
             urnStatus={urnStatus}
-            increaseAllowance={increateTokenAllowance}
             mint={mint}
             liquidationRatio={liquidationRatio}
             balance={tokenBalance}
-            allowance={tokenAllowance}
+            submitFormProps={mintSubmitFormProps}
             address={address}
             buttonContent={t('mint')}
             selectedTab={selectedTab}
@@ -189,7 +209,7 @@ const Controller: FC<ControllerProps> = ({
           />
         );
     }
-  }, [selectedTab, proxyAddress, createProxy, vault.ilkInfo, ilkStatus, urnStatus, increateTokenAllowance, mint, liquidationRatio, tokenBalance, tokenAllowance, address, t, onSelectTab, burn, burnAll, daiBalance, burnSubmitFormProps]);
+  }, [selectedTab, vault.ilkInfo, ilkStatus, urnStatus, mint, liquidationRatio, tokenBalance, mintSubmitFormProps, address, t, onSelectTab, burn, burnAll, daiBalance, burnSubmitFormProps]);
 
   return formContent;
 };

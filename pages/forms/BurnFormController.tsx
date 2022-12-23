@@ -97,7 +97,21 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         submitFormProps={submitFormProps}
       />
     ),
-    [balance, buttonContent, colText, daiText, ilkInfo, ilkStatus, onAmountChange, onBurn, onBurnAll, onColChange, submitFormProps, urnStatus.debt, urnStatus.lockedBalance],
+    [
+      balance,
+      buttonContent,
+      colText,
+      daiText,
+      ilkInfo,
+      ilkStatus,
+      onAmountChange,
+      onBurn,
+      onBurnAll,
+      onColChange,
+      submitFormProps,
+      urnStatus.debt,
+      urnStatus.lockedBalance,
+    ],
   );
 
   const current: CurrentVaultStatus | undefined = useMemo(() => {

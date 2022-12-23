@@ -148,7 +148,9 @@
       },
       "errors": {
         "errorWhileDeposit": "$t(units.stableToken)を預け入れる際に問題が発生しました。$t(terms.retry)",
-        "errorWhileWithdraw": "$t(units.stableToken)を引き出す際に問題が発生しました。$t(terms.retry)"
+        "errorWhileWithdraw": "$t(units.stableToken)を引き出す際に問題が発生しました。$t(terms.retry)",
+        "errorWhileIncreasingAllowance": "支給額を増額中に問題が発生しました。$t(terms.retry)",
+        "errorWhileCreatingProxy": "Proxy作成中に問題が発生しました。$t(terms.retry)."
       }
     }
   },

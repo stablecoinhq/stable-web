@@ -11,7 +11,7 @@ export type SubmitFormProps = {
   proxyAddress: string | undefined;
   allowance: FixedNumber;
   increaseAllowance: (n: FixedNumber) => Promise<void>;
-}
+};
 
 type SubmitFormProp = {
   children: NonNullable<ReactNode>;

@@ -10,6 +10,7 @@ import { MintFormValidation, MintError } from './MintFormValidation';
 
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
+import type { SubmitFormProps } from 'ethereum/react/form/SubmitForm';
 import type { FixedNumber } from 'ethers';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
@@ -18,17 +19,14 @@ export type MintFormProps = {
   ilkStatus: IlkStatus;
   buttonContent: ReactNode;
   balance: FixedNumber;
-  allowance: FixedNumber;
-  increaseAllowance: (n: FixedNumber) => Promise<void>;
-  proxyAddress: string | undefined;
   lockedBalance: FixedNumber;
   debt: FixedNumber;
   onMint: (colAmount: FixedNumber, daiAmount: FixedNumber) => Promise<void>;
-  createProxy: () => Promise<void>;
   onAmountChange: (s: string) => void;
   onDaiAmountChange: (s: string) => void;
   amountText: string;
   daiAmountText: string;
+  submitFormProps: SubmitFormProps;
 };
 
 const MintForm: FC<MintFormProps> = ({
@@ -37,16 +35,13 @@ const MintForm: FC<MintFormProps> = ({
   onMint,
   buttonContent,
   balance,
-  allowance,
-  increaseAllowance,
-  proxyAddress,
-  createProxy,
   lockedBalance,
   debt,
   onAmountChange,
   onDaiAmountChange,
   amountText,
   daiAmountText,
+  submitFormProps,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms.mint' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
@@ -144,12 +139,12 @@ const MintForm: FC<MintFormProps> = ({
         </Grid>
         <Grid item xs={12}>
           <SubmitForm
-            proxyAddress={proxyAddress}
-            increaseAllowance={increaseAllowance}
+            proxyAddress={submitFormProps.proxyAddress}
+            increaseAllowance={submitFormProps.increaseAllowance}
             spendingAmount={collateralAmount}
-            allowance={allowance}
+            allowance={submitFormProps.allowance}
             isInvalid={isInvalid}
-            createProxy={createProxy}
+            createProxy={submitFormProps.createProxy}
           >
             <Button variant="contained" fullWidth disabled={isInvalid} onClick={onButtonClick}>
               {minting ? <CircularProgress /> : buttonContent}
