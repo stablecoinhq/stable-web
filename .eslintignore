@@ -1,5 +1,7 @@
+/__mocks__/
 /generated/
 /.next/
 /node_modules/
 *.config.js
+*.setup.js
 *.lock*
