@@ -190,7 +190,7 @@ const Controller: FC<ControllerProps> = ({
             submitFormProps={mintSubmitFormProps}
             address={address}
             buttonContent={t('mint')}
-            helperText={forms('mint.helperText')}
+            loadingText={forms('mint.loadingText')}
             selectedTab={selectedTab}
             onSelectTab={onSelectTab}
           />
@@ -205,7 +205,7 @@ const Controller: FC<ControllerProps> = ({
             urnStatus={urnStatus}
             balance={daiBalance}
             buttonContent={t('burn')}
-            helperText={forms('burn.helperText')}
+            loadingText={forms('burn.loadingText')}
             address={address}
             ilkStatus={ilkStatus}
             selectedTab={selectedTab}

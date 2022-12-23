@@ -1,4 +1,5 @@
-import { Button, Card, Grid, InputAdornment, TextField, CircularProgress, FormHelperText } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { Card, Grid, InputAdornment, TextField, FormHelperText } from '@mui/material';
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -18,7 +19,7 @@ export type MintFormProps = {
   ilkInfo: IlkInfo;
   ilkStatus: IlkStatus;
   buttonContent: ReactNode;
-  helperText: ReactNode;
+  loadingText: ReactNode;
   balance: FixedNumber;
   lockedBalance: FixedNumber;
   debt: FixedNumber;
@@ -35,7 +36,7 @@ const MintForm: FC<MintFormProps> = ({
   ilkStatus,
   onMint,
   buttonContent,
-  helperText,
+  loadingText,
   balance,
   lockedBalance,
   debt,
@@ -148,10 +149,17 @@ const MintForm: FC<MintFormProps> = ({
             isInvalid={isInvalid}
             createProxy={submitFormProps.createProxy}
           >
-            <Button variant="contained" fullWidth disabled={isInvalid} onClick={onButtonClick}>
-              {minting ? <CircularProgress /> : buttonContent}
-            </Button>
-            {minting && <FormHelperText>{helperText}</FormHelperText>}
+            <LoadingButton
+              loading={minting}
+              variant="contained"
+              fullWidth
+              disabled={isInvalid}
+              onClick={onButtonClick}
+              loadingPosition="end"
+              size="large"
+            >
+              {minting ? loadingText : buttonContent}
+            </LoadingButton>
           </SubmitForm>
         </Grid>
         <Grid item xs={12}>

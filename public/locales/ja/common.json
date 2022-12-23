@@ -42,18 +42,18 @@
   "forms": {
     "createProxy": {
       "submit": "Proxyを作成",
-      "helperText": "Proxyを作成中です"
+      "loadingText": "Proxyを作成中です"
     },
     "increaseAllowance": {
-      "submit": "アクセス権限を付与",
-      "helperText": "Proxyに資金のアクセス権限を付与しています"
+      "submit": "Proxyに資金へのアクセス権限を付与",
+      "loadingText": "Proxyに資金へのアクセス権限を付与しています"
     },
     "burn": {
       "redeemAmount": "返済する$t(units.stableToken)の数量",
       "freeAmount": "引き出す{{gem}}の数量",
       "submit": "返済",
       "repayAll": "全額返済",
-      "helperText": "返済中です",
+      "loadingText": "返済中です",
       "error": {
         "insufficientBalance": "残高不足です",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
@@ -66,7 +66,7 @@
       "stableTokenAmount": "発行する$t(units.stableToken)の数量",
       "lockAmount": "担保に入れる{{gem}}の数量",
       "submit": "発行する",
-      "helperText": "$t(units.stableToken)を発行中です",
+      "loadingText": "$t(units.stableToken)を発行中です",
       "error": {
         "insufficientBalance": "残高不足です",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
@@ -93,7 +93,7 @@
     "ilk": {
       "backToList": "$t(pages.errors.backToList)",
       "noIlks": "担保が見つかりませんでした",
-      "helperText": "$t(terms.vault_one)を新規作成中です",
+      "loadingText": "$t(terms.vault_one)を新規作成中です",
       "openLabel": "$t(terms.vault_one)を新規作成",
       "openDesc": "新規作成",
       "currency": "通貨",
@@ -134,7 +134,7 @@
         "form": {
           "label": "預け入れる$t(units.stableToken)の数量",
           "submit": "預け入れる",
-          "helperText": "$t(terms.savings)に$t(units.stableToken)を預け入れます",
+          "loadingText": "$t(terms.savings)に$t(units.stableToken)を預け入れます",
           "errors": {
             "insufficientBalance": "残高不足です"
           }
@@ -145,7 +145,7 @@
           "label": "引き出す$t(units.stableToken)の数量",
           "withdrawAll": "預金から全額引き出す",
           "submit": "引き出す",
-          "helperText": "$t(terms.savings)から$t(units.stableToken)を引き出します",
+          "loadingText": "$t(terms.savings)から$t(units.stableToken)を引き出します",
           "errors": {
             "insufficientWithdrawAmount": "預金引き出し額が無効な値です"
           }

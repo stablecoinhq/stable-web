@@ -1,5 +1,5 @@
 /* eslint-disable i18next/no-literal-string */
-import { Button, CircularProgress, FormHelperText } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -54,39 +54,38 @@ const SubmitForm: FC<SubmitFormProp> = ({
     }
   }, [increaseAllowance, spendingAmount]);
 
-  const helperText = useMemo(() => {
-    switch (submitState) {
-      case 'createProxy':
-        return t('createProxy.helperText');
-      case 'increaseAllowance':
-        return t('increaseAllowance.helperText');
-      case 'neutral':
-        break;
-    }
-  }, [submitState, t]);
-  if (submitState !== 'neutral') {
+  if (!proxyAddress || submitState === 'createProxy') {
     return (
-      <>
-        <Button variant="contained" disabled fullWidth>
-          <CircularProgress />
-        </Button>
-        <FormHelperText>{helperText}</FormHelperText>
-      </>
-    );
-  }
-  if (!proxyAddress) {
-    return (
-      <Button variant="contained" disabled={isInvalid || submitState !== 'neutral'} fullWidth onClick={onCreateProxy}>
-        {t('createProxy.submit')}
-      </Button>
+      <LoadingButton
+        variant="contained"
+        loading={submitState !== 'neutral'}
+        disabled={isInvalid || submitState !== 'neutral'}
+        fullWidth
+        onClick={onCreateProxy}
+        loadingPosition="end"
+        size="large"
+      >
+        {submitState !== 'neutral' ? t('createProxy.loadingText') : t('createProxy.submit')}
+      </LoadingButton>
     );
   }
 
-  if (allowanceToIncrease && !allowanceToIncrease.isNegative() && !allowanceToIncrease.isZero() && !isInvalid) {
+  if (
+    (allowanceToIncrease && !allowanceToIncrease.isNegative() && !allowanceToIncrease.isZero() && !isInvalid) ||
+    submitState === 'increaseAllowance'
+  ) {
     return (
-      <Button variant="contained" fullWidth disabled={isInvalid || submitState !== 'neutral'} onClick={onIncreaseAllowance}>
-        {t('increaseAllowance.submit')}
-      </Button>
+      <LoadingButton
+        loading={submitState !== 'neutral'}
+        variant="contained"
+        fullWidth
+        disabled={isInvalid || submitState !== 'neutral'}
+        onClick={onIncreaseAllowance}
+        loadingPosition="end"
+        size="large"
+      >
+        {submitState !== 'neutral' ? t('increaseAllowance.loadingText') : t('increaseAllowance.submit')}
+      </LoadingButton>
     );
   }
 

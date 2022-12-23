@@ -26,7 +26,7 @@ type BurnFormControllerProps = {
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
   buttonContent: string;
-  helperText: string;
+  loadingText: string;
   address: string;
   selectedTab: TabValue;
   onSelectTab: (_: unknown, value: TabValue) => void;
@@ -41,7 +41,7 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
   liquidationRatio,
   balance,
   buttonContent,
-  helperText,
+  loadingText,
   urnStatus,
   address,
   selectedTab,
@@ -87,7 +87,7 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         ilkInfo={ilkInfo}
         ilkStatus={ilkStatus}
         buttonContent={buttonContent}
-        helperText={helperText}
+        loadingText={loadingText}
         daiBalance={balance}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
@@ -105,9 +105,9 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
       buttonContent,
       colText,
       daiText,
-      helperText,
       ilkInfo,
       ilkStatus,
+      loadingText,
       onAmountChange,
       onBurn,
       onBurnAll,

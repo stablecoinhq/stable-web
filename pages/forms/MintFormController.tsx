@@ -24,7 +24,7 @@ type MintFormControllerProps = {
   balance: FixedNumber;
   address: string;
   buttonContent: string;
-  helperText: ReactNode;
+  loadingText: ReactNode;
   selectedTab?: TabValue;
   onSelectTab?: (_: unknown, value: TabValue) => void;
   mint: (amount: FixedNumber, daiAmount: FixedNumber) => Promise<void>;
@@ -42,7 +42,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
   mint,
   address,
   buttonContent,
-  helperText,
+  loadingText,
   submitFormProps,
 }) => {
   const [amountText, setAmountText] = useState('');
@@ -121,7 +121,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
         ilkInfo={ilkInfo}
         ilkStatus={ilkStatus}
         buttonContent={buttonContent}
-        helperText={helperText}
+        loadingText={loadingText}
         onMint={onMint}
         balance={balance}
         submitFormProps={submitFormProps}
@@ -138,7 +138,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
       balance,
       buttonContent,
       daiAmountText,
-      helperText,
+      loadingText,
       ilkInfo,
       ilkStatus,
       onAmountChange,

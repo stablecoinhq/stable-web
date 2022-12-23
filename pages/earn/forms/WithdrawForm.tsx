@@ -1,15 +1,5 @@
-import {
-  Button,
-  Card,
-  Grid,
-  InputAdornment,
-  TextField,
-  CircularProgress,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  FormHelperText,
-} from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { Card, Grid, InputAdornment, TextField, Checkbox, FormControlLabel, FormGroup, FormHelperText } from '@mui/material';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -116,15 +106,17 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, onWithdraw, onWith
           </FormGroup>
         </Grid>
         <Grid item xs={12}>
-          <Button
+          <LoadingButton
             variant="contained"
             fullWidth
             disabled={withdrawing || !(withdrawState !== 'neutral') || isInvalidWithdrawAmount}
             onClick={onButtonClick}
+            loading={withdrawing}
+            loadingPosition="end"
+            size="large"
           >
-            {withdrawing ? <CircularProgress /> : t('submit')}
-          </Button>
-          {withdrawing && <FormHelperText>{t('helperText')}</FormHelperText>}
+            {withdrawing ? t('loadingText') : t('submit')}
+          </LoadingButton>
         </Grid>
         <Grid item xs={12}>
           {isInvalidWithdrawAmount && <FormHelperText error>{error('insufficientWithdrawAmount')}</FormHelperText>}

@@ -42,17 +42,17 @@
   "forms": {
     "createProxy": {
       "submit": "Create Proxy",
-      "helperText": "Creating Proxy"
+      "loadingText": "Creating Proxy"
     },
     "increaseAllowance": {
-      "submit": "Increase Allowance",
-      "helperText": "Increasing allowance for Proxy"
+      "submit": "Increase allowance for Proxy",
+      "loadingText": "Increasing allowance for Proxy"
     },
     "burn": {
       "redeemAmount": "Amount of $t(units.stableToken) to redeem",
       "freeAmount": "Amount of {{gem}} to free",
       "repayAll": "Repay all",
-      "helperText": "Repaying debt",
+      "loadingText": "Repaying debt",
       "error": {
         "insufficientBalance": "Insufficient amount of $t(units.stableToken).",
         "collateralTooLow": "The vault's collateralization ratio is too low.",
@@ -64,7 +64,7 @@
     "mint": {
       "stableTokenAmount": "Amount of $t(units.stableToken) to mint",
       "lockAmount": "Amount of {{gem}} to lock",
-      "helperText": "Minting $t(units.stableToken)",
+      "loadingText": "Minting $t(units.stableToken)",
       "error": {
         "insufficientBalance": "Insufficient balance.",
         "collateralTooLow": "Collateralization ratio is too low.",
@@ -92,7 +92,7 @@
       "backToList": "$t(pages.errors.backToList)",
       "noIlks": "No ilks found",
       "openLabel": "Create new $t(terms.vault_one)",
-      "helperText": "Opening new $t(terms.vault_one)",
+      "loadingText": "Opening new $t(terms.vault_one)",
       "openDesc": "Open new $t(terms.vault_one)",
       "currency": "Currency",
       "currentPrice": "Current Price per {{collateral}}",
@@ -132,7 +132,7 @@
         "form": {
           "label": "Amount of $t(units.stableToken) to deposit",
           "submit": "Deposit",
-          "helperText": "Depositing $t(units.stableToken) to $t(terms.savings)",
+          "loadingText": "Depositing $t(units.stableToken) to $t(terms.savings)",
           "errors": {
             "insufficientBalance": "Insufficient balance."
           }
@@ -141,7 +141,7 @@
       "withdraw": {
         "form": {
           "label": "Amount of $t(units.stableToken) to withdraw",
-          "helperText": "Withdrawing $t(units.stableToken) from $t(terms.savings)",
+          "loadingText": "Withdrawing $t(units.stableToken) from $t(terms.savings)",
           "withdrawAll": "Withdraw all",
           "submit": "Withdraw"
         }

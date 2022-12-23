@@ -1,4 +1,5 @@
-import { Button, Card, Grid, InputAdornment, TextField, CircularProgress, FormHelperText } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { Card, Grid, InputAdornment, TextField, FormHelperText } from '@mui/material';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -76,10 +77,17 @@ const DepositForm: FC<DepositFormProps> = ({ onDeposit, balance, submitFormProps
             isInvalid={isInvalid}
             createProxy={submitFormProps.createProxy}
           >
-            <Button variant="contained" fullWidth disabled={isInvalid} onClick={onButtonClick}>
-              {depositing ? <CircularProgress /> : t('submit')}
-            </Button>
-            {depositing && <FormHelperText>{t('helperText')}</FormHelperText>}
+            <LoadingButton
+              variant="contained"
+              fullWidth
+              disabled={isInvalid}
+              onClick={onButtonClick}
+              loading={depositing}
+              loadingPosition="end"
+              size="large"
+            >
+              {depositing ? t('loadingText') : t('submit')}
+            </LoadingButton>
           </SubmitForm>
         </Grid>
         <Grid item xs={12}>

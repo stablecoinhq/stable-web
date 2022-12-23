@@ -1,15 +1,5 @@
-import {
-  Button,
-  Card,
-  Grid,
-  InputAdornment,
-  TextField,
-  CircularProgress,
-  FormHelperText,
-  FormControlLabel,
-  FormGroup,
-  Checkbox,
-} from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { Card, Grid, InputAdornment, TextField, FormHelperText, FormControlLabel, FormGroup, Checkbox } from '@mui/material';
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -33,7 +23,7 @@ export type BurnFormProps = {
   ilkStatus: IlkStatus;
   ilkInfo: IlkInfo;
   buttonContent: ReactNode;
-  helperText: ReactNode;
+  loadingText: ReactNode;
   onBurn: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
   onBurnAll: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
   onAmountChange: (s: string) => void;
@@ -50,7 +40,7 @@ const BurnForm: FC<BurnFormProps> = ({
   onBurn,
   onBurnAll,
   buttonContent,
-  helperText,
+  loadingText,
   daiBalance,
   lockedBalance,
   debt,
@@ -221,10 +211,17 @@ const BurnForm: FC<BurnFormProps> = ({
             isInvalid={isInvalid}
             createProxy={submitFormProps.createProxy}
           >
-            <Button variant="contained" fullWidth disabled={isInvalid} onClick={onButtonClick}>
-              {burning ? <CircularProgress /> : buttonContent}
-            </Button>
-            {burning && <FormHelperText>{helperText}</FormHelperText>}
+            <LoadingButton
+              loading={burning}
+              variant="contained"
+              fullWidth
+              disabled={isInvalid}
+              onClick={onButtonClick}
+              loadingPosition="end"
+              size="large"
+            >
+              {burning ? loadingText : buttonContent}
+            </LoadingButton>
           </SubmitForm>
           {formErrors.map((e) => (
             <FormHelperText key={e} error>
