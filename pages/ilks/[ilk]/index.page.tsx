@@ -115,6 +115,7 @@ const OpenVault: FC<OpenVaultProps> = ({
       balance={balance}
       address={address}
       buttonContent={t('openLabel')}
+      helperText={t('helperText')}
     />
   );
 };

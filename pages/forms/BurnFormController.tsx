@@ -26,6 +26,7 @@ type BurnFormControllerProps = {
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
   buttonContent: string;
+  helperText: string;
   address: string;
   selectedTab: TabValue;
   onSelectTab: (_: unknown, value: TabValue) => void;
@@ -40,6 +41,7 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
   liquidationRatio,
   balance,
   buttonContent,
+  helperText,
   urnStatus,
   address,
   selectedTab,
@@ -85,6 +87,7 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         ilkInfo={ilkInfo}
         ilkStatus={ilkStatus}
         buttonContent={buttonContent}
+        helperText={helperText}
         daiBalance={balance}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
@@ -97,21 +100,7 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         submitFormProps={submitFormProps}
       />
     ),
-    [
-      balance,
-      buttonContent,
-      colText,
-      daiText,
-      ilkInfo,
-      ilkStatus,
-      onAmountChange,
-      onBurn,
-      onBurnAll,
-      onColChange,
-      submitFormProps,
-      urnStatus.debt,
-      urnStatus.lockedBalance,
-    ],
+    [balance, buttonContent, colText, daiText, helperText, ilkInfo, ilkStatus, onAmountChange, onBurn, onBurnAll, onColChange, submitFormProps, urnStatus.debt, urnStatus.lockedBalance],
   );
 
   const current: CurrentVaultStatus | undefined = useMemo(() => {

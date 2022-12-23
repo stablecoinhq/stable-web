@@ -52,6 +52,7 @@
       "redeemAmount": "Amount of $t(units.stableToken) to redeem",
       "freeAmount": "Amount of {{gem}} to free",
       "repayAll": "Repay all",
+      "helperText": "Repaying debt",
       "error": {
         "insufficientBalance": "Insufficient amount of $t(units.stableToken).",
         "collateralTooLow": "The vault's collateralization ratio is too low.",
@@ -63,6 +64,7 @@
     "mint": {
       "stableTokenAmount": "Amount of $t(units.stableToken) to mint",
       "lockAmount": "Amount of {{gem}} to lock",
+      "helperText": "Minting $t(units.stableToken)",
       "error": {
         "insufficientBalance": "Insufficient balance.",
         "collateralTooLow": "Collateralization ratio is too low.",
@@ -90,6 +92,7 @@
       "backToList": "$t(pages.errors.backToList)",
       "noIlks": "No ilks found",
       "openLabel": "Create new $t(terms.vault_one)",
+      "helperText": "Opening new $t(terms.vault_one)",
       "openDesc": "Open new $t(terms.vault_one)",
       "currency": "Currency",
       "currentPrice": "Current Price per {{collateral}}",

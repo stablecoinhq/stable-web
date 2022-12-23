@@ -18,6 +18,7 @@ export type MintFormProps = {
   ilkInfo: IlkInfo;
   ilkStatus: IlkStatus;
   buttonContent: ReactNode;
+  helperText: ReactNode;
   balance: FixedNumber;
   lockedBalance: FixedNumber;
   debt: FixedNumber;
@@ -34,6 +35,7 @@ const MintForm: FC<MintFormProps> = ({
   ilkStatus,
   onMint,
   buttonContent,
+  helperText,
   balance,
   lockedBalance,
   debt,
@@ -149,6 +151,7 @@ const MintForm: FC<MintFormProps> = ({
             <Button variant="contained" fullWidth disabled={isInvalid} onClick={onButtonClick}>
               {minting ? <CircularProgress /> : buttonContent}
             </Button>
+            {minting && <FormHelperText>{helperText}</FormHelperText>}
           </SubmitForm>
         </Grid>
         <Grid item xs={12}>

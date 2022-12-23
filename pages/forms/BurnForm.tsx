@@ -33,6 +33,7 @@ export type BurnFormProps = {
   ilkStatus: IlkStatus;
   ilkInfo: IlkInfo;
   buttonContent: ReactNode;
+  helperText: ReactNode;
   onBurn: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
   onBurnAll: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
   onAmountChange: (s: string) => void;
@@ -49,6 +50,7 @@ const BurnForm: FC<BurnFormProps> = ({
   onBurn,
   onBurnAll,
   buttonContent,
+  helperText,
   daiBalance,
   lockedBalance,
   debt,
@@ -222,6 +224,7 @@ const BurnForm: FC<BurnFormProps> = ({
             <Button variant="contained" fullWidth disabled={isInvalid} onClick={onButtonClick}>
               {burning ? <CircularProgress /> : buttonContent}
             </Button>
+            {burning && <FormHelperText>{helperText}</FormHelperText>}
           </SubmitForm>
           {formErrors.map((e) => (
             <FormHelperText key={e} error>

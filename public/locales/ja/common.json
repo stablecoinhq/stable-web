@@ -53,6 +53,7 @@
       "freeAmount": "引き出す{{gem}}の数量",
       "submit": "返済",
       "repayAll": "全額返済",
+      "helperText": "返済中です",
       "error": {
         "insufficientBalance": "残高不足です",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
@@ -65,6 +66,7 @@
       "stableTokenAmount": "発行する$t(units.stableToken)の数量",
       "lockAmount": "担保に入れる{{gem}}の数量",
       "submit": "発行する",
+      "helperText": "$t(units.stableToken)を発行中です",
       "error": {
         "insufficientBalance": "残高不足です",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
@@ -91,6 +93,7 @@
     "ilk": {
       "backToList": "$t(pages.errors.backToList)",
       "noIlks": "担保が見つかりませんでした",
+      "helperText": "$t(terms.vault_one)を新規作成中です",
       "openLabel": "$t(terms.vault_one)を新規作成",
       "openDesc": "新規作成",
       "currency": "通貨",

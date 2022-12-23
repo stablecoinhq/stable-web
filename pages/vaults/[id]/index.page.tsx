@@ -84,6 +84,7 @@ const Controller: FC<ControllerProps> = ({
   dai,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'terms' });
+  const { t: forms } = useTranslation('common', { keyPrefix: 'forms' });
   const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.vault.errors' });
   const { openDialog } = useErrorDialog();
 
@@ -187,6 +188,7 @@ const Controller: FC<ControllerProps> = ({
             submitFormProps={mintSubmitFormProps}
             address={address}
             buttonContent={t('mint')}
+            helperText={forms('mint.helperText')}
             selectedTab={selectedTab}
             onSelectTab={onSelectTab}
           />
@@ -201,6 +203,7 @@ const Controller: FC<ControllerProps> = ({
             urnStatus={urnStatus}
             balance={daiBalance}
             buttonContent={t('burn')}
+            helperText={forms('burn.helperText')}
             address={address}
             ilkStatus={ilkStatus}
             selectedTab={selectedTab}
@@ -209,7 +212,7 @@ const Controller: FC<ControllerProps> = ({
           />
         );
     }
-  }, [selectedTab, vault.ilkInfo, ilkStatus, urnStatus, mint, liquidationRatio, tokenBalance, mintSubmitFormProps, address, t, onSelectTab, burn, burnAll, daiBalance, burnSubmitFormProps]);
+  }, [selectedTab, vault.ilkInfo, ilkStatus, urnStatus, mint, liquidationRatio, tokenBalance, mintSubmitFormProps, address, t, forms, onSelectTab, burn, burnAll, daiBalance, burnSubmitFormProps]);
 
   return formContent;
 };
