@@ -40,6 +40,9 @@
     }
   },
   "forms": {
+    "createProxy": "Creating proxy",
+    "increaseAllowance": "Increasing allowance for Proxy",
+    "done":"Success",
     "burn": {
       "redeemAmount": "Amount of $t(units.stableToken) to redeem",
       "freeAmount": "Amount of {{gem}} to free",
@@ -55,6 +58,7 @@
     "mint": {
       "stableTokenAmount": "Amount of $t(units.stableToken) to mint",
       "lockAmount": "Amount of {{gem}} to lock",
+      "processing": "Minting ${units.stableToken)",
       "error": {
         "insufficientBalance": "Insufficient balance.",
         "collateralTooLow": "Collateralization ratio is too low.",
@@ -83,6 +87,7 @@
       "noIlks": "No ilks found",
       "openLabel": "Create new $t(terms.vault_one)",
       "openDesc": "Open new $t(terms.vault_one)",
+      "openVault": "New $t(terms.vault_one) created",
       "currency": "Currency",
       "currentPrice": "Current Price per {{collateral}}",
       "unableToLoadCollateral": "Unable to load collateral",
@@ -145,8 +150,11 @@
   "error": {
     "close": "Close",
     "title": "Error",
-    "unexpectedError": "An unexpected error occured. Please try again."
+    "unexpectedError": "An unexpected error occured. Please try again.",
+    "errorWhileIncreasingAllowance": "An unexpected error occured while increasing allowance. Please try again.",
+    "errorWhileCreatingProxy": "An unexpected error occured while creating Proxy. Please try again."
   },
+  "close": "Close",
   "terms": {
     "collateral": "collateral",
     "colRatio": "Collateralization Ratio",

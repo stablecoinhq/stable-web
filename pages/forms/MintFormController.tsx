@@ -21,11 +21,17 @@ type MintFormControllerProps = {
   urnStatus: UrnStatus;
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
+  allowance: FixedNumber;
+  proxyAddress: string | undefined;
+  increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
+  ensureProxy: () => Promise<string>;
   address: string;
   buttonContent: string;
+  onMintDialog: string;
   selectedTab?: TabValue;
   onSelectTab?: (_: unknown, value: TabValue) => void;
-  mint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
+  onCloseDialog?: () => void;
+  mint: (colAmount: FixedNumber, daiAmount: FixedNumber) => Promise<void>;
 };
 
 const MintFormController: FC<MintFormControllerProps> = ({
@@ -33,9 +39,15 @@ const MintFormController: FC<MintFormControllerProps> = ({
   ilkStatus,
   liquidationRatio,
   balance,
+  allowance,
+  proxyAddress,
+  increaseAllowance,
+  ensureProxy,
+  onMintDialog,
   urnStatus,
   selectedTab,
   onSelectTab,
+  onCloseDialog,
   mint,
   address,
   buttonContent,
@@ -51,6 +63,15 @@ const MintFormController: FC<MintFormControllerProps> = ({
   const onDaiAmountChange = useCallback(
     (value: string) => setDaiAmountText(cutDecimals(pickNumbers(value), UnitFormats.WAD.decimals)),
     [],
+  );
+
+  const onMint = useCallback(
+    (colAmount: FixedNumber, daiAmount: FixedNumber) =>
+      mint(colAmount, daiAmount).then(() => {
+        setAmountText('');
+        setDaiAmountText('');
+      }),
+    [mint],
   );
 
   const current: CurrentVaultStatus | undefined = useMemo(() => {
@@ -107,7 +128,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
         ilkInfo={ilkInfo}
         ilkStatus={ilkStatus}
         buttonContent={buttonContent}
-        onMint={mint}
+        onMint={onMint}
         balance={balance}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
@@ -115,18 +136,30 @@ const MintFormController: FC<MintFormControllerProps> = ({
         amountText={amountText}
         daiAmountText={daiAmountText}
         onDaiAmountChange={onDaiAmountChange}
+        allowance={allowance}
+        proxyAddress={proxyAddress}
+        increaseAllowance={increaseAllowance}
+        ensureProxy={ensureProxy}
+        onCloseDialog={onCloseDialog}
+        onMintDialog={onMintDialog}
       />
     ),
     [
+      allowance,
       amountText,
       balance,
       buttonContent,
+      ensureProxy,
       daiAmountText,
       ilkInfo,
       ilkStatus,
-      mint,
+      increaseAllowance,
       onAmountChange,
+      onCloseDialog,
       onDaiAmountChange,
+      onMint,
+      onMintDialog,
+      proxyAddress,
       urnStatus.debt,
       urnStatus.lockedBalance,
     ],

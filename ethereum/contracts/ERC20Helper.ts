@@ -25,7 +25,7 @@ export default class ERC20Helper {
     this.format = format;
   }
 
-  private async getAllowance(spenderAddress: string) {
+  async getAllowance(spenderAddress: string) {
     const value = await this.contract.allowance(this.provider.address, spenderAddress);
     return toFixedNumber(value, this.format);
   }
@@ -55,6 +55,6 @@ export default class ERC20Helper {
       return;
     }
 
-    await this.approve(spenderAddress, diff, wait);
+    await this.approve(spenderAddress, amount, wait);
   }
 }

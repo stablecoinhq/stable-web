@@ -20,6 +20,7 @@ import InvalidIlk from './InvalidIlk';
 
 import type EthereumProvider from 'ethereum/EthereumProvider';
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
+import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
@@ -30,23 +31,35 @@ type OpenVaultProps = {
   ilkStatus: IlkStatus;
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
+  allowance: FixedNumber;
+  proxyRegistry: ProxyRegistryHelper;
+  proxyAddress: string | undefined;
+  update: () => void;
   address: string;
 };
 
-const OpenVault: FC<OpenVaultProps> = ({ ilkInfo, vault, ilkStatus, liquidationRatio, balance, address }) => {
+const OpenVault: FC<OpenVaultProps> = ({
+  ilkInfo,
+  vault,
+  ilkStatus,
+  liquidationRatio,
+  balance,
+  address,
+  allowance,
+  proxyAddress,
+  proxyRegistry,
+  update,
+}) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
   const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.ilk.errors' });
+  const { t: common } = useTranslation('common');
   const { openDialog } = useErrorDialog();
   const router = useRouter();
-
   const openVault = useCallback(
     async (colAmount: FixedNumber, daiAmount: FixedNumber) => {
-      await vault
-        .open(colAmount, daiAmount)
-        .then(() => router.push('/vaults'))
-        .catch((e) => openDialog(errorMessage('errorWhileOpeningVault'), e));
+      await vault.open(colAmount, daiAmount).catch((e) => openDialog(errorMessage('errorWhileOpeningVault'), e));
     },
-    [errorMessage, openDialog, router, vault],
+    [errorMessage, openDialog, vault],
   );
 
   const zero = FixedNumber.fromString('0', UnitFormats.WAD);
@@ -57,6 +70,17 @@ const OpenVault: FC<OpenVaultProps> = ({ ilkInfo, vault, ilkStatus, liquidationR
     debt: zero,
   };
 
+  const increaseAllowance = useCallback(
+    async (who: string, n: FixedNumber) => {
+      await ilkInfo.gem
+        .ensureAllowance(who, n, 5)
+        .then(() => update())
+        .catch((err) => openDialog(common('error.errorWhileIncreasingAllowance'), err));
+    },
+    [common, ilkInfo.gem, openDialog, update],
+  );
+  const ensureProxy = useCallback(() => proxyRegistry.ensureDSProxy().then((v) => v.address), [proxyRegistry]);
+
   return (
     <MintFormController
       ilkInfo={ilkInfo}
@@ -65,8 +89,14 @@ const OpenVault: FC<OpenVaultProps> = ({ ilkInfo, vault, ilkStatus, liquidationR
       mint={openVault}
       liquidationRatio={liquidationRatio}
       balance={balance}
+      allowance={allowance}
+      proxyAddress={proxyAddress}
+      increaseAllowance={increaseAllowance}
+      ensureProxy={ensureProxy}
+      onMintDialog={t('openVault')}
       address={address}
       buttonContent={t('openLabel')}
+      onCloseDialog={() => router.push('/vaults')}
     />
   );
 };
@@ -78,16 +108,25 @@ type ContentProps = {
 
 const Content: FC<ContentProps> = ({ provider, ilkType }) => {
   const chainLog = useChainLog(provider);
-  const { data, isLoading, error } = useSWR('getData', async () => {
+  const { data, isLoading, error, mutate } = useSWR('getData', async () => {
     const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, ilkType);
-    const [balance, vault] = await Promise.all([ilkInfo.gem.getBalance(), Vault.fromChainlog(chainLog, ilkInfo)]);
+    const proxyRegistry = await chainLog.proxyRegistry();
+    const proxy = await proxyRegistry.getDSProxy();
+    const [balance, vault, allowance] = await Promise.all([
+      ilkInfo.gem.getBalance(),
+      Vault.fromChainlog(chainLog, ilkInfo),
+      proxy ? ilkInfo.gem.getAllowance(proxy.address) : FixedNumber.from('0', ilkInfo.gem.format),
+    ]);
     return {
       ilkInfo,
       ilkStatus,
       liquidationRatio,
       stabilityFee,
       balance,
+      allowance,
       vault,
+      proxyRegistry,
+      proxyAddress: proxy?.address,
     };
   });
 
@@ -103,7 +142,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
     );
   }
 
-  const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, balance, vault } = data;
+  const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, balance, vault, allowance, proxyAddress, proxyRegistry } = data;
   return (
     <Stack padding={2} spacing={2}>
       <IlkStatusCard ilkInfo={ilkInfo} ilkStatus={ilkStatus} liquidationRatio={liquidationRatio} stabilityFee={stabilityFee} />
@@ -114,6 +153,10 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
         liquidationRatio={liquidationRatio}
         balance={balance}
         address={provider.address}
+        allowance={allowance}
+        proxyRegistry={proxyRegistry}
+        proxyAddress={proxyAddress}
+        update={() => mutate()}
       />
     </Stack>
   );

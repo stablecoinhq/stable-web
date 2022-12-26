@@ -40,6 +40,9 @@
     }
   },
   "forms": {
+    "createProxy": "Proxyを作成中です",
+    "increaseAllowance": "Proxyに資金へのアクセス権限を付与しています",
+    "done":"完了しました",
     "burn": {
       "redeemAmount": "返済する$t(units.stableToken)の数量",
       "freeAmount": "引き出す{{gem}}の数量",
@@ -57,6 +60,7 @@
       "stableTokenAmount": "発行する$t(units.stableToken)の数量",
       "lockAmount": "担保に入れる{{gem}}の数量",
       "submit": "発行する",
+      "processing": "$t(units.stableToken)の発行を行います。",
       "error": {
         "insufficientBalance": "残高不足です",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
@@ -84,6 +88,7 @@
       "backToList": "$t(pages.errors.backToList)",
       "noIlks": "担保が見つかりませんでした",
       "openLabel": "$t(terms.vault_one)を新規作成",
+      "openVault": "$t(terms.vault_one)を新規作成します",
       "openDesc": "新規作成",
       "currency": "通貨",
       "currentPrice": "1 {{collateral}}あたりの価格",
@@ -150,8 +155,11 @@
   "error": {
     "title": "エラー",
     "close": "閉じる",
-    "unexpectedError": "予期せぬエラーが発生しました。$t(terms.retry)"
+    "unexpectedError": "予期せぬエラーが発生しました。$t(terms.retry)",
+    "errorWhileIncreasingAllowance": "アクセス権限を付与中に問題が発生しました。$t(terms.retry)",
+    "errorWhileCreatingProxy": "Proxy作成中に問題が発生しました。$t(terms.retry)"
   },
+  "close": "閉じる",
   "terms": {
     "collateral": "担保",
     "colRatio": "担保率",
