@@ -26,6 +26,10 @@ type BurnFormControllerProps = {
   balance: FixedNumber;
   buttonContent: string;
   address: string;
+  proxyAddress: string | undefined;
+  increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
+  ensureProxy: () => Promise<string>;
+  allowance: FixedNumber;
   selectedTab: TabValue;
   onSelectTab: (_: unknown, value: TabValue) => void;
   burn: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
@@ -44,6 +48,10 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
   onSelectTab,
   burn,
   burnAll,
+  proxyAddress,
+  increaseAllowance,
+  ensureProxy,
+  allowance,
 }) => {
   const [daiText, setDaiText] = useState('');
   const [colText, setColText] = useState('');
@@ -57,6 +65,23 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
     [ilkInfo.gem.format.decimals],
   );
 
+  const onBurn = useCallback(
+    (daiAmount: FixedNumber, colAmount: FixedNumber) =>
+      burn(daiAmount, colAmount).then(() => {
+        setDaiText('');
+        setColText('');
+      }),
+    [burn],
+  );
+
+  const onBurnAll = useCallback(
+    (daiAmount: FixedNumber, colAmount: FixedNumber) =>
+      burnAll(daiAmount, colAmount).then(() => {
+        setDaiText('');
+        setColText('');
+      }),
+    [burnAll],
+  );
   const burnForm = useMemo(
     () => (
       <BurnForm
@@ -66,25 +91,33 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         daiBalance={balance}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
-        onBurn={burn}
-        onBurnAll={burnAll}
+        onBurn={onBurn}
+        onBurnAll={onBurnAll}
         onAmountChange={onAmountChange}
         onColChange={onColChange}
         daiText={daiText}
         colText={colText}
+        proxyAddress={proxyAddress}
+        increaseAllowance={increaseAllowance}
+        ensureProxy={ensureProxy}
+        allowance={allowance}
       />
     ),
     [
+      allowance,
       balance,
-      burn,
-      burnAll,
       buttonContent,
       colText,
       daiText,
+      ensureProxy,
       ilkInfo,
       ilkStatus,
+      increaseAllowance,
       onAmountChange,
+      onBurn,
+      onBurnAll,
       onColChange,
+      proxyAddress,
       urnStatus.debt,
       urnStatus.lockedBalance,
     ],

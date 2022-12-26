@@ -47,6 +47,7 @@
       "redeemAmount": "Amount of $t(units.stableToken) to redeem",
       "freeAmount": "Amount of {{gem}} to free",
       "repayAll": "Repay all",
+      "processing": "Repaying $t{units.stableToken)",
       "error": {
         "insufficientBalance": "Insufficient amount of $t(units.stableToken).",
         "collateralTooLow": "The vault's collateralization ratio is too low.",
@@ -125,11 +126,13 @@
         "description": "Amount of $t(terms.stableToken) currently being deposited at $t(terms.savings)",
         "form": {
           "label": "Amount of $t(terms.stableToken) to deposit",
-          "submit": "Deposit"
+          "submit": "Deposit",
+          "processing": "Depositing $t(units.stableToken) to $t(terms.savings)"
         }
       },
       "withdraw": {
         "form": {
+          "processing": "Withdrawing $t(units.stableToken) from $t(terms.savings)",
           "label": "Amount of $t(terms.stableToken) to withdraw",
           "withdrawAll": "Withdraw all",
           "submit": "Withdraw"

@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from 'react';
 import ProgressDialog from 'component/ProgressDialog';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
+import { useErrorDialog } from 'store/ErrorDialogProvider';
 
 import { MintFormValidation, MintError } from './MintFormValidation';
 
@@ -26,6 +27,7 @@ export type MintFormProps = {
   onDaiAmountChange: (s: string) => void;
   allowance: FixedNumber;
   onMintDialog: string;
+  onErrorMessage: string;
   proxyAddress: string | undefined;
   increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
   ensureProxy: () => Promise<string>;
@@ -46,6 +48,7 @@ const MintForm: FC<MintFormProps> = ({
   onCloseDialog,
   amountText,
   daiAmountText,
+  onErrorMessage,
   proxyAddress,
   allowance,
   increaseAllowance,
@@ -54,6 +57,7 @@ const MintForm: FC<MintFormProps> = ({
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
+  const { openDialog } = useErrorDialog();
 
   const [dialogText, setDialogText] = useState('');
   const [totalSteps, setTotalSteps] = useState(0);
@@ -82,39 +86,57 @@ const MintForm: FC<MintFormProps> = ({
       return;
     }
 
-    const allowanceToIncrease = collateralAmount.subUnsafe(allowance);
-    setCurrentStep(1);
-    setTotalSteps(() => {
-      let steps = 2;
+    const f = async () => {
+      const allowanceToIncrease = collateralAmount.subUnsafe(allowance);
+      setCurrentStep(1);
+      setTotalSteps(() => {
+        let steps = 2;
+        if (!proxyAddress) {
+          steps += 1;
+        }
+        if (!allowanceToIncrease.isNegative() && !allowanceToIncrease.isZero()) {
+          steps += 1;
+        }
+        return steps;
+      });
+      setMinting(true);
+      let proxy = '';
       if (!proxyAddress) {
-        steps += 1;
+        setDialogText(t('createProxy')!);
+        proxy = await ensureProxy();
+        setCurrentStep((prev) => prev + 1);
+      } else {
+        proxy = await ensureProxy();
       }
+
       if (!allowanceToIncrease.isNegative() && !allowanceToIncrease.isZero()) {
-        steps += 1;
+        setDialogText(t('increaseAllowance')!);
+        await increaseAllowance(proxy, collateralAmount);
+        setCurrentStep((prev) => prev + 1);
       }
-      return steps;
+
+      setDialogText(onMintDialog);
+      await onMint(collateralAmount, daiAmount);
+      setCurrentStep((prev) => prev + 1);
+      setDialogText(t('done')!);
+    };
+    await f().catch((err) => {
+      setMinting(false);
+      openDialog(onErrorMessage, err);
     });
-    setMinting(true);
-    let proxy = '';
-    if (!proxyAddress) {
-      setDialogText(t('createProxy')!);
-      proxy = await ensureProxy();
-      setCurrentStep((prev) => prev + 1);
-    } else {
-      proxy = await ensureProxy();
-    }
-
-    if (!allowanceToIncrease.isNegative() && !allowanceToIncrease.isZero()) {
-      setDialogText(t('increaseAllowance')!);
-      await increaseAllowance(proxy, collateralAmount);
-      setCurrentStep((prev) => prev + 1);
-    }
-
-    setDialogText(onMintDialog);
-    await onMint(collateralAmount, daiAmount);
-    setCurrentStep((prev) => prev + 1);
-    setDialogText(t('done')!);
-  }, [collateralAmount, daiAmount, allowance, proxyAddress, onMintDialog, onMint, t, ensureProxy, increaseAllowance]);
+  }, [
+    collateralAmount,
+    daiAmount,
+    allowance,
+    proxyAddress,
+    onMintDialog,
+    onMint,
+    t,
+    ensureProxy,
+    increaseAllowance,
+    openDialog,
+    onErrorMessage,
+  ]);
 
   const formErrors: MintError[] = useMemo(() => {
     if (collateralAmount && daiAmount) {

@@ -40,16 +40,18 @@
     }
   },
   "forms": {
-    "createProxy": "Proxyを作成中です",
-    "increaseAllowance": "Proxyに資金へのアクセス権限を付与しています",
-    "done":"完了しました",
+    "createProxy": "Proxyを作成します",
+    "increaseAllowance": "Proxyに資金へのアクセス権限を付与します",
+    "done": "完了しました",
     "burn": {
       "redeemAmount": "返済する$t(units.stableToken)の数量",
       "freeAmount": "引き出す{{gem}}の数量",
       "submit": "返済",
       "repayAll": "全額返済",
+      "processing": "負債を返済します",
       "error": {
         "insufficientBalance": "残高不足です",
+        "errorWhileRepaying": "返済時に問題が発生しました。$t(terms.retry)",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
         "debtTooLow": "$t(terms.vault_one)の負債額が下限値を下回っています。",
         "invalidCollateralFreeAmount": "解放する担保の額が、ロックされた担保の額を超過しています。",
@@ -60,8 +62,9 @@
       "stableTokenAmount": "発行する$t(units.stableToken)の数量",
       "lockAmount": "担保に入れる{{gem}}の数量",
       "submit": "発行する",
-      "processing": "$t(units.stableToken)の発行を行います。",
+      "processing": "$t(units.stableToken)を発行します",
       "error": {
+        "errorWhileMinting": "$t(units.stableToken)発行時に問題が発生しました。$t(terms.retry)",
         "insufficientBalance": "残高不足です",
         "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
         "debtTooLow": "$t(terms.vault_one)の負債額が下限値を下回っています。",
@@ -110,11 +113,7 @@
       "id": "Vault ID",
       "lockedCollateral": "ロックされた担保",
       "debt": "負債",
-      "manageVault": "管理",
-      "errors": {
-        "errorWhileMinting": "$t(units.stableToken)発行時に問題が発生しました。$t(terms.retry)",
-        "errorWhileRepaying": "返済時に問題が発生しました。$t(terms.retry)"
-      }
+      "manageVault": "管理"
     },
     "earn": {
       "cardTitle": "利息を得る",
@@ -128,6 +127,7 @@
         "form": {
           "label": "預け入れる$t(units.stableToken)の数量",
           "submit": "預け入れる",
+          "processing": "$t(units.stableToken)を$t(terms.savings)に預け入れます",
           "errors": {
             "insufficientBalance": "残高不足です"
           }
@@ -136,6 +136,7 @@
       "withdraw": {
         "form": {
           "label": "引き出す$t(units.stableToken)の数量",
+          "processing": "$t(terms.savings)から$t(units.stableToken)を引き出します",
           "withdrawAll": "預金から全額引き出す",
           "submit": "引き出す",
           "errors": {

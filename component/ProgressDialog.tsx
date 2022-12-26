@@ -30,7 +30,7 @@ const ProgressDialog: FC<ProgressDialogProps> = ({ title, text, totalStep, curre
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <DialogContentText sx={{ paddingBottom: 3 }}>
-          {text}&nbsp;&nbsp;{isInProgress ? <CircularProgress size="1rem" /> : ''}
+          {text}&nbsp;{isInProgress ? <CircularProgress size="1rem" /> : ''}
         </DialogContentText>
         <LinearProgress variant="determinate" value={currentProgress} />
       </DialogContent>

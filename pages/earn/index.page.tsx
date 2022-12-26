@@ -1,6 +1,6 @@
 import { Box, Card, CardContent, CircularProgress, Stack, Tab, Tabs } from '@mui/material';
 import { FixedNumber } from 'ethers';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import useSWR from 'swr';
 
@@ -9,7 +9,6 @@ import { UnitFormats } from 'ethereum/helpers/math';
 import useChainLog from 'ethereum/react/useChainLog';
 import BalanceStatusCard from 'pages/earn/BalanceStatusCard';
 import getTranslationProps from 'pages/getTranslationProps';
-import { useErrorDialog } from 'store/ErrorDialogProvider';
 
 import SavingRateCard from './SavingRateCard';
 import DepositForm from './forms/DepositForm';
@@ -19,6 +18,8 @@ import type { DepositFormProps } from './forms/DepositForm';
 import type { WithdrawFormProps } from './forms/WithdrawForm';
 import type EthereumProvider from 'ethereum/EthereumProvider';
 import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
+import type ERC20Helper from 'ethereum/contracts/ERC20Helper';
+import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { FC } from 'react';
 
@@ -27,50 +28,69 @@ type ControllerProps = {
   updateAllBalance: () => void;
   depositAmount: FixedNumber | undefined;
   balance: FixedNumber;
+  proxyAddress: string | undefined;
+  dai: ERC20Helper;
+  proxyRegistry: ProxyRegistryHelper;
+  allowance: FixedNumber;
 };
 
 type TabValue = 'deposit' | 'withdraw';
 
-const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, depositAmount, balance }) => {
+const Controller: FC<ControllerProps> = ({
+  savingRate,
+  updateAllBalance,
+  depositAmount,
+  balance,
+  proxyAddress,
+  dai,
+  proxyRegistry,
+  allowance,
+}) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn' });
   const [selectedTab, setSelectedTab] = useState<TabValue>('deposit');
-  const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.earn.errors' });
-  const { openDialog } = useErrorDialog();
 
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback((_, value) => {
     setSelectedTab(value);
   }, []);
 
   const deposit: DepositFormProps['onDeposit'] = useCallback(
-    (amount) =>
-      savingRate
-        .deposit(amount)
-        .then(() => updateAllBalance())
-        .catch((err) => openDialog(errorMessage('errorWhileDeposit'), err)),
-    [errorMessage, openDialog, savingRate, updateAllBalance],
+    (amount) => savingRate.deposit(amount).then(() => updateAllBalance()),
+    [savingRate, updateAllBalance],
   );
 
   const withdraw: WithdrawFormProps['onWithdraw'] = useCallback(
-    (amount) =>
-      savingRate
-        .withdraw(amount)
-        .then(() => updateAllBalance())
-        .catch((err) => openDialog(errorMessage('errorWhileWithdraw'), err)),
-    [errorMessage, openDialog, savingRate, updateAllBalance],
+    (amount) => savingRate.withdraw(amount).then(() => updateAllBalance()),
+    [savingRate, updateAllBalance],
   );
 
   const withdrawAll: WithdrawFormProps['onWithdrawAll'] = useCallback(
-    () =>
-      savingRate
-        .withdrawAll()
-        .then(() => updateAllBalance())
-        .catch((err) => openDialog(errorMessage('errorWhileWithdraw'), err)),
-    [errorMessage, openDialog, savingRate, updateAllBalance],
+    () => savingRate.withdrawAll().then(() => updateAllBalance()),
+    [savingRate, updateAllBalance],
   );
-  const TabContent: FC = useCallback(() => {
+
+  const increaseAllowance = useCallback(
+    async (who: string, n: FixedNumber) => {
+      await dai.ensureAllowance(who, n, 5);
+    },
+    [dai],
+  );
+
+  const ensureProxy = useCallback(() => proxyRegistry.ensureDSProxy().then((v) => v.address), [proxyRegistry]);
+
+  const content = useMemo(() => {
     switch (selectedTab) {
       case 'deposit':
-        return <DepositForm buttonContent={t('deposit.form.submit')} onDeposit={deposit} balance={balance} />;
+        return (
+          <DepositForm
+            buttonContent={t('deposit.form.submit')}
+            onDeposit={deposit}
+            balance={balance}
+            increaseAllowance={increaseAllowance}
+            proxyAddress={proxyAddress}
+            allowance={allowance}
+            ensureProxy={ensureProxy}
+          />
+        );
       case 'withdraw':
         return (
           <WithdrawForm
@@ -81,7 +101,19 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, deposit
           />
         );
     }
-  }, [deposit, withdraw, selectedTab, withdrawAll, depositAmount, balance, t]);
+  }, [
+    selectedTab,
+    t,
+    deposit,
+    balance,
+    increaseAllowance,
+    proxyAddress,
+    allowance,
+    ensureProxy,
+    withdraw,
+    withdrawAll,
+    depositAmount,
+  ]);
 
   return (
     <>
@@ -89,7 +121,7 @@ const Controller: FC<ControllerProps> = ({ savingRate, updateAllBalance, deposit
         <Tab label={t('depositTab')} value="deposit" />
         <Tab label={t('withdrawTab')} value="withdraw" disabled={!depositAmount || depositAmount?.isZero()} />
       </Tabs>
-      <TabContent />
+      {content}
     </>
   );
 };
@@ -106,16 +138,24 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
 
   const { data, mutate, isLoading } = useSWR('getSavingData', async () => {
     const saving = await Savings.fromChainlog(chainLog);
-    const [annualRate, balance, deposit] = await Promise.all([
+    const proxyRegistry = await chainLog.proxyRegistry();
+    const proxy = await proxyRegistry.getDSProxy();
+    const dai = await chainLog.dai();
+    const [annualRate, balance, allowance, deposit] = await Promise.all([
       saving.getAnnualRate(),
-      chainLog.dai().then((dai) => dai.getBalance()),
+      dai.getBalance(),
+      proxy ? dai.getAllowance(proxy.address) : FixedNumber.from('0', UnitFormats.WAD),
       saving.getDepositAmount(),
     ]);
     return {
       saving,
       annualRate,
       balance,
+      allowance,
       deposit,
+      proxyAddress: proxy?.address,
+      proxyRegistry,
+      dai,
     };
   });
 
@@ -129,7 +169,7 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
     );
   }
 
-  const { saving, annualRate, deposit, balance } = data;
+  const { saving, annualRate, deposit, balance, proxyAddress, proxyRegistry, allowance, dai } = data;
   return (
     <Stack padding={2} spacing={2}>
       <SavingRateCard annualRate={annualRate} />
@@ -151,7 +191,16 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
         tooltipText={wallet('description')!}
         unit="DAI"
       />
-      <Controller savingRate={saving} updateAllBalance={updateAllBalance} depositAmount={deposit?.amount} balance={balance} />
+      <Controller
+        savingRate={saving}
+        updateAllBalance={updateAllBalance}
+        depositAmount={deposit?.amount}
+        balance={balance}
+        proxyAddress={proxyAddress}
+        proxyRegistry={proxyRegistry}
+        allowance={allowance}
+        dai={dai}
+      />
     </Stack>
   );
 };

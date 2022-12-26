@@ -15,7 +15,6 @@ import useChainLog from 'ethereum/react/useChainLog';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
-import { useErrorDialog } from 'store/ErrorDialogProvider';
 
 import BurnFormController from '../../forms/BurnFormController';
 import MintFormController from '../../forms/MintFormController';
@@ -83,10 +82,8 @@ const Controller: FC<ControllerProps> = ({
   proxyRegistry,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'terms' });
-  const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.vault.errors' });
   const { t: common } = useTranslation('common');
 
-  const { openDialog } = useErrorDialog();
   const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback(
     (_, value) => {
@@ -96,51 +93,34 @@ const Controller: FC<ControllerProps> = ({
   );
 
   const mint: MintFormProps['onMint'] = useCallback(
-    (collateralAmount, daiAmount) =>
-      vault
-        .mint(cdp.id, collateralAmount, daiAmount)
-        .then(() => update())
-        .catch((err) => openDialog(errorMessage('errorWhileMinting'), err)),
-    [vault, cdp.id, update, openDialog, errorMessage],
+    (collateralAmount, daiAmount) => vault.mint(cdp.id, collateralAmount, daiAmount).then(() => update()),
+    [vault, cdp.id, update],
   );
 
   const burn: BurnFormProps['onBurn'] = useCallback(
-    (daiAmount, col) =>
-      vault
-        .burn(cdp.id, col, daiAmount)
-        .then(() => update())
-        .catch((err) => openDialog(errorMessage('errorWhileRepaying'), err)),
-    [vault, cdp.id, update, openDialog, errorMessage],
+    (daiAmount, col) => vault.burn(cdp.id, col, daiAmount).then(() => update()),
+    [vault, cdp.id, update],
   );
 
   const burnAll: BurnFormProps['onBurnAll'] = useCallback(
-    (daiAmount, col) =>
-      vault
-        .burnAll(cdp.id, col, daiAmount)
-        .then(() => update())
-        .catch((err) => openDialog(errorMessage('errorWhileRepaying'), err)),
-    [vault, cdp.id, update, openDialog, errorMessage],
+    (daiAmount, col) => vault.burnAll(cdp.id, col, daiAmount).then(() => update()),
+    [vault, cdp.id, update],
   );
 
-  const createProxy = useCallback(
-    () =>
-      proxyRegistry
-        .ensureDSProxy()
-        .then(() => update())
-        .catch((err) => openDialog(common('error.errorWhileCreatingProxy'), err)),
-    [common, openDialog, proxyRegistry, update],
-  );
+  const ensureProxy = useCallback(() => proxyRegistry.ensureDSProxy().then((v) => v.address), [proxyRegistry]);
 
   const increateTokenAllowance = useCallback(
-    async (n: FixedNumber) => {
-      if (proxyAddress) {
-        await vault.ilkInfo.gem
-          .ensureAllowance(proxyAddress, n, 5)
-          .then(() => update())
-          .catch((err) => openDialog(common('error.errorWhileIncreasingAllowance'), err));
-      }
+    async (who: string, n: FixedNumber) => {
+      await vault.ilkInfo.gem.ensureAllowance(who, n, 5);
     },
-    [proxyAddress, vault.ilkInfo.gem, update, openDialog, common],
+    [vault.ilkInfo.gem],
+  );
+
+  const increaseDaiAllowance = useCallback(
+    async (who: string, n: FixedNumber) => {
+      await dai.ensureAllowance(who, n, 5);
+    },
+    [dai],
   );
 
   const content = useMemo(() => {
@@ -162,7 +142,8 @@ const Controller: FC<ControllerProps> = ({
             proxyAddress={proxyAddress}
             increaseAllowance={increateTokenAllowance}
             onMintDialog={common('forms.mint.processing')}
-            createProxy={createProxy}
+            ensureProxy={ensureProxy}
+            onErrorMessage={common('forms.mint.error.errorWhileMinting')}
           />
         );
       case 'burn':
@@ -179,6 +160,10 @@ const Controller: FC<ControllerProps> = ({
             ilkStatus={ilkStatus}
             selectedTab={selectedTab}
             onSelectTab={onSelectTab}
+            allowance={daiAllowance}
+            increaseAllowance={increaseDaiAllowance}
+            ensureProxy={ensureProxy}
+            proxyAddress={proxyAddress}
           />
         );
     }
@@ -197,10 +182,12 @@ const Controller: FC<ControllerProps> = ({
     proxyAddress,
     increateTokenAllowance,
     common,
-    createProxy,
+    ensureProxy,
     burn,
     burnAll,
     daiBalance,
+    daiAllowance,
+    increaseDaiAllowance,
   ]);
 
   return content;

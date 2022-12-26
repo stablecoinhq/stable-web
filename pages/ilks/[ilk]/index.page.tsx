@@ -14,7 +14,6 @@ import MintFormController from 'pages/forms/MintFormController';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
-import { useErrorDialog } from 'store/ErrorDialogProvider';
 
 import InvalidIlk from './InvalidIlk';
 
@@ -51,15 +50,12 @@ const OpenVault: FC<OpenVaultProps> = ({
   update,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
-  const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.ilk.errors' });
-  const { t: common } = useTranslation('common');
-  const { openDialog } = useErrorDialog();
   const router = useRouter();
   const openVault = useCallback(
     async (colAmount: FixedNumber, daiAmount: FixedNumber) => {
-      await vault.open(colAmount, daiAmount).catch((e) => openDialog(errorMessage('errorWhileOpeningVault'), e));
+      await vault.open(colAmount, daiAmount);
     },
-    [errorMessage, openDialog, vault],
+    [vault],
   );
 
   const zero = FixedNumber.fromString('0', UnitFormats.WAD);
@@ -72,12 +68,9 @@ const OpenVault: FC<OpenVaultProps> = ({
 
   const increaseAllowance = useCallback(
     async (who: string, n: FixedNumber) => {
-      await ilkInfo.gem
-        .ensureAllowance(who, n, 5)
-        .then(() => update())
-        .catch((err) => openDialog(common('error.errorWhileIncreasingAllowance'), err));
+      await ilkInfo.gem.ensureAllowance(who, n, 5).then(() => update());
     },
-    [common, ilkInfo.gem, openDialog, update],
+    [ilkInfo.gem, update],
   );
   const ensureProxy = useCallback(() => proxyRegistry.ensureDSProxy().then((v) => v.address), [proxyRegistry]);
 
@@ -96,6 +89,7 @@ const OpenVault: FC<OpenVaultProps> = ({
       onMintDialog={t('openVault')}
       address={address}
       buttonContent={t('openLabel')}
+      onErrorMessage={t('errors.errorWhileOpeningVault')}
       onCloseDialog={() => router.push('/vaults')}
     />
   );

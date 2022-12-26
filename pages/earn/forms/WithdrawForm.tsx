@@ -4,7 +4,6 @@ import {
   Grid,
   InputAdornment,
   TextField,
-  CircularProgress,
   Checkbox,
   FormControlLabel,
   FormGroup,
@@ -13,8 +12,10 @@ import {
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import ProgressDialog from 'component/ProgressDialog';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
+import { useErrorDialog } from 'store/ErrorDialogProvider';
 
 import type { FixedNumber } from 'ethers';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
@@ -30,12 +31,15 @@ type WithdrawState = 'withdraw' | 'withdrawAll' | 'neutral';
 
 const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onWithdraw, onWithdrawAll }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn.withdraw.form' });
+  const { t: forms } = useTranslation('common', { keyPrefix: 'forms' });
+  const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.earn.errors' });
   const { t: error } = useTranslation('common', { keyPrefix: 'pages.earn.withdraw.form.errors' });
-
+  const { openDialog } = useErrorDialog();
+  const [dialogText, setDialogText] = useState('');
+  const [currentStep, setCurrentStep] = useState(1);
   const [amountText, setAmountText] = useState('');
-
   const [withdrawState, setWithdrawState] = useState<WithdrawState>('neutral');
-
+  const [withdrawing, setWithdrawing] = useState(false);
   const formats = UnitFormats.WAD;
   const amount = useMemo(() => toFixedNumberOrUndefined(amountText, formats), [amountText, formats]);
   const isInvalidWithdrawAmount = useMemo(
@@ -43,7 +47,6 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
     [amount, depositAmount],
   );
   // input as percentage, return as ratio
-  const [withdrawing, setWithdrawing] = useState(false);
 
   const onAmountChange: ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
@@ -67,30 +70,45 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
     }
   };
 
-  const onButtonClick: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
-    switch (withdrawState) {
-      case 'withdrawAll':
-        setWithdrawing(true);
-        onWithdrawAll().finally(() => {
-          setWithdrawing(false);
-        });
-        break;
-      case 'withdraw':
-        if (!amount || isInvalidWithdrawAmount) {
+  const onButtonClick: MouseEventHandler<HTMLButtonElement> = useCallback(async () => {
+    const f = async () => {
+      setWithdrawing(true);
+      setCurrentStep(1);
+      setDialogText(t('processing')!);
+      switch (withdrawState) {
+        case 'withdrawAll':
+          await onWithdrawAll();
           break;
-        }
-        setWithdrawing(true);
-        onWithdraw(amount).finally(() => {
-          setWithdrawing(false);
-        });
-        break;
-      case 'neutral':
-        break;
-    }
-  }, [amount, onWithdraw, onWithdrawAll, withdrawState, isInvalidWithdrawAmount]);
+        case 'withdraw':
+          if (!amount || isInvalidWithdrawAmount) {
+            break;
+          }
+          await onWithdraw(amount);
+          break;
+        case 'neutral':
+          break;
+      }
+      setCurrentStep((prev) => prev + 1);
+      setAmountText('');
+      setDialogText(forms('done')!);
+      setWithdrawState('neutral');
+    };
+    await f().catch((err) => {
+      setWithdrawing(false);
+      openDialog(errorMessage('errorWhileWithdraw'), err);
+    });
+  }, [t, withdrawState, forms, onWithdrawAll, amount, isInvalidWithdrawAmount, onWithdraw, openDialog, errorMessage]);
 
   return (
     <Card component="form" elevation={0}>
+      <ProgressDialog
+        open={withdrawing}
+        title={buttonContent}
+        text={dialogText}
+        totalStep={2}
+        currentStep={currentStep}
+        onClose={() => setWithdrawing(false)}
+      />
       <Grid container padding={2} spacing={2}>
         <Grid item xs={12} lg={6}>
           <TextField
@@ -119,7 +137,7 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
             disabled={withdrawing || !(withdrawState !== 'neutral') || isInvalidWithdrawAmount}
             onClick={onButtonClick}
           >
-            {withdrawing ? <CircularProgress /> : buttonContent}
+            {buttonContent}
           </Button>
         </Grid>
         <Grid item xs={12}>
