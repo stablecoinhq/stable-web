@@ -1,0 +1,2047 @@
+{
+    "title": "Root Schema",
+    "type": "object",
+    "default": {},
+    "required": [
+        "cards",
+        "forms",
+        "metamask",
+        "pages",
+        "site",
+        "notFound",
+        "error",
+        "close",
+        "terms",
+        "units"
+    ],
+    "properties": {
+        "cards": {
+            "title": "The cards Schema",
+            "type": "object",
+            "default": {},
+            "required": [
+                "ilk",
+                "vault",
+                "wallet",
+                "savings"
+            ],
+            "properties": {
+                "ilk": {
+                    "title": "The ilk Schema",
+                    "type": "object",
+                    "default": {},
+                    "required": [
+                        "annualFee",
+                        "annualFeeDesc",
+                        "currentPrice",
+                        "currentPriceDesc",
+                        "debtFloor",
+                        "debtFloorDesc",
+                        "liqRatio",
+                        "liqRatioDesc",
+                        "maxLiquidity",
+                        "maxLiquidityDesc",
+                        "title",
+                        "totalIssue",
+                        "totalIssueDesc"
+                    ],
+                    "properties": {
+                        "annualFee": {
+                            "title": "The annualFee Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Annual Fee"
+                            ]
+                        },
+                        "annualFeeDesc": {
+                            "title": "The annualFeeDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "The Maker Protocol collects a Stability Fee on Dai that is generated from Maker Vaults. It is a variable-rate fee that changes when Maker’s governing body votes on proposals put forth by Risk Teams."
+                            ]
+                        },
+                        "currentPrice": {
+                            "title": "The currentPrice Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Current Price per {{collateral}}"
+                            ]
+                        },
+                        "currentPriceDesc": {
+                            "title": "The currentPriceDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Current price of collateral {{collateral}} in DAI"
+                            ]
+                        },
+                        "debtFloor": {
+                            "title": "The debtFloor Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Debt Floor"
+                            ]
+                        },
+                        "debtFloorDesc": {
+                            "title": "The debtFloorDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "The minimum amount of DAI that can be minted for this type of Vault. This value is also called the \"Dust Limit\"."
+                            ]
+                        },
+                        "liqRatio": {
+                            "title": "The liqRatio Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Liquidation Ratio"
+                            ]
+                        },
+                        "liqRatioDesc": {
+                            "title": "The liqRatioDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "If the $t(terms.vault) reaches below the minimum collateralization level it is considered undercollateralized and is subject to liquidation. Your collateral will then be partially auctioned off to cover outstanding debt and liquidation fee."
+                            ]
+                        },
+                        "maxLiquidity": {
+                            "title": "The maxLiquidity Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Maximum Liquidity"
+                            ]
+                        },
+                        "maxLiquidityDesc": {
+                            "title": "The maxLiquidityDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "The Maximum Liquidity specified, the amount of DAI that the users can be issued for this type of Vault."
+                            ]
+                        },
+                        "title": {
+                            "title": "The title Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "{{ilk}} $t(terms.collateral) status"
+                            ]
+                        },
+                        "totalIssue": {
+                            "title": "The totalIssue Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Total Issued"
+                            ]
+                        },
+                        "totalIssueDesc": {
+                            "title": "The totalIssueDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Total amount of DAI issued by collateral"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "annualFee": "Annual Fee",
+                        "annualFeeDesc": "The Maker Protocol collects a Stability Fee on Dai that is generated from Maker Vaults. It is a variable-rate fee that changes when Maker’s governing body votes on proposals put forth by Risk Teams.",
+                        "currentPrice": "Current Price per {{collateral}}",
+                        "currentPriceDesc": "Current price of collateral {{collateral}} in DAI",
+                        "debtFloor": "Debt Floor",
+                        "debtFloorDesc": "The minimum amount of DAI that can be minted for this type of Vault. This value is also called the \"Dust Limit\".",
+                        "liqRatio": "Liquidation Ratio",
+                        "liqRatioDesc": "If the $t(terms.vault) reaches below the minimum collateralization level it is considered undercollateralized and is subject to liquidation. Your collateral will then be partially auctioned off to cover outstanding debt and liquidation fee.",
+                        "maxLiquidity": "Maximum Liquidity",
+                        "maxLiquidityDesc": "The Maximum Liquidity specified, the amount of DAI that the users can be issued for this type of Vault.",
+                        "title": "{{ilk}} $t(terms.collateral) status",
+                        "totalIssue": "Total Issued",
+                        "totalIssueDesc": "Total amount of DAI issued by collateral"
+                    }]
+                },
+                "vault": {
+                    "title": "The vault Schema",
+                    "type": "object",
+                    "default": {},
+                    "required": [
+                        "colRatio",
+                        "colRatioDesc",
+                        "debt",
+                        "debtDesc",
+                        "freeCollateral",
+                        "freeCollateralDesc",
+                        "lockedCollateral",
+                        "lockedCollateralDesc",
+                        "liquidationPrice",
+                        "liquidationPriceDesc",
+                        "title"
+                    ],
+                    "properties": {
+                        "colRatio": {
+                            "title": "The colRatio Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "$t(terms.colRatio)"
+                            ]
+                        },
+                        "colRatioDesc": {
+                            "title": "The colRatioDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "The collateralization ratio is the ratio between the value of the tokens given as collateral and the value of the Dai debt outstanding, and defined as a percentage."
+                            ]
+                        },
+                        "debt": {
+                            "title": "The debt Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Debt"
+                            ]
+                        },
+                        "debtDesc": {
+                            "title": "The debtDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Total amount of debt that this $t(terms.vault) owes"
+                            ]
+                        },
+                        "freeCollateral": {
+                            "title": "The freeCollateral Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Free Collateral"
+                            ]
+                        },
+                        "freeCollateralDesc": {
+                            "title": "The freeCollateralDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Amount of tokens that is currently being locked in Vault but not used as collateral"
+                            ]
+                        },
+                        "lockedCollateral": {
+                            "title": "The lockedCollateral Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Locked Collateral"
+                            ]
+                        },
+                        "lockedCollateralDesc": {
+                            "title": "The lockedCollateralDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Total amount of collateral that is locked in this vault"
+                            ]
+                        },
+                        "liquidationPrice": {
+                            "title": "The liquidationPrice Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Liquidation Price"
+                            ]
+                        },
+                        "liquidationPriceDesc": {
+                            "title": "The liquidationPriceDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "If the price of {{collateral}} falls any further, this vault will be liquidated."
+                            ]
+                        },
+                        "title": {
+                            "title": "The title Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Vault status"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "colRatio": "$t(terms.colRatio)",
+                        "colRatioDesc": "The collateralization ratio is the ratio between the value of the tokens given as collateral and the value of the Dai debt outstanding, and defined as a percentage.",
+                        "debt": "Debt",
+                        "debtDesc": "Total amount of debt that this $t(terms.vault) owes",
+                        "freeCollateral": "Free Collateral",
+                        "freeCollateralDesc": "Amount of tokens that is currently being locked in Vault but not used as collateral",
+                        "lockedCollateral": "Locked Collateral",
+                        "lockedCollateralDesc": "Total amount of collateral that is locked in this vault",
+                        "liquidationPrice": "Liquidation Price",
+                        "liquidationPriceDesc": "If the price of {{collateral}} falls any further, this vault will be liquidated.",
+                        "title": "Vault status"
+                    }]
+                },
+                "wallet": {
+                    "title": "The wallet Schema",
+                    "type": "object",
+                    "default": {},
+                    "required": [
+                        "title",
+                        "balance",
+                        "description"
+                    ],
+                    "properties": {
+                        "title": {
+                            "title": "The title Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Wallet status"
+                            ]
+                        },
+                        "balance": {
+                            "title": "The balance Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "{{gem}} Balance"
+                            ]
+                        },
+                        "description": {
+                            "title": "The description Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Amount of token that wallet currently holds"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "title": "Wallet status",
+                        "balance": "{{gem}} Balance",
+                        "description": "Amount of token that wallet currently holds"
+                    }]
+                },
+                "savings": {
+                    "title": "The savings Schema",
+                    "type": "object",
+                    "default": {},
+                    "required": [
+                        "title",
+                        "annualSavingRate",
+                        "annualSavingRateDesc"
+                    ],
+                    "properties": {
+                        "title": {
+                            "title": "The title Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Saving Rate"
+                            ]
+                        },
+                        "annualSavingRate": {
+                            "title": "The annualSavingRate Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Annual saving rate"
+                            ]
+                        },
+                        "annualSavingRateDesc": {
+                            "title": "The annualSavingRateDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Annual saving rate of the DSR"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "title": "Saving Rate",
+                        "annualSavingRate": "Annual saving rate",
+                        "annualSavingRateDesc": "Annual saving rate of the DSR"
+                    }]
+                }
+            },
+            "examples": [{
+                "ilk": {
+                    "annualFee": "Annual Fee",
+                    "annualFeeDesc": "The Maker Protocol collects a Stability Fee on Dai that is generated from Maker Vaults. It is a variable-rate fee that changes when Maker’s governing body votes on proposals put forth by Risk Teams.",
+                    "currentPrice": "Current Price per {{collateral}}",
+                    "currentPriceDesc": "Current price of collateral {{collateral}} in DAI",
+                    "debtFloor": "Debt Floor",
+                    "debtFloorDesc": "The minimum amount of DAI that can be minted for this type of Vault. This value is also called the \"Dust Limit\".",
+                    "liqRatio": "Liquidation Ratio",
+                    "liqRatioDesc": "If the $t(terms.vault) reaches below the minimum collateralization level it is considered undercollateralized and is subject to liquidation. Your collateral will then be partially auctioned off to cover outstanding debt and liquidation fee.",
+                    "maxLiquidity": "Maximum Liquidity",
+                    "maxLiquidityDesc": "The Maximum Liquidity specified, the amount of DAI that the users can be issued for this type of Vault.",
+                    "title": "{{ilk}} $t(terms.collateral) status",
+                    "totalIssue": "Total Issued",
+                    "totalIssueDesc": "Total amount of DAI issued by collateral"
+                },
+                "vault": {
+                    "colRatio": "$t(terms.colRatio)",
+                    "colRatioDesc": "The collateralization ratio is the ratio between the value of the tokens given as collateral and the value of the Dai debt outstanding, and defined as a percentage.",
+                    "debt": "Debt",
+                    "debtDesc": "Total amount of debt that this $t(terms.vault) owes",
+                    "freeCollateral": "Free Collateral",
+                    "freeCollateralDesc": "Amount of tokens that is currently being locked in Vault but not used as collateral",
+                    "lockedCollateral": "Locked Collateral",
+                    "lockedCollateralDesc": "Total amount of collateral that is locked in this vault",
+                    "liquidationPrice": "Liquidation Price",
+                    "liquidationPriceDesc": "If the price of {{collateral}} falls any further, this vault will be liquidated.",
+                    "title": "Vault status"
+                },
+                "wallet": {
+                    "title": "Wallet status",
+                    "balance": "{{gem}} Balance",
+                    "description": "Amount of token that wallet currently holds"
+                },
+                "savings": {
+                    "title": "Saving Rate",
+                    "annualSavingRate": "Annual saving rate",
+                    "annualSavingRateDesc": "Annual saving rate of the DSR"
+                }
+            }]
+        },
+        "forms": {
+            "title": "The forms Schema",
+            "type": "object",
+            "default": {},
+            "required": [
+                "createProxy",
+                "increaseAllowance",
+                "done",
+                "burn",
+                "mint"
+            ],
+            "properties": {
+                "createProxy": {
+                    "title": "The createProxy Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Creating proxy"
+                    ]
+                },
+                "increaseAllowance": {
+                    "title": "The increaseAllowance Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Granting the Proxy access to your {{token}}"
+                    ]
+                },
+                "done": {
+                    "title": "The done Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Success"
+                    ]
+                },
+                "burn": {
+                    "title": "The burn Schema",
+                    "type": "object",
+                    "default": {},
+                    "required": [
+                        "redeemAmount",
+                        "freeAmount",
+                        "repayAll",
+                        "processing",
+                        "done",
+                        "error"
+                    ],
+                    "properties": {
+                        "redeemAmount": {
+                            "title": "The redeemAmount Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Amount of $t(units.stableToken) to repay"
+                            ]
+                        },
+                        "freeAmount": {
+                            "title": "The freeAmount Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Amount of {{gem}} to redeem"
+                            ]
+                        },
+                        "repayAll": {
+                            "title": "The repayAll Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Repay all"
+                            ]
+                        },
+                        "processing": {
+                            "title": "The processing Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Repaying $t(units.stableToken)"
+                            ]
+                        },
+                        "done": {
+                            "title": "The done Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Debt successfully repayed"
+                            ]
+                        },
+                        "error": {
+                            "title": "The error Schema",
+                            "type": "object",
+                            "default": {},
+                            "required": [
+                                "errorWhileRepaying",
+                                "insufficientBalance",
+                                "collateralTooLow",
+                                "debtTooLow",
+                                "invalidCollateralFreeAmount",
+                                "invalidRepayAmount"
+                            ],
+                            "properties": {
+                                "errorWhileRepaying": {
+                                    "title": "The errorWhileRepaying Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "An error occured while trying to repay debt. Please try again."
+                                    ]
+                                },
+                                "insufficientBalance": {
+                                    "title": "The insufficientBalance Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "Insufficient amount of $t(units.stableToken)."
+                                    ]
+                                },
+                                "collateralTooLow": {
+                                    "title": "The collateralTooLow Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "The vault's collateralization ratio is too low."
+                                    ]
+                                },
+                                "debtTooLow": {
+                                    "title": "The debtTooLow Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "Amount of bebt the vault owes is below the debt floor."
+                                    ]
+                                },
+                                "invalidCollateralFreeAmount": {
+                                    "title": "The invalidCollateralFreeAmount Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "The amount of collateral trying to free exceeds the locked collateral amount."
+                                    ]
+                                },
+                                "invalidRepayAmount": {
+                                    "title": "The invalidRepayAmount Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "The amount of $t(units.stableToken) being repayed is exceeding the debt."
+                                    ]
+                                }
+                            },
+                            "examples": [{
+                                "errorWhileRepaying": "An error occured while trying to repay debt. Please try again.",
+                                "insufficientBalance": "Insufficient amount of $t(units.stableToken).",
+                                "collateralTooLow": "The vault's collateralization ratio is too low.",
+                                "debtTooLow": "Amount of bebt the vault owes is below the debt floor.",
+                                "invalidCollateralFreeAmount": "The amount of collateral trying to free exceeds the locked collateral amount.",
+                                "invalidRepayAmount": "The amount of $t(units.stableToken) being repayed is exceeding the debt."
+                            }]
+                        }
+                    },
+                    "examples": [{
+                        "redeemAmount": "Amount of $t(units.stableToken) to repay",
+                        "freeAmount": "Amount of {{gem}} to redeem",
+                        "repayAll": "Repay all",
+                        "processing": "Repaying $t(units.stableToken)",
+                        "done": "Debt successfully repayed",
+                        "error": {
+                            "errorWhileRepaying": "An error occured while trying to repay debt. Please try again.",
+                            "insufficientBalance": "Insufficient amount of $t(units.stableToken).",
+                            "collateralTooLow": "The vault's collateralization ratio is too low.",
+                            "debtTooLow": "Amount of bebt the vault owes is below the debt floor.",
+                            "invalidCollateralFreeAmount": "The amount of collateral trying to free exceeds the locked collateral amount.",
+                            "invalidRepayAmount": "The amount of $t(units.stableToken) being repayed is exceeding the debt."
+                        }
+                    }]
+                },
+                "mint": {
+                    "title": "The mint Schema",
+                    "type": "object",
+                    "default": {},
+                    "required": [
+                        "stableTokenAmount",
+                        "lockAmount",
+                        "processing",
+                        "done",
+                        "error"
+                    ],
+                    "properties": {
+                        "stableTokenAmount": {
+                            "title": "The stableTokenAmount Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Amount of $t(units.stableToken) to mint"
+                            ]
+                        },
+                        "lockAmount": {
+                            "title": "The lockAmount Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Amount of {{gem}} to lock"
+                            ]
+                        },
+                        "processing": {
+                            "title": "The processing Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Minting $t(units.stableToken)"
+                            ]
+                        },
+                        "done": {
+                            "title": "The done Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "$t(units.stableToken) successfully minted"
+                            ]
+                        },
+                        "error": {
+                            "title": "The error Schema",
+                            "type": "object",
+                            "default": {},
+                            "required": [
+                                "errorWhileMinting",
+                                "insufficientBalance",
+                                "collateralTooLow",
+                                "debtTooLow",
+                                "issuingTooMuchCoins"
+                            ],
+                            "properties": {
+                                "errorWhileMinting": {
+                                    "title": "The errorWhileMinting Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "An error occured while trying to mint $t(units.stableToken). Please try again."
+                                    ]
+                                },
+                                "insufficientBalance": {
+                                    "title": "The insufficientBalance Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "Insufficient balance."
+                                    ]
+                                },
+                                "collateralTooLow": {
+                                    "title": "The collateralTooLow Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "Collateralization ratio is too low."
+                                    ]
+                                },
+                                "debtTooLow": {
+                                    "title": "The debtTooLow Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "Amount of $t(units.stableToken) being minted is too low."
+                                    ]
+                                },
+                                "issuingTooMuchCoins": {
+                                    "title": "The issuingTooMuchCoins Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "Amount of $t(units.stableToken) issued is above Maximum Liquidity"
+                                    ]
+                                }
+                            },
+                            "examples": [{
+                                "errorWhileMinting": "An error occured while trying to mint $t(units.stableToken). Please try again.",
+                                "insufficientBalance": "Insufficient balance.",
+                                "collateralTooLow": "Collateralization ratio is too low.",
+                                "debtTooLow": "Amount of $t(units.stableToken) being minted is too low.",
+                                "issuingTooMuchCoins": "Amount of $t(units.stableToken) issued is above Maximum Liquidity"
+                            }]
+                        }
+                    },
+                    "examples": [{
+                        "stableTokenAmount": "Amount of $t(units.stableToken) to mint",
+                        "lockAmount": "Amount of {{gem}} to lock",
+                        "processing": "Minting $t(units.stableToken)",
+                        "done": "$t(units.stableToken) successfully minted",
+                        "error": {
+                            "errorWhileMinting": "An error occured while trying to mint $t(units.stableToken). Please try again.",
+                            "insufficientBalance": "Insufficient balance.",
+                            "collateralTooLow": "Collateralization ratio is too low.",
+                            "debtTooLow": "Amount of $t(units.stableToken) being minted is too low.",
+                            "issuingTooMuchCoins": "Amount of $t(units.stableToken) issued is above Maximum Liquidity"
+                        }
+                    }]
+                }
+            },
+            "examples": [{
+                "createProxy": "Creating proxy",
+                "increaseAllowance": "Granting the Proxy access to your {{token}}",
+                "done": "Success",
+                "burn": {
+                    "redeemAmount": "Amount of $t(units.stableToken) to repay",
+                    "freeAmount": "Amount of {{gem}} to redeem",
+                    "repayAll": "Repay all",
+                    "processing": "Repaying $t(units.stableToken)",
+                    "done": "Debt successfully repayed",
+                    "error": {
+                        "errorWhileRepaying": "An error occured while trying to repay debt. Please try again.",
+                        "insufficientBalance": "Insufficient amount of $t(units.stableToken).",
+                        "collateralTooLow": "The vault's collateralization ratio is too low.",
+                        "debtTooLow": "Amount of bebt the vault owes is below the debt floor.",
+                        "invalidCollateralFreeAmount": "The amount of collateral trying to free exceeds the locked collateral amount.",
+                        "invalidRepayAmount": "The amount of $t(units.stableToken) being repayed is exceeding the debt."
+                    }
+                },
+                "mint": {
+                    "stableTokenAmount": "Amount of $t(units.stableToken) to mint",
+                    "lockAmount": "Amount of {{gem}} to lock",
+                    "processing": "Minting $t(units.stableToken)",
+                    "done": "$t(units.stableToken) successfully minted",
+                    "error": {
+                        "errorWhileMinting": "An error occured while trying to mint $t(units.stableToken). Please try again.",
+                        "insufficientBalance": "Insufficient balance.",
+                        "collateralTooLow": "Collateralization ratio is too low.",
+                        "debtTooLow": "Amount of $t(units.stableToken) being minted is too low.",
+                        "issuingTooMuchCoins": "Amount of $t(units.stableToken) issued is above Maximum Liquidity"
+                    }
+                }
+            }]
+        },
+        "metamask": {
+            "title": "The metamask Schema",
+            "type": "object",
+            "default": {},
+            "required": [
+                "name",
+                "buttons"
+            ],
+            "properties": {
+                "name": {
+                    "title": "The name Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "MetaMask"
+                    ]
+                },
+                "buttons": {
+                    "title": "The buttons Schema",
+                    "type": "object",
+                    "default": {},
+                    "required": [
+                        "connect",
+                        "install"
+                    ],
+                    "properties": {
+                        "connect": {
+                            "title": "The connect Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Connect $t(metamask.name)"
+                            ]
+                        },
+                        "install": {
+                            "title": "The install Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Install $t(metamask.name)"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "connect": "Connect $t(metamask.name)",
+                        "install": "Install $t(metamask.name)"
+                    }]
+                }
+            },
+            "examples": [{
+                "name": "MetaMask",
+                "buttons": {
+                    "connect": "Connect $t(metamask.name)",
+                    "install": "Install $t(metamask.name)"
+                }
+            }]
+        },
+        "pages": {
+            "title": "The pages Schema",
+            "type": "object",
+            "default": {},
+            "required": [
+                "errors",
+                "ilk",
+                "vault",
+                "earn"
+            ],
+            "properties": {
+                "errors": {
+                    "title": "The errors Schema",
+                    "type": "object",
+                    "default": {},
+                    "required": [
+                        "backToList",
+                        "changeNetwork",
+                        "notConnected",
+                        "requireConnection",
+                        "unsupportedNetwork"
+                    ],
+                    "properties": {
+                        "backToList": {
+                            "title": "The backToList Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Back to the list"
+                            ]
+                        },
+                        "changeNetwork": {
+                            "title": "The changeNetwork Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Change network"
+                            ]
+                        },
+                        "notConnected": {
+                            "title": "The notConnected Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "No Ethereum wallet is connected"
+                            ]
+                        },
+                        "requireConnection": {
+                            "title": "The requireConnection Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "$t(metamask.name) must be installed and connected in order to use this application."
+                            ]
+                        },
+                        "unsupportedNetwork": {
+                            "title": "The unsupportedNetwork Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "This network is not supported.\u003cbr /\u003eSelect another network on $t(metamask.name)."
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "backToList": "Back to the list",
+                        "changeNetwork": "Change network",
+                        "notConnected": "No Ethereum wallet is connected",
+                        "requireConnection": "$t(metamask.name) must be installed and connected in order to use this application.",
+                        "unsupportedNetwork": "This network is not supported.\u003cbr /\u003eSelect another network on $t(metamask.name)."
+                    }]
+                },
+                "ilk": {
+                    "title": "The ilk Schema",
+                    "type": "object",
+                    "default": {},
+                    "required": [
+                        "backToList",
+                        "noIlks",
+                        "openLabel",
+                        "openDesc",
+                        "openVault",
+                        "vaultCreated",
+                        "currency",
+                        "currentPrice",
+                        "unableToLoadCollateral",
+                        "errors"
+                    ],
+                    "properties": {
+                        "backToList": {
+                            "title": "The backToList Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "$t(pages.errors.backToList)"
+                            ]
+                        },
+                        "noIlks": {
+                            "title": "The noIlks Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "No ilks found"
+                            ]
+                        },
+                        "openLabel": {
+                            "title": "The openLabel Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Create new $t(terms.vault)"
+                            ]
+                        },
+                        "openDesc": {
+                            "title": "The openDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Open new $t(terms.vault)"
+                            ]
+                        },
+                        "openVault": {
+                            "title": "The openVault Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Creating new $t(terms.vault)"
+                            ]
+                        },
+                        "vaultCreated": {
+                            "title": "The vaultCreated Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "$t(terms.vault) created"
+                            ]
+                        },
+                        "currency": {
+                            "title": "The currency Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Currency"
+                            ]
+                        },
+                        "currentPrice": {
+                            "title": "The currentPrice Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Current Price per {{collateral}}"
+                            ]
+                        },
+                        "unableToLoadCollateral": {
+                            "title": "The unableToLoadCollateral Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Unable to load collateral"
+                            ]
+                        },
+                        "errors": {
+                            "title": "The errors Schema",
+                            "type": "object",
+                            "default": {},
+                            "required": [
+                                "errorWhileOpeningVault"
+                            ],
+                            "properties": {
+                                "errorWhileOpeningVault": {
+                                    "title": "The errorWhileOpeningVault Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "An error occured while opening vault. Please try again."
+                                    ]
+                                }
+                            },
+                            "examples": [{
+                                "errorWhileOpeningVault": "An error occured while opening vault. Please try again."
+                            }]
+                        }
+                    },
+                    "examples": [{
+                        "backToList": "$t(pages.errors.backToList)",
+                        "noIlks": "No ilks found",
+                        "openLabel": "Create new $t(terms.vault)",
+                        "openDesc": "Open new $t(terms.vault)",
+                        "openVault": "Creating new $t(terms.vault)",
+                        "vaultCreated": "$t(terms.vault) created",
+                        "currency": "Currency",
+                        "currentPrice": "Current Price per {{collateral}}",
+                        "unableToLoadCollateral": "Unable to load collateral",
+                        "errors": {
+                            "errorWhileOpeningVault": "An error occured while opening vault. Please try again."
+                        }
+                    }]
+                },
+                "vault": {
+                    "title": "The vault Schema",
+                    "type": "object",
+                    "default": {},
+                    "required": [
+                        "backToList",
+                        "cardDesc",
+                        "cardTitle",
+                        "listTitle",
+                        "new",
+                        "noVaults",
+                        "notFound",
+                        "title",
+                        "collateralType",
+                        "id",
+                        "lockedCollateral",
+                        "debt",
+                        "manageVault"
+                    ],
+                    "properties": {
+                        "backToList": {
+                            "title": "The backToList Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "$t(pages.errors.backToList)"
+                            ]
+                        },
+                        "cardDesc": {
+                            "title": "The cardDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Create a new $t(terms.vault) or manage your existing $t(terms.vaults)."
+                            ]
+                        },
+                        "cardTitle": {
+                            "title": "The cardTitle Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Manage $t(terms.vaults)"
+                            ]
+                        },
+                        "listTitle": {
+                            "title": "The listTitle Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Vaults"
+                            ]
+                        },
+                        "new": {
+                            "title": "The new Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "New $t(terms.vault)"
+                            ]
+                        },
+                        "noVaults": {
+                            "title": "The noVaults Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "No $t(terms.vaults) found"
+                            ]
+                        },
+                        "notFound": {
+                            "title": "The notFound Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "The specified $t(terms.vault) not found"
+                            ]
+                        },
+                        "title": {
+                            "title": "The title Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "{{ilk}} $t(terms.vault) ({{id}})"
+                            ]
+                        },
+                        "collateralType": {
+                            "title": "The collateralType Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Collateral Type"
+                            ]
+                        },
+                        "id": {
+                            "title": "The id Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Vault ID"
+                            ]
+                        },
+                        "lockedCollateral": {
+                            "title": "The lockedCollateral Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Locked Collateral"
+                            ]
+                        },
+                        "debt": {
+                            "title": "The debt Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Debt"
+                            ]
+                        },
+                        "manageVault": {
+                            "title": "The manageVault Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Manage Vault"
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "backToList": "$t(pages.errors.backToList)",
+                        "cardDesc": "Create a new $t(terms.vault) or manage your existing $t(terms.vaults).",
+                        "cardTitle": "Manage $t(terms.vaults)",
+                        "listTitle": "Vaults",
+                        "new": "New $t(terms.vault)",
+                        "noVaults": "No $t(terms.vaults) found",
+                        "notFound": "The specified $t(terms.vault) not found",
+                        "title": "{{ilk}} $t(terms.vault) ({{id}})",
+                        "collateralType": "Collateral Type",
+                        "id": "Vault ID",
+                        "lockedCollateral": "Locked Collateral",
+                        "debt": "Debt",
+                        "manageVault": "Manage Vault"
+                    }]
+                },
+                "earn": {
+                    "title": "The earn Schema",
+                    "type": "object",
+                    "default": {},
+                    "required": [
+                        "cardTitle",
+                        "cardDesc",
+                        "depositTab",
+                        "withdrawTab",
+                        "deposit",
+                        "withdraw"
+                    ],
+                    "properties": {
+                        "cardTitle": {
+                            "title": "The cardTitle Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Earn Savings"
+                            ]
+                        },
+                        "cardDesc": {
+                            "title": "The cardDesc Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Deposit your $t(units.stableToken) to $t(terms.savings) and earn savings."
+                            ]
+                        },
+                        "depositTab": {
+                            "title": "The depositTab Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Deposit"
+                            ]
+                        },
+                        "withdrawTab": {
+                            "title": "The withdrawTab Schema",
+                            "type": "string",
+                            "default": "",
+                            "examples": [
+                                "Withdraw"
+                            ]
+                        },
+                        "deposit": {
+                            "title": "The deposit Schema",
+                            "type": "object",
+                            "default": {},
+                            "required": [
+                                "title",
+                                "label",
+                                "description",
+                                "form"
+                            ],
+                            "properties": {
+                                "title": {
+                                    "title": "The title Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "Deposit Status"
+                                    ]
+                                },
+                                "label": {
+                                    "title": "The label Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "Deposit Balance"
+                                    ]
+                                },
+                                "description": {
+                                    "title": "The description Schema",
+                                    "type": "string",
+                                    "default": "",
+                                    "examples": [
+                                        "Amount of $t(units.stableToken) currently being deposited at $t(terms.savings)"
+                                    ]
+                                },
+                                "form": {
+                                    "title": "The form Schema",
+                                    "type": "object",
+                                    "default": {},
+                                    "required": [
+                                        "label",
+                                        "submit",
+                                        "processing",
+                                        "done",
+                                        "errors"
+                                    ],
+                                    "properties": {
+                                        "label": {
+                                            "title": "The label Schema",
+                                            "type": "string",
+                                            "default": "",
+                                            "examples": [
+                                                "Amount of $t(units.stableToken) to deposit"
+                                            ]
+                                        },
+                                        "submit": {
+                                            "title": "The submit Schema",
+                                            "type": "string",
+                                            "default": "",
+                                            "examples": [
+                                                "Deposit"
+                                            ]
+                                        },
+                                        "processing": {
+                                            "title": "The processing Schema",
+                                            "type": "string",
+                                            "default": "",
+                                            "examples": [
+                                                "Depositing $t(units.stableToken) to the $t(terms.savings)"
+                                            ]
+                                        },
+                                        "done": {
+                                            "title": "The done Schema",
+                                            "type": "string",
+                                            "default": "",
+                                            "examples": [
+                                                "$t(units.stableToken) successfullly deposited to the $t(terms.savings)"
+                                            ]
+                                        },
+                                        "errors": {
+                                            "title": "The errors Schema",
+                                            "type": "object",
+                                            "default": {},
+                                            "required": [
+                                                "insufficientBalance",
+                                                "invalidAmount",
+                                                "errorWhileDeposit"
+                                            ],
+                                            "properties": {
+                                                "insufficientBalance": {
+                                                    "title": "The insufficientBalance Schema",
+                                                    "type": "string",
+                                                    "default": "",
+                                                    "examples": [
+                                                        "Insufficient balance"
+                                                    ]
+                                                },
+                                                "invalidAmount": {
+                                                    "title": "The invalidAmount Schema",
+                                                    "type": "string",
+                                                    "default": "",
+                                                    "examples": [
+                                                        "Invalid deposit amount"
+                                                    ]
+                                                },
+                                                "errorWhileDeposit": {
+                                                    "title": "The errorWhileDeposit Schema",
+                                                    "type": "string",
+                                                    "default": "",
+                                                    "examples": [
+                                                        "An error occured while depositing. Please try again."
+                                                    ]
+                                                }
+                                            },
+                                            "examples": [{
+                                                "insufficientBalance": "Insufficient balance",
+                                                "invalidAmount": "Invalid deposit amount",
+                                                "errorWhileDeposit": "An error occured while depositing. Please try again."
+                                            }]
+                                        }
+                                    },
+                                    "examples": [{
+                                        "label": "Amount of $t(units.stableToken) to deposit",
+                                        "submit": "Deposit",
+                                        "processing": "Depositing $t(units.stableToken) to the $t(terms.savings)",
+                                        "done": "$t(units.stableToken) successfullly deposited to the $t(terms.savings)",
+                                        "errors": {
+                                            "insufficientBalance": "Insufficient balance",
+                                            "invalidAmount": "Invalid deposit amount",
+                                            "errorWhileDeposit": "An error occured while depositing. Please try again."
+                                        }
+                                    }]
+                                }
+                            },
+                            "examples": [{
+                                "title": "Deposit Status",
+                                "label": "Deposit Balance",
+                                "description": "Amount of $t(units.stableToken) currently being deposited at $t(terms.savings)",
+                                "form": {
+                                    "label": "Amount of $t(units.stableToken) to deposit",
+                                    "submit": "Deposit",
+                                    "processing": "Depositing $t(units.stableToken) to the $t(terms.savings)",
+                                    "done": "$t(units.stableToken) successfullly deposited to the $t(terms.savings)",
+                                    "errors": {
+                                        "insufficientBalance": "Insufficient balance",
+                                        "invalidAmount": "Invalid deposit amount",
+                                        "errorWhileDeposit": "An error occured while depositing. Please try again."
+                                    }
+                                }
+                            }]
+                        },
+                        "withdraw": {
+                            "title": "The withdraw Schema",
+                            "type": "object",
+                            "default": {},
+                            "required": [
+                                "form"
+                            ],
+                            "properties": {
+                                "form": {
+                                    "title": "The form Schema",
+                                    "type": "object",
+                                    "default": {},
+                                    "required": [
+                                        "label",
+                                        "processing",
+                                        "done",
+                                        "withdrawAll",
+                                        "submit",
+                                        "errors"
+                                    ],
+                                    "properties": {
+                                        "label": {
+                                            "title": "The label Schema",
+                                            "type": "string",
+                                            "default": "",
+                                            "examples": [
+                                                "Amount of $t(units.stableToken) to withdraw"
+                                            ]
+                                        },
+                                        "processing": {
+                                            "title": "The processing Schema",
+                                            "type": "string",
+                                            "default": "",
+                                            "examples": [
+                                                "Withdrawing $t(units.stableToken) from $t(terms.savings)"
+                                            ]
+                                        },
+                                        "done": {
+                                            "title": "The done Schema",
+                                            "type": "string",
+                                            "default": "",
+                                            "examples": [
+                                                "$t(units.stableToken) successfullly withdrawn from $t(terms.savings)"
+                                            ]
+                                        },
+                                        "withdrawAll": {
+                                            "title": "The withdrawAll Schema",
+                                            "type": "string",
+                                            "default": "",
+                                            "examples": [
+                                                "Withdraw all"
+                                            ]
+                                        },
+                                        "submit": {
+                                            "title": "The submit Schema",
+                                            "type": "string",
+                                            "default": "",
+                                            "examples": [
+                                                "Withdraw"
+                                            ]
+                                        },
+                                        "errors": {
+                                            "title": "The errors Schema",
+                                            "type": "object",
+                                            "default": {},
+                                            "required": [
+                                                "insufficientBalance",
+                                                "invalidAmount",
+                                                "errorWhileWithdraw"
+                                            ],
+                                            "properties": {
+                                                "insufficientBalance": {
+                                                    "title": "The insufficientBalance Schema",
+                                                    "type": "string",
+                                                    "default": "",
+                                                    "examples": [
+                                                        "Insufficient balance"
+                                                    ]
+                                                },
+                                                "invalidAmount": {
+                                                    "title": "The invalidAmount Schema",
+                                                    "type": "string",
+                                                    "default": "",
+                                                    "examples": [
+                                                        "Invalid withdraw amount"
+                                                    ]
+                                                },
+                                                "errorWhileWithdraw": {
+                                                    "title": "The errorWhileWithdraw Schema",
+                                                    "type": "string",
+                                                    "default": "",
+                                                    "examples": [
+                                                        "An error occured while withdrawing. Please try again"
+                                                    ]
+                                                }
+                                            },
+                                            "examples": [{
+                                                "insufficientBalance": "Insufficient balance",
+                                                "invalidAmount": "Invalid withdraw amount",
+                                                "errorWhileWithdraw": "An error occured while withdrawing. Please try again"
+                                            }]
+                                        }
+                                    },
+                                    "examples": [{
+                                        "label": "Amount of $t(units.stableToken) to withdraw",
+                                        "processing": "Withdrawing $t(units.stableToken) from $t(terms.savings)",
+                                        "done": "$t(units.stableToken) successfullly withdrawn from $t(terms.savings)",
+                                        "withdrawAll": "Withdraw all",
+                                        "submit": "Withdraw",
+                                        "errors": {
+                                            "insufficientBalance": "Insufficient balance",
+                                            "invalidAmount": "Invalid withdraw amount",
+                                            "errorWhileWithdraw": "An error occured while withdrawing. Please try again"
+                                        }
+                                    }]
+                                }
+                            },
+                            "examples": [{
+                                "form": {
+                                    "label": "Amount of $t(units.stableToken) to withdraw",
+                                    "processing": "Withdrawing $t(units.stableToken) from $t(terms.savings)",
+                                    "done": "$t(units.stableToken) successfullly withdrawn from $t(terms.savings)",
+                                    "withdrawAll": "Withdraw all",
+                                    "submit": "Withdraw",
+                                    "errors": {
+                                        "insufficientBalance": "Insufficient balance",
+                                        "invalidAmount": "Invalid withdraw amount",
+                                        "errorWhileWithdraw": "An error occured while withdrawing. Please try again"
+                                    }
+                                }
+                            }]
+                        }
+                    },
+                    "examples": [{
+                        "cardTitle": "Earn Savings",
+                        "cardDesc": "Deposit your $t(units.stableToken) to $t(terms.savings) and earn savings.",
+                        "depositTab": "Deposit",
+                        "withdrawTab": "Withdraw",
+                        "deposit": {
+                            "title": "Deposit Status",
+                            "label": "Deposit Balance",
+                            "description": "Amount of $t(units.stableToken) currently being deposited at $t(terms.savings)",
+                            "form": {
+                                "label": "Amount of $t(units.stableToken) to deposit",
+                                "submit": "Deposit",
+                                "processing": "Depositing $t(units.stableToken) to the $t(terms.savings)",
+                                "done": "$t(units.stableToken) successfullly deposited to the $t(terms.savings)",
+                                "errors": {
+                                    "insufficientBalance": "Insufficient balance",
+                                    "invalidAmount": "Invalid deposit amount",
+                                    "errorWhileDeposit": "An error occured while depositing. Please try again."
+                                }
+                            }
+                        },
+                        "withdraw": {
+                            "form": {
+                                "label": "Amount of $t(units.stableToken) to withdraw",
+                                "processing": "Withdrawing $t(units.stableToken) from $t(terms.savings)",
+                                "done": "$t(units.stableToken) successfullly withdrawn from $t(terms.savings)",
+                                "withdrawAll": "Withdraw all",
+                                "submit": "Withdraw",
+                                "errors": {
+                                    "insufficientBalance": "Insufficient balance",
+                                    "invalidAmount": "Invalid withdraw amount",
+                                    "errorWhileWithdraw": "An error occured while withdrawing. Please try again"
+                                }
+                            }
+                        }
+                    }]
+                }
+            },
+            "examples": [{
+                "errors": {
+                    "backToList": "Back to the list",
+                    "changeNetwork": "Change network",
+                    "notConnected": "No Ethereum wallet is connected",
+                    "requireConnection": "$t(metamask.name) must be installed and connected in order to use this application.",
+                    "unsupportedNetwork": "This network is not supported.\u003cbr /\u003eSelect another network on $t(metamask.name)."
+                },
+                "ilk": {
+                    "backToList": "$t(pages.errors.backToList)",
+                    "noIlks": "No ilks found",
+                    "openLabel": "Create new $t(terms.vault)",
+                    "openDesc": "Open new $t(terms.vault)",
+                    "openVault": "Creating new $t(terms.vault)",
+                    "vaultCreated": "$t(terms.vault) created",
+                    "currency": "Currency",
+                    "currentPrice": "Current Price per {{collateral}}",
+                    "unableToLoadCollateral": "Unable to load collateral",
+                    "errors": {
+                        "errorWhileOpeningVault": "An error occured while opening vault. Please try again."
+                    }
+                },
+                "vault": {
+                    "backToList": "$t(pages.errors.backToList)",
+                    "cardDesc": "Create a new $t(terms.vault) or manage your existing $t(terms.vaults).",
+                    "cardTitle": "Manage $t(terms.vaults)",
+                    "listTitle": "Vaults",
+                    "new": "New $t(terms.vault)",
+                    "noVaults": "No $t(terms.vaults) found",
+                    "notFound": "The specified $t(terms.vault) not found",
+                    "title": "{{ilk}} $t(terms.vault) ({{id}})",
+                    "collateralType": "Collateral Type",
+                    "id": "Vault ID",
+                    "lockedCollateral": "Locked Collateral",
+                    "debt": "Debt",
+                    "manageVault": "Manage Vault"
+                },
+                "earn": {
+                    "cardTitle": "Earn Savings",
+                    "cardDesc": "Deposit your $t(units.stableToken) to $t(terms.savings) and earn savings.",
+                    "depositTab": "Deposit",
+                    "withdrawTab": "Withdraw",
+                    "deposit": {
+                        "title": "Deposit Status",
+                        "label": "Deposit Balance",
+                        "description": "Amount of $t(units.stableToken) currently being deposited at $t(terms.savings)",
+                        "form": {
+                            "label": "Amount of $t(units.stableToken) to deposit",
+                            "submit": "Deposit",
+                            "processing": "Depositing $t(units.stableToken) to the $t(terms.savings)",
+                            "done": "$t(units.stableToken) successfullly deposited to the $t(terms.savings)",
+                            "errors": {
+                                "insufficientBalance": "Insufficient balance",
+                                "invalidAmount": "Invalid deposit amount",
+                                "errorWhileDeposit": "An error occured while depositing. Please try again."
+                            }
+                        }
+                    },
+                    "withdraw": {
+                        "form": {
+                            "label": "Amount of $t(units.stableToken) to withdraw",
+                            "processing": "Withdrawing $t(units.stableToken) from $t(terms.savings)",
+                            "done": "$t(units.stableToken) successfullly withdrawn from $t(terms.savings)",
+                            "withdrawAll": "Withdraw all",
+                            "submit": "Withdraw",
+                            "errors": {
+                                "insufficientBalance": "Insufficient balance",
+                                "invalidAmount": "Invalid withdraw amount",
+                                "errorWhileWithdraw": "An error occured while withdrawing. Please try again"
+                            }
+                        }
+                    }
+                }
+            }]
+        },
+        "site": {
+            "title": "The site Schema",
+            "type": "object",
+            "default": {},
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "title": {
+                    "title": "The title Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "stable-web"
+                    ]
+                }
+            },
+            "examples": [{
+                "title": "stable-web"
+            }]
+        },
+        "notFound": {
+            "title": "The notFound Schema",
+            "type": "object",
+            "default": {},
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "title": {
+                    "title": "The title Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "This page could not be found"
+                    ]
+                }
+            },
+            "examples": [{
+                "title": "This page could not be found"
+            }]
+        },
+        "error": {
+            "title": "The error Schema",
+            "type": "object",
+            "default": {},
+            "required": [
+                "title",
+                "unexpectedError",
+                "errorWhileIncreasingAllowance",
+                "errorWhileCreatingProxy"
+            ],
+            "properties": {
+                "title": {
+                    "title": "The title Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Error"
+                    ]
+                },
+                "unexpectedError": {
+                    "title": "The unexpectedError Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "An unexpected error occured. Please try again."
+                    ]
+                },
+                "errorWhileIncreasingAllowance": {
+                    "title": "The errorWhileIncreasingAllowance Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "An unexpected error occured while increasing allowance. Please try again."
+                    ]
+                },
+                "errorWhileCreatingProxy": {
+                    "title": "The errorWhileCreatingProxy Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "An unexpected error occured while creating Proxy. Please try again."
+                    ]
+                }
+            },
+            "examples": [{
+                "title": "Error",
+                "unexpectedError": "An unexpected error occured. Please try again.",
+                "errorWhileIncreasingAllowance": "An unexpected error occured while increasing allowance. Please try again.",
+                "errorWhileCreatingProxy": "An unexpected error occured while creating Proxy. Please try again."
+            }]
+        },
+        "close": {
+            "title": "The close Schema",
+            "type": "string",
+            "default": "",
+            "examples": [
+                "Close"
+            ]
+        },
+        "terms": {
+            "title": "The terms Schema",
+            "type": "object",
+            "default": {},
+            "required": [
+                "collateral",
+                "colRatio",
+                "vault",
+                "vaults",
+                "mint",
+                "burn",
+                "annualFee",
+                "debtFloor",
+                "totalIssued",
+                "maxLiquidity",
+                "liqRatio",
+                "liquidationPrice",
+                "savings"
+            ],
+            "properties": {
+                "collateral": {
+                    "title": "The collateral Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "collateral"
+                    ]
+                },
+                "colRatio": {
+                    "title": "The colRatio Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Collateralization Ratio"
+                    ]
+                },
+                "vault": {
+                    "title": "The vault Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Vault"
+                    ]
+                },
+                "vaults": {
+                    "title": "The vaults Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Vaults"
+                    ]
+                },
+                "mint": {
+                    "title": "The mint Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Mint"
+                    ]
+                },
+                "burn": {
+                    "title": "The burn Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Repay"
+                    ]
+                },
+                "annualFee": {
+                    "title": "The annualFee Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Annual Fee"
+                    ]
+                },
+                "debtFloor": {
+                    "title": "The debtFloor Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Debt Floor"
+                    ]
+                },
+                "totalIssued": {
+                    "title": "The totalIssued Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Total Issued"
+                    ]
+                },
+                "maxLiquidity": {
+                    "title": "The maxLiquidity Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Maximum Liquidity"
+                    ]
+                },
+                "liqRatio": {
+                    "title": "The liqRatio Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Liquidation Ratio"
+                    ]
+                },
+                "liquidationPrice": {
+                    "title": "The liquidationPrice Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "Liquidation Price"
+                    ]
+                },
+                "savings": {
+                    "title": "The savings Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "JSR"
+                    ]
+                }
+            },
+            "examples": [{
+                "collateral": "collateral",
+                "colRatio": "Collateralization Ratio",
+                "vault": "Vault",
+                "vaults": "Vaults",
+                "mint": "Mint",
+                "burn": "Repay",
+                "annualFee": "Annual Fee",
+                "debtFloor": "Debt Floor",
+                "totalIssued": "Total Issued",
+                "maxLiquidity": "Maximum Liquidity",
+                "liqRatio": "Liquidation Ratio",
+                "liquidationPrice": "Liquidation Price",
+                "savings": "JSR"
+            }]
+        },
+        "units": {
+            "title": "The units Schema",
+            "type": "object",
+            "default": {},
+            "required": [
+                "stableToken",
+                "jpy"
+            ],
+            "properties": {
+                "stableToken": {
+                    "title": "The stableToken Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "DAI"
+                    ]
+                },
+                "jpy": {
+                    "title": "The jpy Schema",
+                    "type": "string",
+                    "default": "",
+                    "examples": [
+                        "JPY"
+                    ]
+                }
+            },
+            "examples": [{
+                "stableToken": "DAI",
+                "jpy": "JPY"
+            }]
+        }
+    },
+    "examples": [{
+        "cards": {
+            "ilk": {
+                "annualFee": "Annual Fee",
+                "annualFeeDesc": "The Maker Protocol collects a Stability Fee on Dai that is generated from Maker Vaults. It is a variable-rate fee that changes when Maker’s governing body votes on proposals put forth by Risk Teams.",
+                "currentPrice": "Current Price per {{collateral}}",
+                "currentPriceDesc": "Current price of collateral {{collateral}} in DAI",
+                "debtFloor": "Debt Floor",
+                "debtFloorDesc": "The minimum amount of DAI that can be minted for this type of Vault. This value is also called the \"Dust Limit\".",
+                "liqRatio": "Liquidation Ratio",
+                "liqRatioDesc": "If the $t(terms.vault) reaches below the minimum collateralization level it is considered undercollateralized and is subject to liquidation. Your collateral will then be partially auctioned off to cover outstanding debt and liquidation fee.",
+                "maxLiquidity": "Maximum Liquidity",
+                "maxLiquidityDesc": "The Maximum Liquidity specified, the amount of DAI that the users can be issued for this type of Vault.",
+                "title": "{{ilk}} $t(terms.collateral) status",
+                "totalIssue": "Total Issued",
+                "totalIssueDesc": "Total amount of DAI issued by collateral"
+            },
+            "vault": {
+                "colRatio": "$t(terms.colRatio)",
+                "colRatioDesc": "The collateralization ratio is the ratio between the value of the tokens given as collateral and the value of the Dai debt outstanding, and defined as a percentage.",
+                "debt": "Debt",
+                "debtDesc": "Total amount of debt that this $t(terms.vault) owes",
+                "freeCollateral": "Free Collateral",
+                "freeCollateralDesc": "Amount of tokens that is currently being locked in Vault but not used as collateral",
+                "lockedCollateral": "Locked Collateral",
+                "lockedCollateralDesc": "Total amount of collateral that is locked in this vault",
+                "liquidationPrice": "Liquidation Price",
+                "liquidationPriceDesc": "If the price of {{collateral}} falls any further, this vault will be liquidated.",
+                "title": "Vault status"
+            },
+            "wallet": {
+                "title": "Wallet status",
+                "balance": "{{gem}} Balance",
+                "description": "Amount of token that wallet currently holds"
+            },
+            "savings": {
+                "title": "Saving Rate",
+                "annualSavingRate": "Annual saving rate",
+                "annualSavingRateDesc": "Annual saving rate of the DSR"
+            }
+        },
+        "forms": {
+            "createProxy": "Creating proxy",
+            "increaseAllowance": "Granting the Proxy access to your {{token}}",
+            "done": "Success",
+            "burn": {
+                "redeemAmount": "Amount of $t(units.stableToken) to repay",
+                "freeAmount": "Amount of {{gem}} to redeem",
+                "repayAll": "Repay all",
+                "processing": "Repaying $t(units.stableToken)",
+                "done": "Debt successfully repayed",
+                "error": {
+                    "errorWhileRepaying": "An error occured while trying to repay debt. Please try again.",
+                    "insufficientBalance": "Insufficient amount of $t(units.stableToken).",
+                    "collateralTooLow": "The vault's collateralization ratio is too low.",
+                    "debtTooLow": "Amount of bebt the vault owes is below the debt floor.",
+                    "invalidCollateralFreeAmount": "The amount of collateral trying to free exceeds the locked collateral amount.",
+                    "invalidRepayAmount": "The amount of $t(units.stableToken) being repayed is exceeding the debt."
+                }
+            },
+            "mint": {
+                "stableTokenAmount": "Amount of $t(units.stableToken) to mint",
+                "lockAmount": "Amount of {{gem}} to lock",
+                "processing": "Minting $t(units.stableToken)",
+                "done": "$t(units.stableToken) successfully minted",
+                "error": {
+                    "errorWhileMinting": "An error occured while trying to mint $t(units.stableToken). Please try again.",
+                    "insufficientBalance": "Insufficient balance.",
+                    "collateralTooLow": "Collateralization ratio is too low.",
+                    "debtTooLow": "Amount of $t(units.stableToken) being minted is too low.",
+                    "issuingTooMuchCoins": "Amount of $t(units.stableToken) issued is above Maximum Liquidity"
+                }
+            }
+        },
+        "metamask": {
+            "name": "MetaMask",
+            "buttons": {
+                "connect": "Connect $t(metamask.name)",
+                "install": "Install $t(metamask.name)"
+            }
+        },
+        "pages": {
+            "errors": {
+                "backToList": "Back to the list",
+                "changeNetwork": "Change network",
+                "notConnected": "No Ethereum wallet is connected",
+                "requireConnection": "$t(metamask.name) must be installed and connected in order to use this application.",
+                "unsupportedNetwork": "This network is not supported.\u003cbr /\u003eSelect another network on $t(metamask.name)."
+            },
+            "ilk": {
+                "backToList": "$t(pages.errors.backToList)",
+                "noIlks": "No ilks found",
+                "openLabel": "Create new $t(terms.vault)",
+                "openDesc": "Open new $t(terms.vault)",
+                "openVault": "Creating new $t(terms.vault)",
+                "vaultCreated": "$t(terms.vault) created",
+                "currency": "Currency",
+                "currentPrice": "Current Price per {{collateral}}",
+                "unableToLoadCollateral": "Unable to load collateral",
+                "errors": {
+                    "errorWhileOpeningVault": "An error occured while opening vault. Please try again."
+                }
+            },
+            "vault": {
+                "backToList": "$t(pages.errors.backToList)",
+                "cardDesc": "Create a new $t(terms.vault) or manage your existing $t(terms.vaults).",
+                "cardTitle": "Manage $t(terms.vaults)",
+                "listTitle": "Vaults",
+                "new": "New $t(terms.vault)",
+                "noVaults": "No $t(terms.vaults) found",
+                "notFound": "The specified $t(terms.vault) not found",
+                "title": "{{ilk}} $t(terms.vault) ({{id}})",
+                "collateralType": "Collateral Type",
+                "id": "Vault ID",
+                "lockedCollateral": "Locked Collateral",
+                "debt": "Debt",
+                "manageVault": "Manage Vault"
+            },
+            "earn": {
+                "cardTitle": "Earn Savings",
+                "cardDesc": "Deposit your $t(units.stableToken) to $t(terms.savings) and earn savings.",
+                "depositTab": "Deposit",
+                "withdrawTab": "Withdraw",
+                "deposit": {
+                    "title": "Deposit Status",
+                    "label": "Deposit Balance",
+                    "description": "Amount of $t(units.stableToken) currently being deposited at $t(terms.savings)",
+                    "form": {
+                        "label": "Amount of $t(units.stableToken) to deposit",
+                        "submit": "Deposit",
+                        "processing": "Depositing $t(units.stableToken) to the $t(terms.savings)",
+                        "done": "$t(units.stableToken) successfullly deposited to the $t(terms.savings)",
+                        "errors": {
+                            "insufficientBalance": "Insufficient balance",
+                            "invalidAmount": "Invalid deposit amount",
+                            "errorWhileDeposit": "An error occured while depositing. Please try again."
+                        }
+                    }
+                },
+                "withdraw": {
+                    "form": {
+                        "label": "Amount of $t(units.stableToken) to withdraw",
+                        "processing": "Withdrawing $t(units.stableToken) from $t(terms.savings)",
+                        "done": "$t(units.stableToken) successfullly withdrawn from $t(terms.savings)",
+                        "withdrawAll": "Withdraw all",
+                        "submit": "Withdraw",
+                        "errors": {
+                            "insufficientBalance": "Insufficient balance",
+                            "invalidAmount": "Invalid withdraw amount",
+                            "errorWhileWithdraw": "An error occured while withdrawing. Please try again"
+                        }
+                    }
+                }
+            }
+        },
+        "site": {
+            "title": "stable-web"
+        },
+        "notFound": {
+            "title": "This page could not be found"
+        },
+        "error": {
+            "title": "Error",
+            "unexpectedError": "An unexpected error occured. Please try again.",
+            "errorWhileIncreasingAllowance": "An unexpected error occured while increasing allowance. Please try again.",
+            "errorWhileCreatingProxy": "An unexpected error occured while creating Proxy. Please try again."
+        },
+        "close": "Close",
+        "terms": {
+            "collateral": "collateral",
+            "colRatio": "Collateralization Ratio",
+            "vault": "Vault",
+            "vaults": "Vaults",
+            "mint": "Mint",
+            "burn": "Repay",
+            "annualFee": "Annual Fee",
+            "debtFloor": "Debt Floor",
+            "totalIssued": "Total Issued",
+            "maxLiquidity": "Maximum Liquidity",
+            "liqRatio": "Liquidation Ratio",
+            "liquidationPrice": "Liquidation Price",
+            "savings": "JSR"
+        },
+        "units": {
+            "stableToken": "DAI",
+            "jpy": "JPY"
+        }
+    }]
+}
