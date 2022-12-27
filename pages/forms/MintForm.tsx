@@ -62,7 +62,7 @@ const MintForm: FC<MintFormProps> = ({
   const { openDialog } = useErrorDialog();
 
   const [dialogText, setDialogText] = useState('');
-  const [totalSteps, setTotalSteps] = useState(0);
+  const [totalSteps, setTotalSteps] = useState(1);
   const [currentStep, setCurrentStep] = useState(1);
 
   const collateralAmount = useMemo(
@@ -112,7 +112,7 @@ const MintForm: FC<MintFormProps> = ({
       }
 
       if (!allowanceToIncrease.isNegative() && !allowanceToIncrease.isZero()) {
-        setDialogText(t('increaseAllowance')!);
+        setDialogText(t('increaseAllowance', { token: ilkInfo.symbol })!);
         await increaseAllowance(proxy, collateralAmount);
         setCurrentStep((prev) => prev + 1);
       }
@@ -136,6 +136,7 @@ const MintForm: FC<MintFormProps> = ({
     onDoneMessage,
     t,
     ensureProxy,
+    ilkInfo.symbol,
     increaseAllowance,
     openDialog,
     onErrorMessage,

@@ -103,20 +103,27 @@ const Controller: FC<ControllerProps> = ({
     [vault, cdp.id],
   );
 
-  const ensureProxy = useCallback(() => proxyRegistry.ensureDSProxy().then((v) => v.address), [proxyRegistry]);
+  const ensureProxy = useCallback(
+    () =>
+      proxyRegistry.ensureDSProxy().then((v) => {
+        update();
+        return v.address;
+      }),
+    [proxyRegistry, update],
+  );
 
   const increateTokenAllowance = useCallback(
-    async (who: string, n: FixedNumber) => {
-      await vault.ilkInfo.gem.ensureAllowance(who, n, 5);
+    async (who: string, amount: FixedNumber) => {
+      await vault.ilkInfo.gem.ensureAllowance(who, amount, 2).then(() => update());
     },
-    [vault.ilkInfo.gem],
+    [update, vault.ilkInfo.gem],
   );
 
   const increaseDaiAllowance = useCallback(
-    async (who: string, n: FixedNumber) => {
-      await dai.ensureAllowance(who, n, 5);
+    async (who: string, amount: FixedNumber) => {
+      await dai.ensureAllowance(who, amount, 2).then(() => update());
     },
-    [dai],
+    [dai, update],
   );
 
   const content = useMemo(() => {
@@ -239,7 +246,7 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
         dai,
       };
     },
-    { revalidateIfStale: false, revalidateOnFocus: false },
+    { revalidateOnFocus: false },
   );
   if (!data || isLoading) {
     return (

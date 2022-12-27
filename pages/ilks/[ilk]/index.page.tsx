@@ -34,6 +34,7 @@ type OpenVaultProps = {
   proxyRegistry: ProxyRegistryHelper;
   proxyAddress: string | undefined;
   address: string;
+  update: () => void;
 };
 
 const OpenVault: FC<OpenVaultProps> = ({
@@ -46,6 +47,7 @@ const OpenVault: FC<OpenVaultProps> = ({
   allowance,
   proxyAddress,
   proxyRegistry,
+  update,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
   const router = useRouter();
@@ -65,12 +67,19 @@ const OpenVault: FC<OpenVaultProps> = ({
   };
 
   const increaseAllowance = useCallback(
-    async (who: string, n: FixedNumber) => {
-      await ilkInfo.gem.ensureAllowance(who, n, 5);
+    async (who: string, amount: FixedNumber) => {
+      await ilkInfo.gem.ensureAllowance(who, amount, 2).then(() => update());
     },
-    [ilkInfo.gem],
+    [ilkInfo.gem, update],
   );
-  const ensureProxy = useCallback(() => proxyRegistry.ensureDSProxy().then((v) => v.address), [proxyRegistry]);
+  const ensureProxy = useCallback(
+    () =>
+      proxyRegistry.ensureDSProxy().then((v) => {
+        update();
+        return v.address;
+      }),
+    [proxyRegistry, update],
+  );
 
   return (
     <MintFormController
@@ -101,7 +110,7 @@ type ContentProps = {
 
 const Content: FC<ContentProps> = ({ provider, ilkType }) => {
   const chainLog = useChainLog(provider);
-  const { data, isLoading, error } = useSWR('getData', async () => {
+  const { data, isLoading, error, mutate } = useSWR('getData', async () => {
     const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, ilkType);
     const proxyRegistry = await chainLog.proxyRegistry();
     const proxy = await proxyRegistry.getDSProxy();
@@ -149,6 +158,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
         allowance={allowance}
         proxyRegistry={proxyRegistry}
         proxyAddress={proxyAddress}
+        update={() => mutate()}
       />
     </Stack>
   );

@@ -67,6 +67,8 @@ const BurnForm: FC<BurnFormProps> = ({
   onDialogClose,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms' });
+  const { t: units } = useTranslation('common', { keyPrefix: 'units' });
+
   const { openDialog } = useErrorDialog();
 
   const daiAmount = useMemo(() => toFixedNumberOrUndefined(daiText, UnitFormats.WAD), [daiText]);
@@ -74,7 +76,7 @@ const BurnForm: FC<BurnFormProps> = ({
   const [burning, setBurning] = useState(false);
   const [burnFormState, setBurnFormState] = useState<BurnFormState>('neutral');
   const [dialogText, setDialogText] = useState('');
-  const [totalSteps, setTotalSteps] = useState(0);
+  const [totalSteps, setTotalSteps] = useState(1);
   const [currentStep, setCurrentStep] = useState(1);
 
   const handleDaiChange: ChangeEventHandler<HTMLInputElement> = useCallback(
@@ -140,7 +142,7 @@ const BurnForm: FC<BurnFormProps> = ({
         proxy = await ensureProxy();
       }
       if (!allowanceToIncrease.isNegative() && !allowanceToIncrease.isZero()) {
-        setDialogText(t('increaseAllowance')!);
+        setDialogText(t('increaseAllowance', { token: units('stableToken') })!);
         await increaseAllowance(proxy, daiAmount);
         setCurrentStep((prev) => prev + 1);
       }
@@ -180,6 +182,7 @@ const BurnForm: FC<BurnFormProps> = ({
     openDialog,
     proxyAddress,
     t,
+    units,
   ]);
 
   const isInvalidRepayAmount = useMemo(

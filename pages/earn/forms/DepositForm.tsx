@@ -34,12 +34,12 @@ const DepositForm: FC<DepositFormProps> = ({
   onDialogClose,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn.deposit.form' });
-
+  const { t: units } = useTranslation('common', { keyPrefix: 'units' });
   const { t: forms } = useTranslation('common', { keyPrefix: 'forms' });
   const { t: error } = useTranslation('common', { keyPrefix: 'pages.earn.deposit.form.errors' });
 
   const [dialogText, setDialogText] = useState('');
-  const [totalSteps, setTotalSteps] = useState(0);
+  const [totalSteps, setTotalSteps] = useState(1);
   const [currentStep, setCurrentStep] = useState(1);
   const [amountText, setAmountText] = useState('');
 
@@ -81,7 +81,7 @@ const DepositForm: FC<DepositFormProps> = ({
         proxy = await ensureProxy();
       }
       if (!allowanceToIncrease.isNegative() && !allowanceToIncrease.isZero()) {
-        setDialogText(forms('increaseAllowance')!);
+        setDialogText(forms('increaseAllowance', { token: units('stableToken') })!);
         await increaseAllowance(proxy, amount);
         setCurrentStep((prev) => prev + 1);
       }
@@ -95,7 +95,7 @@ const DepositForm: FC<DepositFormProps> = ({
       setDepositing(false);
       openDialog(error('errorWhileDeposit'), err);
     });
-  }, [amount, allowance, proxyAddress, t, onDeposit, forms, ensureProxy, increaseAllowance, openDialog, error]);
+  }, [amount, allowance, proxyAddress, t, onDeposit, forms, ensureProxy, units, increaseAllowance, openDialog, error]);
 
   const formErrors: DepositError[] = useMemo(() => {
     if (amount) {
