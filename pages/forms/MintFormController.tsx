@@ -29,6 +29,7 @@ type MintFormControllerProps = {
   buttonContent: string;
   onMintDialog: string;
   onErrorMessage: string;
+  onDoneMessage: string;
   selectedTab?: TabValue;
   onSelectTab?: (_: unknown, value: TabValue) => void;
   onDialogClose: () => void;
@@ -53,6 +54,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
   mint,
   address,
   buttonContent,
+  onDoneMessage,
 }) => {
   const [amountText, setAmountText] = useState('');
   const [daiAmountText, setDaiAmountText] = useState('');
@@ -140,6 +142,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
         }}
         onMintDialog={onMintDialog}
         onErrorMessage={onErrorMessage}
+        onDoneMessage={onDoneMessage}
       />
     ),
     [
@@ -160,6 +163,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
       ensureProxy,
       onMintDialog,
       onErrorMessage,
+      onDoneMessage,
       onDialogClose,
     ],
   );

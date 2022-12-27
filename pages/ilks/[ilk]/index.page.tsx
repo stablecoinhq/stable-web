@@ -87,6 +87,7 @@ const OpenVault: FC<OpenVaultProps> = ({
       onMintDialog={t('openVault')}
       address={address}
       buttonContent={t('openLabel')}
+      onDoneMessage={t('vaultCreated')}
       onErrorMessage={t('errors.errorWhileOpeningVault')}
       onDialogClose={() => router.push('/vaults')}
     />

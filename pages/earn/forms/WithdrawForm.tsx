@@ -34,8 +34,6 @@ type WithdrawState = 'withdraw' | 'withdrawAll' | 'neutral';
 
 const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onWithdraw, onWithdrawAll, onDialogClose }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn.withdraw.form' });
-  const { t: forms } = useTranslation('common', { keyPrefix: 'forms' });
-  const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.earn.errors' });
   const { t: error } = useTranslation('common', { keyPrefix: 'pages.earn.withdraw.form.errors' });
   const { openDialog } = useErrorDialog();
   const [dialogText, setDialogText] = useState('');
@@ -87,13 +85,13 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
           break;
       }
       setCurrentStep((prev) => prev + 1);
-      setDialogText(forms('done')!);
+      setDialogText(t('done')!);
     };
     await f().catch((err) => {
       setWithdrawing(false);
-      openDialog(errorMessage('errorWhileWithdraw'), err);
+      openDialog(error('errorWhileWithdraw'), err);
     });
-  }, [t, withdrawState, forms, onWithdrawAll, amount, onWithdraw, openDialog, errorMessage]);
+  }, [t, withdrawState, onWithdrawAll, amount, onWithdraw, openDialog, error]);
 
   const formErrors: WithdrawError[] = useMemo(() => {
     if (amount) {

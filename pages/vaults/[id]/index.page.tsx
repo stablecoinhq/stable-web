@@ -138,6 +138,7 @@ const Controller: FC<ControllerProps> = ({
             proxyAddress={proxyAddress}
             increaseAllowance={increateTokenAllowance}
             onMintDialog={common('forms.mint.processing')}
+            onDoneMessage={common('forms.mint.done')}
             ensureProxy={ensureProxy}
             onErrorMessage={common('forms.mint.error.errorWhileMinting')}
             onDialogClose={update}

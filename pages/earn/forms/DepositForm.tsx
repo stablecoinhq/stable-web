@@ -37,7 +37,6 @@ const DepositForm: FC<DepositFormProps> = ({
 
   const { t: forms } = useTranslation('common', { keyPrefix: 'forms' });
   const { t: error } = useTranslation('common', { keyPrefix: 'pages.earn.deposit.form.errors' });
-  const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.earn.errors' });
 
   const [dialogText, setDialogText] = useState('');
   const [totalSteps, setTotalSteps] = useState(0);
@@ -90,13 +89,13 @@ const DepositForm: FC<DepositFormProps> = ({
       setDialogText(t('processing')!);
       await onDeposit(amount);
       setCurrentStep((prev) => prev + 1);
-      setDialogText(forms('done')!);
+      setDialogText(t('done')!);
     };
     await f().catch((err) => {
       setDepositing(false);
-      openDialog(errorMessage('errorWhileDeposit'), err);
+      openDialog(error('errorWhileDeposit'), err);
     });
-  }, [amount, allowance, proxyAddress, t, onDeposit, forms, ensureProxy, increaseAllowance, openDialog, errorMessage]);
+  }, [amount, allowance, proxyAddress, t, onDeposit, forms, ensureProxy, increaseAllowance, openDialog, error]);
 
   const formErrors: DepositError[] = useMemo(() => {
     if (amount) {

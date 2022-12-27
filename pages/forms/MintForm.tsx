@@ -27,6 +27,7 @@ export type MintFormProps = {
   onDaiAmountChange: (s: string) => void;
   allowance: FixedNumber;
   onMintDialog: string;
+  onDoneMessage: string;
   onErrorMessage: string;
   proxyAddress: string | undefined;
   increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
@@ -54,6 +55,7 @@ const MintForm: FC<MintFormProps> = ({
   increaseAllowance,
   ensureProxy,
   onMintDialog,
+  onDoneMessage,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
@@ -118,7 +120,7 @@ const MintForm: FC<MintFormProps> = ({
       setDialogText(onMintDialog);
       await onMint(collateralAmount, daiAmount);
       setCurrentStep((prev) => prev + 1);
-      setDialogText(t('done')!);
+      setDialogText(onDoneMessage);
     };
     await f().catch((err) => {
       setMinting(false);
@@ -131,6 +133,7 @@ const MintForm: FC<MintFormProps> = ({
     proxyAddress,
     onMintDialog,
     onMint,
+    onDoneMessage,
     t,
     ensureProxy,
     increaseAllowance,

@@ -42,13 +42,15 @@
   "forms": {
     "createProxy": "Creating proxy",
     "increaseAllowance": "Increasing allowance for Proxy",
-    "done":"Success",
+    "done": "Success",
     "burn": {
-      "redeemAmount": "Amount of $t(units.stableToken) to redeem",
-      "freeAmount": "Amount of {{gem}} to free",
+      "redeemAmount": "Amount of $t(units.stableToken) to repay",
+      "freeAmount": "Amount of {{gem}} to redeem",
       "repayAll": "Repay all",
-      "processing": "Repaying $t{units.stableToken)",
+      "processing": "Repaying $t(units.stableToken)",
+      "done": "Debt successfully repayed",
       "error": {
+        "errorWhileRepaying": "An error occured while trying to repay debt. Please try again.",
         "insufficientBalance": "Insufficient amount of $t(units.stableToken).",
         "collateralTooLow": "The vault's collateralization ratio is too low.",
         "debtTooLow": "Amount of bebt the vault owes is below the debt floor.",
@@ -59,8 +61,10 @@
     "mint": {
       "stableTokenAmount": "Amount of $t(units.stableToken) to mint",
       "lockAmount": "Amount of {{gem}} to lock",
-      "processing": "Minting ${units.stableToken)",
+      "processing": "Minting $t(units.stableToken)",
+      "done": "$t(units.stableToken) successfully minted",
       "error": {
+        "errorWhileMinting": "An error occured while trying to mint $t(units.stableToken). Please try again.",
         "insufficientBalance": "Insufficient balance.",
         "collateralTooLow": "Collateralization ratio is too low.",
         "debtTooLow": "Amount of $t(units.stableToken) being minted is too low.",
@@ -89,6 +93,7 @@
       "openLabel": "Create new $t(terms.vault_one)",
       "openDesc": "Open new $t(terms.vault_one)",
       "openVault": "New $t(terms.vault_one) created",
+      "vaultCreated": "$t(terms.vault_one) created",
       "currency": "Currency",
       "currentPrice": "Current Price per {{collateral}}",
       "unableToLoadCollateral": "Unable to load collateral",
@@ -109,38 +114,42 @@
       "id": "Vault ID",
       "lockedCollateral": "Locked Collateral",
       "debt": "Debt",
-      "manageVault": "Manage Vault",
-      "errors": {
-        "errorWhileMinting": "An error occured while trying to mint $t(units.stableToken). Please try again.",
-        "errorWhileRepaying": "An error occured while trying to repay debt. Please try again."
-      }
+      "manageVault": "Manage Vault"
     },
     "earn": {
       "cardTitle": "Earn Savings",
-      "cardDesc": "Deposit your $t(terms.stableToken) to $t(terms.savings) and earn savings.",
+      "cardDesc": "Deposit your $t(units.stableToken) to $t(terms.savings) and earn savings.",
       "depositTab": "Deposit",
       "withdrawTab": "Withdraw",
       "deposit": {
         "title": "Deposit Status",
         "label": "Deposit Balance",
-        "description": "Amount of $t(terms.stableToken) currently being deposited at $t(terms.savings)",
+        "description": "Amount of $t(units.stableToken) currently being deposited at $t(terms.savings)",
         "form": {
-          "label": "Amount of $t(terms.stableToken) to deposit",
+          "label": "Amount of $t(units.stableToken) to deposit",
           "submit": "Deposit",
-          "processing": "Depositing $t(units.stableToken) to $t(terms.savings)"
+          "processing": "Depositing $t(units.stableToken) to $t(terms.savings)",
+          "done": "$t(units.stableToken) successfullly deposited to $t(terms.savings)",
+          "errors": {
+            "insufficientBalance": "Insufficient balance",
+            "invalidAmount": "Invalid deposit amount",
+            "errorWhileDeposit": "An error occured while depositing. Please try again."
+          }
         }
       },
       "withdraw": {
         "form": {
+          "label": "Amount of $t(units.stableToken) to withdraw",
           "processing": "Withdrawing $t(units.stableToken) from $t(terms.savings)",
-          "label": "Amount of $t(terms.stableToken) to withdraw",
+          "done": "$t(units.stableToken) successfullly withdrawn from $t(terms.savings)",
           "withdrawAll": "Withdraw all",
-          "submit": "Withdraw"
+          "submit": "Withdraw",
+          "errors": {
+            "insufficientBalance": "Insufficient balance",
+            "invalidAmount": "Invalid withdraw amount",
+            "errorWhileWithdraw": "An error occured while withdrawing. Please try again"
+          }
         }
-      },
-      "errors": {
-        "errorWhileDeposit": "An unexpected error occured. Please try again.",
-        "errorWhileWithdraw": "An unexpected error occured. Please try again."
       }
     }
   },
@@ -164,7 +173,7 @@
     "vault_one": "Vault",
     "vault_other": "Vaults",
     "mint": "Mint",
-    "burn": "Burn",
+    "burn": "Repay",
     "annualFee": "Annual Fee",
     "debtFloor": "Debt Floor",
     "totalIssued": "Total Issued",

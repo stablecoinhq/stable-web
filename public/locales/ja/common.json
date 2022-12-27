@@ -49,6 +49,7 @@
       "submit": "返済",
       "repayAll": "全額返済",
       "processing": "負債を返済します",
+      "done": "返済が完了しました",
       "error": {
         "insufficientBalance": "残高不足です",
         "errorWhileRepaying": "返済時に問題が発生しました。$t(terms.retry)",
@@ -63,6 +64,7 @@
       "lockAmount": "担保に入れる{{gem}}の数量",
       "submit": "発行する",
       "processing": "$t(units.stableToken)を発行します",
+      "done": "$t(units.stableToken)の発行が完了しました",
       "error": {
         "errorWhileMinting": "$t(units.stableToken)発行時に問題が発生しました。$t(terms.retry)",
         "insufficientBalance": "残高不足です",
@@ -92,6 +94,7 @@
       "noIlks": "担保が見つかりませんでした",
       "openLabel": "$t(terms.vault_one)を新規作成",
       "openVault": "$t(terms.vault_one)を新規作成します",
+      "vaultCreated": "$t(terms.vault_one)が作成されました",
       "openDesc": "新規作成",
       "currency": "通貨",
       "currentPrice": "1 {{collateral}}あたりの価格",
@@ -128,7 +131,9 @@
           "label": "預け入れる$t(units.stableToken)の数量",
           "submit": "預け入れる",
           "processing": "$t(units.stableToken)を$t(terms.savings)に預け入れます",
+          "done": "預け入れが完了しました",
           "errors": {
+            "errorWhileDeposit": "$t(units.stableToken)を預け入れる際に問題が発生しました。$t(terms.retry)",
             "insufficientBalance": "残高不足です",
             "invalidAmount": "預け入れ額が無効な値です"
           }
@@ -138,17 +143,15 @@
         "form": {
           "label": "引き出す$t(units.stableToken)の数量",
           "processing": "$t(terms.savings)から$t(units.stableToken)を引き出します",
+          "done": "引き出しが完了しました",
           "withdrawAll": "預金から全額引き出す",
           "submit": "引き出す",
           "errors": {
             "insufficientBalance": "預金残高が不足しています",
-            "invalidAmount": "預け入れ額が無効な値です"
+            "invalidAmount": "預け入れ額が無効な値です",
+            "errorWhileWithdraw": "$t(units.stableToken)を引き出す際に問題が発生しました。$t(terms.retry)"
           }
         }
-      },
-      "errors": {
-        "errorWhileDeposit": "$t(units.stableToken)を預け入れる際に問題が発生しました。$t(terms.retry)",
-        "errorWhileWithdraw": "$t(units.stableToken)を引き出す際に問題が発生しました。$t(terms.retry)"
       }
     }
   },

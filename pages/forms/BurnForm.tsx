@@ -158,9 +158,8 @@ const BurnForm: FC<BurnFormProps> = ({
         case 'neutral':
           break;
       }
-      setBurnFormState('neutral');
       setCurrentStep((prev) => prev + 1);
-      setDialogText(t('done')!);
+      setDialogText(t('burn.done')!);
     };
     await f().catch((err) => {
       setBurning(false);
@@ -227,6 +226,7 @@ const BurnForm: FC<BurnFormProps> = ({
         totalStep={totalSteps}
         currentStep={currentStep}
         onClose={() => {
+          setBurnFormState('neutral');
           setBurning(false);
           onDialogClose();
         }}
