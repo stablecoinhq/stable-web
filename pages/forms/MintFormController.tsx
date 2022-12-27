@@ -31,7 +31,7 @@ type MintFormControllerProps = {
   onErrorMessage: string;
   selectedTab?: TabValue;
   onSelectTab?: (_: unknown, value: TabValue) => void;
-  onCloseDialog?: () => void;
+  onDialogClose: () => void;
   mint: (colAmount: FixedNumber, daiAmount: FixedNumber) => Promise<void>;
 };
 
@@ -48,7 +48,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
   urnStatus,
   selectedTab,
   onSelectTab,
-  onCloseDialog,
+  onDialogClose,
   onErrorMessage,
   mint,
   address,
@@ -65,15 +65,6 @@ const MintFormController: FC<MintFormControllerProps> = ({
   const onDaiAmountChange = useCallback(
     (value: string) => setDaiAmountText(cutDecimals(pickNumbers(value), UnitFormats.WAD.decimals)),
     [],
-  );
-
-  const onMint = useCallback(
-    (colAmount: FixedNumber, daiAmount: FixedNumber) =>
-      mint(colAmount, daiAmount).then(() => {
-        setAmountText('');
-        setDaiAmountText('');
-      }),
-    [mint],
   );
 
   const current: CurrentVaultStatus | undefined = useMemo(() => {
@@ -130,7 +121,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
         ilkInfo={ilkInfo}
         ilkStatus={ilkStatus}
         buttonContent={buttonContent}
-        onMint={onMint}
+        onMint={mint}
         balance={balance}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
@@ -142,7 +133,11 @@ const MintFormController: FC<MintFormControllerProps> = ({
         proxyAddress={proxyAddress}
         increaseAllowance={increaseAllowance}
         ensureProxy={ensureProxy}
-        onCloseDialog={onCloseDialog}
+        onDialogClose={() => {
+          onDialogClose();
+          setAmountText('');
+          setDaiAmountText('');
+        }}
         onMintDialog={onMintDialog}
         onErrorMessage={onErrorMessage}
       />
@@ -151,7 +146,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
       ilkInfo,
       ilkStatus,
       buttonContent,
-      onMint,
+      mint,
       balance,
       urnStatus.lockedBalance,
       urnStatus.debt,
@@ -163,9 +158,9 @@ const MintFormController: FC<MintFormControllerProps> = ({
       proxyAddress,
       increaseAllowance,
       ensureProxy,
-      onCloseDialog,
       onMintDialog,
       onErrorMessage,
+      onDialogClose,
     ],
   );
   return (

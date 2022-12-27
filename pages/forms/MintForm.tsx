@@ -22,7 +22,7 @@ export type MintFormProps = {
   lockedBalance: FixedNumber;
   debt: FixedNumber;
   onMint: (colAmount: FixedNumber, daiAmount: FixedNumber) => Promise<void>;
-  onCloseDialog?: () => void;
+  onDialogClose?: () => void;
   onAmountChange: (s: string) => void;
   onDaiAmountChange: (s: string) => void;
   allowance: FixedNumber;
@@ -45,7 +45,7 @@ const MintForm: FC<MintFormProps> = ({
   debt,
   onAmountChange,
   onDaiAmountChange,
-  onCloseDialog,
+  onDialogClose: onCloseDialog,
   amountText,
   daiAmountText,
   onErrorMessage,

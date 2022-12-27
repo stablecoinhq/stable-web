@@ -18,6 +18,7 @@ export type DepositFormProps = {
   increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
   ensureProxy: () => Promise<string>;
   allowance: FixedNumber;
+  onDialogClose: () => void;
 };
 
 const DepositForm: FC<DepositFormProps> = ({
@@ -28,6 +29,7 @@ const DepositForm: FC<DepositFormProps> = ({
   increaseAllowance,
   ensureProxy,
   allowance,
+  onDialogClose,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn.deposit.form' });
 
@@ -89,7 +91,6 @@ const DepositForm: FC<DepositFormProps> = ({
       await onDeposit(amount);
       setCurrentStep((prev) => prev + 1);
       setDialogText(forms('done')!);
-      setAmountText('');
     };
     await f().catch((err) => {
       setDepositing(false);
@@ -117,7 +118,11 @@ const DepositForm: FC<DepositFormProps> = ({
         text={dialogText}
         totalStep={totalSteps}
         currentStep={currentStep}
-        onClose={() => setDepositing(false)}
+        onClose={() => {
+          setAmountText('');
+          setDepositing(false);
+          onDialogClose();
+        }}
       />
       <Grid container padding={2} spacing={2}>
         <Grid item xs={12} lg={6}>

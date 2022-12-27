@@ -92,18 +92,15 @@ const Controller: FC<ControllerProps> = ({
   );
 
   const mint: MintFormProps['onMint'] = useCallback(
-    (collateralAmount, daiAmount) => vault.mint(cdp.id, collateralAmount, daiAmount).then(() => update()),
-    [vault, cdp.id, update],
+    (collateralAmount, daiAmount) => vault.mint(cdp.id, collateralAmount, daiAmount),
+    [vault, cdp.id],
   );
 
-  const burn: BurnFormProps['onBurn'] = useCallback(
-    (daiAmount, col) => vault.burn(cdp.id, col, daiAmount).then(() => update()),
-    [vault, cdp.id, update],
-  );
+  const burn: BurnFormProps['onBurn'] = useCallback((daiAmount, col) => vault.burn(cdp.id, col, daiAmount), [vault, cdp.id]);
 
   const burnAll: BurnFormProps['onBurnAll'] = useCallback(
-    (daiAmount, col) => vault.burnAll(cdp.id, col, daiAmount).then(() => update()),
-    [vault, cdp.id, update],
+    (daiAmount, col) => vault.burnAll(cdp.id, col, daiAmount),
+    [vault, cdp.id],
   );
 
   const ensureProxy = useCallback(() => proxyRegistry.ensureDSProxy().then((v) => v.address), [proxyRegistry]);
@@ -143,6 +140,7 @@ const Controller: FC<ControllerProps> = ({
             onMintDialog={common('forms.mint.processing')}
             ensureProxy={ensureProxy}
             onErrorMessage={common('forms.mint.error.errorWhileMinting')}
+            onDialogClose={update}
           />
         );
       case 'burn':
@@ -163,6 +161,7 @@ const Controller: FC<ControllerProps> = ({
             increaseAllowance={increaseDaiAllowance}
             ensureProxy={ensureProxy}
             proxyAddress={proxyAddress}
+            onDialogClose={update}
           />
         );
     }
@@ -187,6 +186,7 @@ const Controller: FC<ControllerProps> = ({
     daiBalance,
     daiAllowance,
     increaseDaiAllowance,
+    update,
   ]);
 
   return content;
@@ -201,38 +201,45 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
     [router.query.id],
   );
   const chainLog = useChainLog(provider);
-  const { data, isLoading, mutate } = useSWR('getCDP', async () => {
-    const cdpManager = await chainLog.dssCDPManager();
-    const proxyRegistry = await chainLog.proxyRegistry();
-    const proxy = await proxyRegistry.getDSProxy();
-    const cdp = await cdpManager.getCDP(cdpId);
-    const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, cdp.ilk);
-    const dai = await chainLog.dai();
-    const [daiBalance, daiAllowance, urnStatus, tokenBalance, tokenAllowance, vault] = await Promise.all([
-      dai.getBalance(),
-      proxy ? dai.getAllowance(proxy.address) : FixedNumber.from('0', UnitFormats.WAD),
-      chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)),
-      ilkInfo.gem.getBalance(),
-      proxy ? ilkInfo.gem.getAllowance(proxy.address) : FixedNumber.from('0', ilkInfo.gem.format),
-      Vault.fromChainlog(chainLog, ilkInfo),
-    ]);
-    return {
-      cdp,
-      proxyRegistry,
-      proxyAddress: proxy?.address,
-      ilkInfo,
-      ilkStatus,
-      liquidationRatio,
-      stabilityFee,
-      daiBalance,
-      daiAllowance,
-      urnStatus,
-      tokenBalance,
-      tokenAllowance,
-      vault,
-      dai,
-    };
-  });
+  const { data, isLoading, mutate } = useSWR(
+    'getCDP',
+    async () => {
+      const [cdpManager, proxyRegistry, dai, vat] = await Promise.all([
+        chainLog.dssCDPManager(),
+        chainLog.proxyRegistry(),
+        chainLog.dai(),
+        chainLog.vat(),
+      ]);
+      const proxy = await proxyRegistry.getDSProxy();
+      const cdp = await cdpManager.getCDP(cdpId);
+      const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, cdp.ilk);
+      const [daiBalance, daiAllowance, urnStatus, tokenBalance, tokenAllowance, vault] = await Promise.all([
+        dai.getBalance(),
+        proxy ? dai.getAllowance(proxy.address) : FixedNumber.from('0', UnitFormats.WAD),
+        vat.getUrnStatus(cdp.ilk, cdp.urn),
+        ilkInfo.gem.getBalance(),
+        proxy ? ilkInfo.gem.getAllowance(proxy.address) : FixedNumber.from('0', ilkInfo.gem.format),
+        Vault.fromChainlog(chainLog, ilkInfo),
+      ]);
+      return {
+        cdp,
+        proxyRegistry,
+        proxyAddress: proxy?.address,
+        ilkInfo,
+        ilkStatus,
+        liquidationRatio,
+        stabilityFee,
+        daiBalance,
+        daiAllowance,
+        urnStatus,
+        tokenBalance,
+        tokenAllowance,
+        vault,
+        dai,
+      };
+    },
+    { revalidateIfStale: false, revalidateOnFocus: false },
+  );
   if (!data || isLoading) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>

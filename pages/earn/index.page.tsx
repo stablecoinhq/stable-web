@@ -25,7 +25,7 @@ import type { FC } from 'react';
 
 type ControllerProps = {
   savingRate: Savings;
-  updateAllBalance: () => void;
+  update: () => void;
   depositAmount: FixedNumber | undefined;
   balance: FixedNumber;
   proxyAddress: string | undefined;
@@ -38,7 +38,7 @@ type TabValue = 'deposit' | 'withdraw';
 
 const Controller: FC<ControllerProps> = ({
   savingRate,
-  updateAllBalance,
+  update,
   depositAmount,
   balance,
   proxyAddress,
@@ -53,20 +53,11 @@ const Controller: FC<ControllerProps> = ({
     setSelectedTab(value);
   }, []);
 
-  const deposit: DepositFormProps['onDeposit'] = useCallback(
-    (amount) => savingRate.deposit(amount).then(() => updateAllBalance()),
-    [savingRate, updateAllBalance],
-  );
+  const deposit: DepositFormProps['onDeposit'] = useCallback((amount) => savingRate.deposit(amount), [savingRate]);
 
-  const withdraw: WithdrawFormProps['onWithdraw'] = useCallback(
-    (amount) => savingRate.withdraw(amount).then(() => updateAllBalance()),
-    [savingRate, updateAllBalance],
-  );
+  const withdraw: WithdrawFormProps['onWithdraw'] = useCallback((amount) => savingRate.withdraw(amount), [savingRate]);
 
-  const withdrawAll: WithdrawFormProps['onWithdrawAll'] = useCallback(
-    () => savingRate.withdrawAll().then(() => updateAllBalance()),
-    [savingRate, updateAllBalance],
-  );
+  const withdrawAll: WithdrawFormProps['onWithdrawAll'] = useCallback(() => savingRate.withdrawAll(), [savingRate]);
 
   const increaseAllowance = useCallback(
     async (who: string, n: FixedNumber) => {
@@ -89,6 +80,7 @@ const Controller: FC<ControllerProps> = ({
             proxyAddress={proxyAddress}
             allowance={allowance}
             ensureProxy={ensureProxy}
+            onDialogClose={update}
           />
         );
       case 'withdraw':
@@ -98,6 +90,7 @@ const Controller: FC<ControllerProps> = ({
             onWithdraw={withdraw}
             onWithdrawAll={withdrawAll}
             depositAmount={depositAmount || FixedNumber.from(0, UnitFormats.WAD)}
+            onDialogClose={update}
           />
         );
     }
@@ -110,6 +103,7 @@ const Controller: FC<ControllerProps> = ({
     proxyAddress,
     allowance,
     ensureProxy,
+    update,
     withdraw,
     withdrawAll,
     depositAmount,
@@ -133,33 +127,35 @@ type ContentProps = {
 
 const Content: FC<ContentProps> = ({ chainLog, provider }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn' });
-
+  const { t: units } = useTranslation('common', { keyPrefix: 'units' });
   const { t: wallet } = useTranslation('common', { keyPrefix: 'cards.wallet' });
 
-  const { data, mutate, isLoading } = useSWR('getSavingData', async () => {
-    const saving = await Savings.fromChainlog(chainLog);
-    const proxyRegistry = await chainLog.proxyRegistry();
-    const proxy = await proxyRegistry.getDSProxy();
-    const dai = await chainLog.dai();
-    const [annualRate, balance, allowance, deposit] = await Promise.all([
-      saving.getAnnualRate(),
-      dai.getBalance(),
-      proxy ? dai.getAllowance(proxy.address) : FixedNumber.from('0', UnitFormats.WAD),
-      saving.getDepositAmount(),
-    ]);
-    return {
-      saving,
-      annualRate,
-      balance,
-      allowance,
-      deposit,
-      proxyAddress: proxy?.address,
-      proxyRegistry,
-      dai,
-    };
-  });
-
-  const updateAllBalance = mutate;
+  const { data, mutate, isLoading } = useSWR(
+    'getSavingData',
+    async () => {
+      const saving = await Savings.fromChainlog(chainLog);
+      const proxyRegistry = await chainLog.proxyRegistry();
+      const proxy = await proxyRegistry.getDSProxy();
+      const dai = await chainLog.dai();
+      const [annualRate, balance, allowance, deposit] = await Promise.all([
+        saving.getAnnualRate(),
+        dai.getBalance(),
+        proxy ? dai.getAllowance(proxy.address) : FixedNumber.from('0', UnitFormats.WAD),
+        saving.getDepositAmount(),
+      ]);
+      return {
+        saving,
+        annualRate,
+        balance,
+        allowance,
+        deposit,
+        proxyAddress: proxy?.address,
+        proxyRegistry,
+        dai,
+      };
+    },
+    { revalidateIfStale: false, revalidateOnFocus: false },
+  );
 
   if (isLoading || !data) {
     return (
@@ -180,20 +176,20 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
           balance={deposit.amount}
           label={t('deposit.label')}
           tooltipText={t('deposit.description')!}
-          unit="DAI"
+          unit={units('stableToken')}
         />
       )}
       <BalanceStatusCard
         title={wallet('title')}
         address={provider.address}
         balance={balance}
-        label={wallet('balance', { gem: 'DAI' })}
+        label={wallet('balance', { gem: units('stableToken') })}
         tooltipText={wallet('description')!}
-        unit="DAI"
+        unit={units('stableToken')}
       />
       <Controller
         savingRate={saving}
-        updateAllBalance={updateAllBalance}
+        update={() => mutate()}
         depositAmount={deposit?.amount}
         balance={balance}
         proxyAddress={proxyAddress}

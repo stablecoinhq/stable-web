@@ -32,6 +32,7 @@ type BurnFormControllerProps = {
   allowance: FixedNumber;
   selectedTab: TabValue;
   onSelectTab: (_: unknown, value: TabValue) => void;
+  onDialogClose: () => void;
   burn: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
   burnAll: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
 };
@@ -52,6 +53,7 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
   increaseAllowance,
   ensureProxy,
   allowance,
+  onDialogClose,
 }) => {
   const [daiText, setDaiText] = useState('');
   const [colText, setColText] = useState('');
@@ -65,23 +67,6 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
     [ilkInfo.gem.format.decimals],
   );
 
-  const onBurn = useCallback(
-    (daiAmount: FixedNumber, colAmount: FixedNumber) =>
-      burn(daiAmount, colAmount).then(() => {
-        setDaiText('');
-        setColText('');
-      }),
-    [burn],
-  );
-
-  const onBurnAll = useCallback(
-    (daiAmount: FixedNumber, colAmount: FixedNumber) =>
-      burnAll(daiAmount, colAmount).then(() => {
-        setDaiText('');
-        setColText('');
-      }),
-    [burnAll],
-  );
   const burnForm = useMemo(
     () => (
       <BurnForm
@@ -91,8 +76,8 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         daiBalance={balance}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
-        onBurn={onBurn}
-        onBurnAll={onBurnAll}
+        onBurn={burn}
+        onBurnAll={burnAll}
         onAmountChange={onAmountChange}
         onColChange={onColChange}
         daiText={daiText}
@@ -101,11 +86,18 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         increaseAllowance={increaseAllowance}
         ensureProxy={ensureProxy}
         allowance={allowance}
+        onDialogClose={() => {
+          onDialogClose();
+          setDaiText('');
+          setColText('');
+        }}
       />
     ),
     [
       allowance,
       balance,
+      burn,
+      burnAll,
       buttonContent,
       colText,
       daiText,
@@ -114,9 +106,8 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
       ilkStatus,
       increaseAllowance,
       onAmountChange,
-      onBurn,
-      onBurnAll,
       onColChange,
+      onDialogClose,
       proxyAddress,
       urnStatus.debt,
       urnStatus.lockedBalance,

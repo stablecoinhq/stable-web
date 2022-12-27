@@ -25,11 +25,12 @@ export type WithdrawFormProps = {
   buttonContent: ReactNode;
   onWithdraw: (amount: FixedNumber) => Promise<void>;
   onWithdrawAll: () => Promise<void>;
+  onDialogClose: () => void;
 };
 
 type WithdrawState = 'withdraw' | 'withdrawAll' | 'neutral';
 
-const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onWithdraw, onWithdrawAll }) => {
+const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onWithdraw, onWithdrawAll, onDialogClose }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn.withdraw.form' });
   const { t: forms } = useTranslation('common', { keyPrefix: 'forms' });
   const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.earn.errors' });
@@ -89,9 +90,7 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
           break;
       }
       setCurrentStep((prev) => prev + 1);
-      setAmountText('');
       setDialogText(forms('done')!);
-      setWithdrawState('neutral');
     };
     await f().catch((err) => {
       setWithdrawing(false);
@@ -107,7 +106,12 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
         text={dialogText}
         totalStep={2}
         currentStep={currentStep}
-        onClose={() => setWithdrawing(false)}
+        onClose={() => {
+          setWithdrawing(false);
+          setAmountText('');
+          setWithdrawState('neutral');
+          onDialogClose();
+        }}
       />
       <Grid container padding={2} spacing={2}>
         <Grid item xs={12} lg={6}>

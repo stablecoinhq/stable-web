@@ -41,6 +41,7 @@ export type BurnFormProps = {
   proxyAddress: string | undefined;
   increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
   ensureProxy: () => Promise<string>;
+  onDialogClose: () => void;
   allowance: FixedNumber;
 };
 
@@ -63,6 +64,7 @@ const BurnForm: FC<BurnFormProps> = ({
   increaseAllowance,
   ensureProxy,
   allowance,
+  onDialogClose,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms' });
   const { openDialog } = useErrorDialog();
@@ -224,7 +226,10 @@ const BurnForm: FC<BurnFormProps> = ({
         text={dialogText}
         totalStep={totalSteps}
         currentStep={currentStep}
-        onClose={() => setBurning(false)}
+        onClose={() => {
+          setBurning(false);
+          onDialogClose();
+        }}
       />
       <Grid container padding={2} spacing={2}>
         <Grid item xs={6}>
