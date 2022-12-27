@@ -20,7 +20,6 @@ import BurnFormController from '../../forms/BurnFormController';
 import MintFormController from '../../forms/MintFormController';
 
 import type { TabValue } from '../../forms/FormLayout';
-import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type ERC20Helper from 'ethereum/contracts/ERC20Helper';
 import type { CDP } from 'ethereum/contracts/GetCDPsHelper';
 import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';
@@ -193,17 +192,21 @@ const Controller: FC<ControllerProps> = ({
   return content;
 };
 
-type ContentProps = {
-  chainLog: ChainLogHelper;
-  cdp: CDP;
-  address: string;
-};
+const VaultDetail: NextPageWithEthereum = ({ provider }) => {
+  const { t } = useTranslation('common', { keyPrefix: 'pages.vault' });
 
-const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
-  const { data, mutate, isLoading } = useSWR('getVaultData', async () => {
-    const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, cdp.ilk);
+  const router = useRouter();
+  const cdpId = useMemo(
+    () => toFixedNumberOrUndefined(getStringQuery(router.query.id), INT_FORMAT) || FixedNumber.fromString('0', INT_FORMAT),
+    [router.query.id],
+  );
+  const chainLog = useChainLog(provider);
+  const { data, isLoading, mutate } = useSWR('getCDP', async () => {
+    const cdpManager = await chainLog.dssCDPManager();
     const proxyRegistry = await chainLog.proxyRegistry();
     const proxy = await proxyRegistry.getDSProxy();
+    const cdp = await cdpManager.getCDP(cdpId);
+    const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, cdp.ilk);
     const dai = await chainLog.dai();
     const [daiBalance, daiAllowance, urnStatus, tokenBalance, tokenAllowance, vault] = await Promise.all([
       dai.getBalance(),
@@ -214,22 +217,22 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
       Vault.fromChainlog(chainLog, ilkInfo),
     ]);
     return {
+      cdp,
+      proxyRegistry,
+      proxyAddress: proxy?.address,
       ilkInfo,
       ilkStatus,
       liquidationRatio,
       stabilityFee,
-      tokenBalance,
-      tokenAllowance,
-      dai,
       daiBalance,
       daiAllowance,
       urnStatus,
+      tokenBalance,
+      tokenAllowance,
       vault,
-      proxyRegistry,
-      proxyAddress: proxy?.address,
+      dai,
     };
   });
-
   if (!data || isLoading) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
@@ -239,71 +242,21 @@ const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
   }
 
   const {
+    proxyAddress,
+    cdp,
     ilkInfo,
     ilkStatus,
     liquidationRatio,
     stabilityFee,
-    urnStatus,
     tokenBalance,
-    daiBalance,
-    vault,
     tokenAllowance,
     daiAllowance,
+    daiBalance,
+    urnStatus,
+    vault,
     proxyRegistry,
-    proxyAddress,
     dai,
   } = data;
-
-  return (
-    <Stack padding={2} spacing={2}>
-      <IlkStatusCard ilkInfo={ilkInfo} ilkStatus={ilkStatus} liquidationRatio={liquidationRatio} stabilityFee={stabilityFee} />
-      <Controller
-        cdp={cdp}
-        vault={vault}
-        urnStatus={urnStatus}
-        ilkStatus={ilkStatus}
-        liquidationRatio={liquidationRatio}
-        update={() => mutate()}
-        tokenBalance={tokenBalance}
-        tokenAllowance={tokenAllowance}
-        daiBalance={daiBalance}
-        daiAllowance={daiAllowance}
-        address={address}
-        proxyRegistry={proxyRegistry}
-        proxyAddress={proxyAddress}
-        dai={dai}
-      />
-    </Stack>
-  );
-};
-
-const VaultDetail: NextPageWithEthereum = ({ provider }) => {
-  const { t } = useTranslation('common', { keyPrefix: 'pages.vault' });
-
-  const router = useRouter();
-  const cdpId = useMemo(
-    () => toFixedNumberOrUndefined(getStringQuery(router.query.id), INT_FORMAT) || FixedNumber.fromString('0', INT_FORMAT),
-    [router.query.id],
-  );
-  const chainLog = useChainLog(provider);
-  const { data, isLoading } = useSWR('getCDP', async () => {
-    const cdpManager = await chainLog.dssCDPManager();
-    const proxyRegistry = await chainLog.proxyRegistry();
-    const proxy = await proxyRegistry.getDSProxy();
-    return {
-      cdp: await cdpManager.getCDP(cdpId),
-      proxyAddress: proxy?.address || '',
-    };
-  });
-  if (!data || isLoading) {
-    return (
-      <Box display="flex" justifyContent="center" padding={2}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  const { proxyAddress, cdp } = data;
 
   if (proxyAddress !== cdp.owner.address) {
     return <NotFound />;
@@ -315,7 +268,30 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
     <Card elevation={0}>
       <CardHeader title={t('title', { ilk: ilk.inString, id: cdpId?.toString() })} subheader={urn} />
       <CardContent>
-        <Content chainLog={chainLog} cdp={cdp} address={provider.address} />
+        <Stack padding={2} spacing={2}>
+          <IlkStatusCard
+            ilkInfo={ilkInfo}
+            ilkStatus={ilkStatus}
+            liquidationRatio={liquidationRatio}
+            stabilityFee={stabilityFee}
+          />
+          <Controller
+            cdp={cdp}
+            address={provider.address}
+            ilkStatus={ilkStatus}
+            liquidationRatio={liquidationRatio}
+            tokenBalance={tokenBalance}
+            tokenAllowance={tokenAllowance}
+            daiAllowance={daiAllowance}
+            daiBalance={daiBalance}
+            urnStatus={urnStatus}
+            vault={vault}
+            proxyRegistry={proxyRegistry}
+            proxyAddress={proxyAddress}
+            dai={dai}
+            update={() => mutate()}
+          />
+        </Stack>
       </CardContent>
     </Card>
   );
