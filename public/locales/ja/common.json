@@ -129,7 +129,8 @@
           "submit": "預け入れる",
           "processing": "$t(units.stableToken)を$t(terms.savings)に預け入れます",
           "errors": {
-            "insufficientBalance": "残高不足です"
+            "insufficientBalance": "残高不足です",
+            "invalidAmount": "預け入れ額が無効な値です"
           }
         }
       },
@@ -140,7 +141,8 @@
           "withdrawAll": "預金から全額引き出す",
           "submit": "引き出す",
           "errors": {
-            "insufficientWithdrawAmount": "預金引き出し額が無効な値です"
+            "insufficientBalance": "預金残高が不足しています",
+            "invalidAmount": "預け入れ額が無効な値です"
           }
         }
       },

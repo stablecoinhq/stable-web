@@ -17,6 +17,8 @@ import { UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import { useErrorDialog } from 'store/ErrorDialogProvider';
 
+import WithdrawFormValidation, { WithdrawError } from './WithdrawFormValidation';
+
 import type { FixedNumber } from 'ethers';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
@@ -43,11 +45,6 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
   const [withdrawing, setWithdrawing] = useState(false);
   const formats = UnitFormats.WAD;
   const amount = useMemo(() => toFixedNumberOrUndefined(amountText, formats), [amountText, formats]);
-  const isInvalidWithdrawAmount = useMemo(
-    () => amount && depositAmount.subUnsafe(amount).isNegative(),
-    [amount, depositAmount],
-  );
-  // input as percentage, return as ratio
 
   const onAmountChange: ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
@@ -81,7 +78,7 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
           await onWithdrawAll();
           break;
         case 'withdraw':
-          if (!amount || isInvalidWithdrawAmount) {
+          if (!amount) {
             break;
           }
           await onWithdraw(amount);
@@ -96,7 +93,23 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
       setWithdrawing(false);
       openDialog(errorMessage('errorWhileWithdraw'), err);
     });
-  }, [t, withdrawState, forms, onWithdrawAll, amount, isInvalidWithdrawAmount, onWithdraw, openDialog, errorMessage]);
+  }, [t, withdrawState, forms, onWithdrawAll, amount, onWithdraw, openDialog, errorMessage]);
+
+  const formErrors: WithdrawError[] = useMemo(() => {
+    if (amount) {
+      return WithdrawFormValidation.canDeposit(depositAmount, amount);
+    }
+    return [];
+  }, [amount, depositAmount]);
+
+  const showErrorMessage = (e: WithdrawError) => {
+    switch (e) {
+      case WithdrawError.insufficientBalance:
+        return error('insufficientBalance');
+      case WithdrawError.invalidAmount:
+        return error('invalidAmount');
+    }
+  };
 
   return (
     <Card component="form" elevation={0}>
@@ -118,7 +131,7 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
           <TextField
             fullWidth
             label={t('label')}
-            error={isInvalidWithdrawAmount}
+            error={formErrors.length !== 0}
             value={amountText}
             disabled={withdrawState === 'withdrawAll' || withdrawing}
             onChange={onAmountChange}
@@ -138,14 +151,18 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
           <Button
             variant="contained"
             fullWidth
-            disabled={withdrawing || !(withdrawState !== 'neutral') || isInvalidWithdrawAmount}
+            disabled={withdrawing || !(withdrawState !== 'neutral') || formErrors.length !== 0}
             onClick={onButtonClick}
           >
             {buttonContent}
           </Button>
         </Grid>
         <Grid item xs={12}>
-          {isInvalidWithdrawAmount && <FormHelperText error>{error('insufficientWithdrawAmount')}</FormHelperText>}
+          {formErrors.map((e) => (
+            <FormHelperText key={e} error>
+              {showErrorMessage(e)}
+            </FormHelperText>
+          ))}
         </Grid>
       </Grid>
     </Card>

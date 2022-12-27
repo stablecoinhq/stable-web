@@ -7,6 +7,8 @@ import { UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import { useErrorDialog } from 'store/ErrorDialogProvider';
 
+import DepositFormValidation, { DepositError } from './DepositFormValidation';
+
 import type { FixedNumber } from 'ethers';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
@@ -46,8 +48,6 @@ const DepositForm: FC<DepositFormProps> = ({
 
   const formats = UnitFormats.WAD;
   const amount = useMemo(() => toFixedNumberOrUndefined(amountText, formats), [amountText, formats]);
-  const isInvalidDepositAmount = useMemo(() => amount && balance.subUnsafe(amount).isNegative(), [amount, balance]);
-
   // input as percentage, return as ratio
   const [depositing, setDepositing] = useState(false);
 
@@ -56,7 +56,7 @@ const DepositForm: FC<DepositFormProps> = ({
     [formats],
   );
   const onButtonClick: MouseEventHandler<HTMLButtonElement> = useCallback(async () => {
-    if (!amount || isInvalidDepositAmount) {
+    if (!amount) {
       return;
     }
     const f = async () => {
@@ -96,20 +96,23 @@ const DepositForm: FC<DepositFormProps> = ({
       setDepositing(false);
       openDialog(errorMessage('errorWhileDeposit'), err);
     });
-  }, [
-    amount,
-    isInvalidDepositAmount,
-    allowance,
-    proxyAddress,
-    t,
-    onDeposit,
-    forms,
-    ensureProxy,
-    increaseAllowance,
-    openDialog,
-    errorMessage,
-  ]);
+  }, [amount, allowance, proxyAddress, t, onDeposit, forms, ensureProxy, increaseAllowance, openDialog, errorMessage]);
 
+  const formErrors: DepositError[] = useMemo(() => {
+    if (amount) {
+      return DepositFormValidation.canDeposit(balance, amount);
+    }
+    return [];
+  }, [amount, balance]);
+
+  const showErrorMessage = (e: DepositError) => {
+    switch (e) {
+      case DepositError.insufficientBalance:
+        return error('insufficientBalance');
+      case DepositError.invalidAmount:
+        return error('invalidAmount');
+    }
+  };
   return (
     <Card component="form" elevation={0}>
       <ProgressDialog
@@ -130,7 +133,7 @@ const DepositForm: FC<DepositFormProps> = ({
             fullWidth
             label={t('label')}
             value={amountText}
-            error={isInvalidDepositAmount}
+            error={formErrors.length !== 0}
             onChange={onAmountChange}
             InputProps={{
               endAdornment: <InputAdornment position="end">DAI</InputAdornment>,
@@ -142,14 +145,18 @@ const DepositForm: FC<DepositFormProps> = ({
           <Button
             variant="contained"
             fullWidth
-            disabled={!amount || depositing || isInvalidDepositAmount}
+            disabled={!amount || depositing || formErrors.length !== 0}
             onClick={onButtonClick}
           >
             {buttonContent}
           </Button>
         </Grid>
         <Grid item xs={12}>
-          {isInvalidDepositAmount && <FormHelperText error>{error('insufficientBalance')}</FormHelperText>}
+          {formErrors.map((e) => (
+            <FormHelperText key={e} error>
+              {showErrorMessage(e)}
+            </FormHelperText>
+          ))}
         </Grid>
       </Grid>
     </Card>
