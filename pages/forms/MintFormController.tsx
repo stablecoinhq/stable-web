@@ -27,7 +27,7 @@ type MintFormControllerProps = {
   ensureProxy: () => Promise<string>;
   address: string;
   buttonContent: string;
-  onMintDialog: string;
+  onMintMessage: string;
   onErrorMessage: string;
   onDoneMessage: string;
   selectedTab?: TabValue;
@@ -45,7 +45,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
   proxyAddress,
   increaseAllowance,
   ensureProxy,
-  onMintDialog,
+  onMintMessage,
   urnStatus,
   selectedTab,
   onSelectTab,
@@ -140,7 +140,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
           setAmountText('');
           setDaiAmountText('');
         }}
-        onMintDialog={onMintDialog}
+        onMintMessage={onMintMessage}
         onErrorMessage={onErrorMessage}
         onDoneMessage={onDoneMessage}
       />
@@ -161,7 +161,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
       proxyAddress,
       increaseAllowance,
       ensureProxy,
-      onMintDialog,
+      onMintMessage,
       onErrorMessage,
       onDoneMessage,
       onDialogClose,

@@ -61,12 +61,19 @@ const Controller: FC<ControllerProps> = ({
 
   const increaseAllowance = useCallback(
     async (who: string, n: FixedNumber) => {
-      await dai.ensureAllowance(who, n, 5);
+      await dai.ensureAllowance(who, n, 2).then(() => update());
     },
-    [dai],
+    [dai, update],
   );
 
-  const ensureProxy = useCallback(() => proxyRegistry.ensureDSProxy().then((v) => v.address), [proxyRegistry]);
+  const ensureProxy = useCallback(
+    () =>
+      proxyRegistry.ensureDSProxy().then((v) => {
+        update();
+        return v.address;
+      }),
+    [proxyRegistry, update],
+  );
 
   const content = useMemo(() => {
     switch (selectedTab) {
@@ -154,7 +161,7 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
         dai,
       };
     },
-    { revalidateIfStale: false, revalidateOnFocus: false },
+    { revalidateOnFocus: false },
   );
 
   if (isLoading || !data) {

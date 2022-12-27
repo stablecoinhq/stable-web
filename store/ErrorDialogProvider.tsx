@@ -53,7 +53,7 @@ export const ErrorDialogProvider: FC<{ children: ReactNode }> = ({ children }) =
 
   const [dialogMessage, setDialogMessage] = useState('');
   const [expandCollapse, setExpandCollapse] = useState(false);
-  const { t } = useTranslation('common', { keyPrefix: 'error' });
+  const { t } = useTranslation('common');
 
   const openDialog = useCallback(
     (message: string, error: Error, onClose?: () => void) => {
@@ -88,7 +88,7 @@ export const ErrorDialogProvider: FC<{ children: ReactNode }> = ({ children }) =
   return (
     <ErrorDialogContext.Provider value={value}>
       <Dialog open={displayDialog} fullWidth onClose={handleClose}>
-        <DialogTitle>{t('title')}</DialogTitle>
+        <DialogTitle>{t('error.title')}</DialogTitle>
         <DialogContent>
           <DialogContentText>{dialogMessage}</DialogContentText>
         </DialogContent>

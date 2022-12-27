@@ -1,5 +1,5 @@
 import { Box, Card, CardContent, CardHeader, CircularProgress, Stack } from '@mui/material';
-import { FixedNumber } from 'ethers';
+import { ethers, FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import { useCallback, useMemo } from 'react';
@@ -34,6 +34,7 @@ type OpenVaultProps = {
   proxyRegistry: ProxyRegistryHelper;
   proxyAddress: string | undefined;
   address: string;
+  update: () => void;
 };
 
 const OpenVault: FC<OpenVaultProps> = ({
@@ -46,6 +47,7 @@ const OpenVault: FC<OpenVaultProps> = ({
   allowance,
   proxyAddress,
   proxyRegistry,
+  update,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.ilk' });
   const router = useRouter();
@@ -58,19 +60,26 @@ const OpenVault: FC<OpenVaultProps> = ({
 
   const zero = FixedNumber.fromString('0', UnitFormats.WAD);
   const urnStatus: UrnStatus = {
-    urn: `0x${'0'.repeat(40)}`,
+    urn: ethers.constants.AddressZero,
     freeBalance: zero,
     lockedBalance: zero,
     debt: zero,
   };
 
   const increaseAllowance = useCallback(
-    async (who: string, n: FixedNumber) => {
-      await ilkInfo.gem.ensureAllowance(who, n, 5);
+    async (who: string, amount: FixedNumber) => {
+      await ilkInfo.gem.ensureAllowance(who, amount, 2).then(() => update());
     },
-    [ilkInfo.gem],
+    [ilkInfo.gem, update],
   );
-  const ensureProxy = useCallback(() => proxyRegistry.ensureDSProxy().then((v) => v.address), [proxyRegistry]);
+  const ensureProxy = useCallback(
+    () =>
+      proxyRegistry.ensureDSProxy().then((v) => {
+        update();
+        return v.address;
+      }),
+    [proxyRegistry, update],
+  );
 
   return (
     <MintFormController
@@ -84,7 +93,7 @@ const OpenVault: FC<OpenVaultProps> = ({
       proxyAddress={proxyAddress}
       increaseAllowance={increaseAllowance}
       ensureProxy={ensureProxy}
-      onMintDialog={t('openVault')}
+      onMintMessage={t('openVault')}
       address={address}
       buttonContent={t('openLabel')}
       onDoneMessage={t('vaultCreated')}
@@ -101,7 +110,7 @@ type ContentProps = {
 
 const Content: FC<ContentProps> = ({ provider, ilkType }) => {
   const chainLog = useChainLog(provider);
-  const { data, isLoading, error } = useSWR('getData', async () => {
+  const { data, isLoading, error, mutate } = useSWR('getData', async () => {
     const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, ilkType);
     const proxyRegistry = await chainLog.proxyRegistry();
     const proxy = await proxyRegistry.getDSProxy();
@@ -149,6 +158,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
         allowance={allowance}
         proxyRegistry={proxyRegistry}
         proxyAddress={proxyAddress}
+        update={() => mutate()}
       />
     </Stack>
   );

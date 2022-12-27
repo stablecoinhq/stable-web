@@ -30,7 +30,7 @@
     },
     "wallet": {
       "title": "Wallet status",
-      "balance": "Balance of {{gem}}",
+      "balance": "{{gem}} Balance",
       "description": "Amount of token that wallet currently holds"
     },
     "savings": {
@@ -41,7 +41,7 @@
   },
   "forms": {
     "createProxy": "Creating proxy",
-    "increaseAllowance": "Increasing allowance for Proxy",
+    "increaseAllowance": "Granting the Proxy access to your {{token}}",
     "done": "Success",
     "burn": {
       "redeemAmount": "Amount of $t(units.stableToken) to repay",
@@ -90,10 +90,10 @@
     "ilk": {
       "backToList": "$t(pages.errors.backToList)",
       "noIlks": "No ilks found",
-      "openLabel": "Create new $t(terms.vault_one)",
-      "openDesc": "Open new $t(terms.vault_one)",
-      "openVault": "New $t(terms.vault_one) created",
-      "vaultCreated": "$t(terms.vault_one) created",
+      "openLabel": "Create new $t(terms.vault)",
+      "openDesc": "Open new $t(terms.vault)",
+      "openVault": "Creating new $t(terms.vault)",
+      "vaultCreated": "$t(terms.vault) created",
       "currency": "Currency",
       "currentPrice": "Current Price per {{collateral}}",
       "unableToLoadCollateral": "Unable to load collateral",
@@ -103,13 +103,13 @@
     },
     "vault": {
       "backToList": "$t(pages.errors.backToList)",
-      "cardDesc": "Create a new $t(terms.vault_one) or manage your existing $t(terms.vault_other).",
-      "cardTitle": "Manage $t(terms.vault_other)",
+      "cardDesc": "Create a new $t(terms.vault) or manage your existing $t(terms.vaults).",
+      "cardTitle": "Manage $t(terms.vaults)",
       "listTitle": "Vaults",
-      "new": "New $t(terms.vault_one)",
-      "noVaults": "No $t(terms.vault_other) found",
-      "notFound": "The specified $t(terms.vault_one) not found",
-      "title": "{{ilk}} $t(terms.vault_one) ({{id}})",
+      "new": "New $t(terms.vault)",
+      "noVaults": "No $t(terms.vaults) found",
+      "notFound": "The specified $t(terms.vault) not found",
+      "title": "{{ilk}} $t(terms.vault) ({{id}})",
       "collateralType": "Collateral Type",
       "id": "Vault ID",
       "lockedCollateral": "Locked Collateral",
@@ -128,8 +128,8 @@
         "form": {
           "label": "Amount of $t(units.stableToken) to deposit",
           "submit": "Deposit",
-          "processing": "Depositing $t(units.stableToken) to $t(terms.savings)",
-          "done": "$t(units.stableToken) successfullly deposited to $t(terms.savings)",
+          "processing": "Depositing $t(units.stableToken) to the $t(terms.savings)",
+          "done": "$t(units.stableToken) successfullly deposited to the $t(terms.savings)",
           "errors": {
             "insufficientBalance": "Insufficient balance",
             "invalidAmount": "Invalid deposit amount",
@@ -160,7 +160,6 @@
     "title": "This page could not be found"
   },
   "error": {
-    "close": "Close",
     "title": "Error",
     "unexpectedError": "An unexpected error occured. Please try again.",
     "errorWhileIncreasingAllowance": "An unexpected error occured while increasing allowance. Please try again.",
@@ -170,8 +169,8 @@
   "terms": {
     "collateral": "collateral",
     "colRatio": "Collateralization Ratio",
-    "vault_one": "Vault",
-    "vault_other": "Vaults",
+    "vault": "Vault",
+    "vaults": "Vaults",
     "mint": "Mint",
     "burn": "Repay",
     "annualFee": "Annual Fee",

@@ -26,7 +26,7 @@ export type MintFormProps = {
   onAmountChange: (s: string) => void;
   onDaiAmountChange: (s: string) => void;
   allowance: FixedNumber;
-  onMintDialog: string;
+  onMintMessage: string;
   onDoneMessage: string;
   onErrorMessage: string;
   proxyAddress: string | undefined;
@@ -54,7 +54,7 @@ const MintForm: FC<MintFormProps> = ({
   allowance,
   increaseAllowance,
   ensureProxy,
-  onMintDialog,
+  onMintMessage,
   onDoneMessage,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms' });
@@ -62,7 +62,7 @@ const MintForm: FC<MintFormProps> = ({
   const { openDialog } = useErrorDialog();
 
   const [dialogText, setDialogText] = useState('');
-  const [totalSteps, setTotalSteps] = useState(0);
+  const [totalSteps, setTotalSteps] = useState(1);
   const [currentStep, setCurrentStep] = useState(1);
 
   const collateralAmount = useMemo(
@@ -112,12 +112,12 @@ const MintForm: FC<MintFormProps> = ({
       }
 
       if (!allowanceToIncrease.isNegative() && !allowanceToIncrease.isZero()) {
-        setDialogText(t('increaseAllowance')!);
+        setDialogText(t('increaseAllowance', { token: ilkInfo.symbol })!);
         await increaseAllowance(proxy, collateralAmount);
         setCurrentStep((prev) => prev + 1);
       }
 
-      setDialogText(onMintDialog);
+      setDialogText(onMintMessage);
       await onMint(collateralAmount, daiAmount);
       setCurrentStep((prev) => prev + 1);
       setDialogText(onDoneMessage);
@@ -131,11 +131,12 @@ const MintForm: FC<MintFormProps> = ({
     daiAmount,
     allowance,
     proxyAddress,
-    onMintDialog,
+    onMintMessage,
     onMint,
     onDoneMessage,
     t,
     ensureProxy,
+    ilkInfo.symbol,
     increaseAllowance,
     openDialog,
     onErrorMessage,

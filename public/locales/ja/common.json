@@ -6,9 +6,9 @@
       "currentPrice": "1 {{collateral}}あたりの価格",
       "currentPriceDesc": "オラクルから取得した担保{{collateral}}の価格です。",
       "debtFloor": "負債額下限",
-      "debtFloorDesc": "$t(terms.vault_one)が負うことのできる負債の下限値です。この値を下回る$t(terms.vault_one)を作成することはできません。",
+      "debtFloorDesc": "$t(terms.vault)が負うことのできる負債の下限値です。この値を下回る$t(terms.vault)を作成することはできません。",
       "liqRatio": "最低担保率",
-      "liqRatioDesc": "$t(terms.vault_one)が最低担保率を下回ると、担保不足と見なされ、清算の対象となります。その後、あなたの担保は、未払い債務と安定化手数料をカバーするために競売に出されます。",
+      "liqRatioDesc": "$t(terms.vault)が最低担保率を下回ると、担保不足と見なされ、清算の対象となります。その後、あなたの担保は、未払い債務と安定化手数料をカバーするために競売に出されます。",
       "maxLiquidity": "負債額上限",
       "maxLiquidityDesc": "担保{{collateral}}に対して、ユーザーが発行できる$t(units.stableToken)の上限値です。この値を上回るような$t(units.stableToken)の発行はできません。",
       "title": "$t(terms.collateral) {{ilk}} の状態",
@@ -19,12 +19,12 @@
       "colRatio": "$t(terms.colRatio)",
       "colRatioDesc": "担保率は、担保として提供されるトークンの価値と$t(units.stableToken)の負債残高の比率です。",
       "debt": "負債",
-      "debtDesc": "$t(terms.vault_one)が負っている$t(units.stableToken)の負債です。",
+      "debtDesc": "$t(terms.vault)が負っている$t(units.stableToken)の負債です。",
       "freeCollateral": "ロックされていない担保",
       "freeCollateralDesc": "Vaultコントラクトにロックされているが、担保として利用されていない通貨です。",
       "lockedCollateral": "ロックされている担保",
-      "lockedCollateralDesc": "$t(terms.vault_one)にロックされている担保の数量です。",
-      "title": "$t(terms.vault_one)の状態",
+      "lockedCollateralDesc": "$t(terms.vault)にロックされている担保の数量です。",
+      "title": "$t(terms.vault)の状態",
       "liquidationPrice": "$t(terms.liquidationPrice)",
       "liquidationPriceDesc": "{{collateral}}の価格がこれ以上下がった場合、このVaultは精算されます。"
     },
@@ -41,7 +41,7 @@
   },
   "forms": {
     "createProxy": "Proxyを作成します",
-    "increaseAllowance": "Proxyに資金へのアクセス権限を付与します",
+    "increaseAllowance": "Proxyに{{token}}へのアクセス権限を付与します",
     "done": "完了しました",
     "burn": {
       "redeemAmount": "返済する$t(units.stableToken)の数量",
@@ -53,10 +53,10 @@
       "error": {
         "insufficientBalance": "残高不足です",
         "errorWhileRepaying": "返済時に問題が発生しました。$t(terms.retry)",
-        "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
-        "debtTooLow": "$t(terms.vault_one)の負債額が下限値を下回っています。",
+        "collateralTooLow": "$t(terms.vault)の担保率が最低担保率を下回っています",
+        "debtTooLow": "$t(terms.vault)の負債額が下限値を下回っています。",
         "invalidCollateralFreeAmount": "解放する担保の額が、ロックされた担保の額を超過しています。",
-        "invalidRepayAmount": "返済する$t(units.stableToken)の数量が$t(terms.vault_one)の負債額を上回っています。"
+        "invalidRepayAmount": "返済する$t(units.stableToken)の数量が$t(terms.vault)の負債額を上回っています。"
       }
     },
     "mint": {
@@ -68,8 +68,8 @@
       "error": {
         "errorWhileMinting": "$t(units.stableToken)発行時に問題が発生しました。$t(terms.retry)",
         "insufficientBalance": "残高不足です",
-        "collateralTooLow": "$t(terms.vault_one)の担保率が最低担保率を下回っています",
-        "debtTooLow": "$t(terms.vault_one)の負債額が下限値を下回っています。",
+        "collateralTooLow": "$t(terms.vault)の担保率が最低担保率を下回っています",
+        "debtTooLow": "$t(terms.vault)の負債額が下限値を下回っています。",
         "issuingTooMuchCoins": "$t(units.stableToken)の発行量が上限値を上回っています。"
       }
     }
@@ -92,9 +92,9 @@
     "ilk": {
       "backToList": "$t(pages.errors.backToList)",
       "noIlks": "担保が見つかりませんでした",
-      "openLabel": "$t(terms.vault_one)を新規作成",
-      "openVault": "$t(terms.vault_one)を新規作成します",
-      "vaultCreated": "$t(terms.vault_one)が作成されました",
+      "openLabel": "$t(terms.vault)を新規作成",
+      "openVault": "$t(terms.vault)を新規作成します",
+      "vaultCreated": "$t(terms.vault)が作成されました",
       "openDesc": "新規作成",
       "currency": "通貨",
       "currentPrice": "1 {{collateral}}あたりの価格",
@@ -105,13 +105,13 @@
     },
     "vault": {
       "backToList": "$t(pages.errors.backToList)",
-      "cardDesc": "$t(terms.vault_one)の新規作成や既存の$t(terms.vault_other)の操作",
-      "cardTitle": "$t(terms.vault_other)管理",
-      "listTitle": "$t(terms.vault_one)一覧",
+      "cardDesc": "$t(terms.vault)の新規作成や既存の$t(terms.vaults)の操作",
+      "cardTitle": "$t(terms.vaults)管理",
+      "listTitle": "$t(terms.vault)一覧",
       "new": "新規作成",
-      "noVaults": "$t(terms.vault_other)がありません",
-      "notFound": "指定された$t(terms.vault_one)が見つかりませんでした",
-      "title": "{{ilk}} $t(terms.vault_one) ({{id}})",
+      "noVaults": "$t(terms.vaults)が存在しません",
+      "notFound": "指定された$t(terms.vault)が見つかりませんでした",
+      "title": "{{ilk}} $t(terms.vault) ({{id}})",
       "collateralType": "担保の種類",
       "id": "Vault ID",
       "lockedCollateral": "ロックされた担保",
@@ -119,7 +119,7 @@
       "manageVault": "管理"
     },
     "earn": {
-      "cardTitle": "利息を得る",
+      "cardTitle": "貯蓄",
       "cardDesc": "$t(terms.savings)に$t(units.stableToken)を預け入れて利息を得る",
       "depositTab": "預け入れ",
       "withdrawTab": "引き出し",
@@ -155,12 +155,14 @@
       }
     }
   },
+  "site": {
+    "title": "stable-web"
+  },
   "notFound": {
     "title": "該当するページは見つかりませんでした"
   },
   "error": {
     "title": "エラー",
-    "close": "閉じる",
     "unexpectedError": "予期せぬエラーが発生しました。$t(terms.retry)",
     "errorWhileIncreasingAllowance": "アクセス権限を付与中に問題が発生しました。$t(terms.retry)",
     "errorWhileCreatingProxy": "Proxy作成中に問題が発生しました。$t(terms.retry)"
@@ -169,8 +171,8 @@
   "terms": {
     "collateral": "担保",
     "colRatio": "担保率",
-    "vault_one": "Vault",
-    "vault_other": "Vaults",
+    "vault": "Vault",
+    "vaults": "Vaults",
     "mint": "発行",
     "burn": "返済",
     "annualFee": "年利",
