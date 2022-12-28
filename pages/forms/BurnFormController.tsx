@@ -26,8 +26,13 @@ type BurnFormControllerProps = {
   balance: FixedNumber;
   buttonContent: string;
   address: string;
+  proxyAddress: string | undefined;
+  increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
+  ensureProxy: () => Promise<string>;
+  allowance: FixedNumber;
   selectedTab: TabValue;
   onSelectTab: (_: unknown, value: TabValue) => void;
+  onDialogClose: () => void;
   burn: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
   burnAll: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
 };
@@ -44,6 +49,11 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
   onSelectTab,
   burn,
   burnAll,
+  proxyAddress,
+  increaseAllowance,
+  ensureProxy,
+  allowance,
+  onDialogClose,
 }) => {
   const [daiText, setDaiText] = useState('');
   const [colText, setColText] = useState('');
@@ -66,25 +76,39 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         daiBalance={balance}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
-        onBurn={burn}
-        onBurnAll={burnAll}
+        burn={burn}
+        burnAll={burnAll}
         onAmountChange={onAmountChange}
         onColChange={onColChange}
         daiText={daiText}
         colText={colText}
+        proxyAddress={proxyAddress}
+        increaseAllowance={increaseAllowance}
+        ensureProxy={ensureProxy}
+        allowance={allowance}
+        onDialogClose={() => {
+          onDialogClose();
+          setDaiText('');
+          setColText('');
+        }}
       />
     ),
     [
+      allowance,
       balance,
       burn,
       burnAll,
       buttonContent,
       colText,
       daiText,
+      ensureProxy,
       ilkInfo,
       ilkStatus,
+      increaseAllowance,
       onAmountChange,
       onColChange,
+      onDialogClose,
+      proxyAddress,
       urnStatus.debt,
       urnStatus.lockedBalance,
     ],

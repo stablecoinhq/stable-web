@@ -21,11 +21,19 @@ type MintFormControllerProps = {
   urnStatus: UrnStatus;
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
+  allowance: FixedNumber;
+  proxyAddress: string | undefined;
+  increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
+  ensureProxy: () => Promise<string>;
   address: string;
   buttonContent: string;
+  mintMessage: string;
+  errorMessage: string;
+  doneMessage: string;
   selectedTab?: TabValue;
   onSelectTab?: (_: unknown, value: TabValue) => void;
-  mint: (amount: FixedNumber, ratio: FixedNumber) => Promise<void>;
+  onDialogClose: () => void;
+  mint: (colAmount: FixedNumber, daiAmount: FixedNumber) => Promise<void>;
 };
 
 const MintFormController: FC<MintFormControllerProps> = ({
@@ -33,12 +41,20 @@ const MintFormController: FC<MintFormControllerProps> = ({
   ilkStatus,
   liquidationRatio,
   balance,
+  allowance,
+  proxyAddress,
+  increaseAllowance,
+  ensureProxy,
+  mintMessage,
   urnStatus,
   selectedTab,
   onSelectTab,
+  onDialogClose,
+  errorMessage,
   mint,
   address,
   buttonContent,
+  doneMessage,
 }) => {
   const [amountText, setAmountText] = useState('');
   const [daiAmountText, setDaiAmountText] = useState('');
@@ -107,7 +123,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
         ilkInfo={ilkInfo}
         ilkStatus={ilkStatus}
         buttonContent={buttonContent}
-        onMint={mint}
+        mint={mint}
         balance={balance}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
@@ -115,20 +131,40 @@ const MintFormController: FC<MintFormControllerProps> = ({
         amountText={amountText}
         daiAmountText={daiAmountText}
         onDaiAmountChange={onDaiAmountChange}
+        allowance={allowance}
+        proxyAddress={proxyAddress}
+        increaseAllowance={increaseAllowance}
+        ensureProxy={ensureProxy}
+        onDialogClose={() => {
+          onDialogClose();
+          setAmountText('');
+          setDaiAmountText('');
+        }}
+        mintMessage={mintMessage}
+        errorMessage={errorMessage}
+        doneMessage={doneMessage}
       />
     ),
     [
-      amountText,
-      balance,
-      buttonContent,
-      daiAmountText,
       ilkInfo,
       ilkStatus,
+      buttonContent,
       mint,
-      onAmountChange,
-      onDaiAmountChange,
-      urnStatus.debt,
+      balance,
       urnStatus.lockedBalance,
+      urnStatus.debt,
+      onAmountChange,
+      amountText,
+      daiAmountText,
+      onDaiAmountChange,
+      allowance,
+      proxyAddress,
+      increaseAllowance,
+      ensureProxy,
+      mintMessage,
+      errorMessage,
+      doneMessage,
+      onDialogClose,
     ],
   );
   return (

@@ -20,16 +20,19 @@ export type IlkStatusCardProps = {
   stabilityFee: FixedNumber;
 };
 
-export function getIlkStatusProps(
-  chainLog: ChainLogHelper,
-  type: IlkType,
-): Promise<[IlkInfo, IlkStatus, FixedNumber, FixedNumber]> {
-  return Promise.all([
+export async function getIlkStatusProps(chainLog: ChainLogHelper, type: IlkType) {
+  const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await Promise.all([
     chainLog.ilkRegistry().then((ilkRegistry) => ilkRegistry.info(type)),
     chainLog.vat().then((vat) => vat.getIlkStatus(type)),
     chainLog.spot().then((spot) => spot.getLiquidationRatio(type)),
     chainLog.jug().then((jug) => jug.getStabilityFee(type)),
   ]);
+  return {
+    ilkInfo,
+    ilkStatus,
+    liquidationRatio,
+    stabilityFee,
+  };
 }
 
 const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidationRatio, stabilityFee }) => {

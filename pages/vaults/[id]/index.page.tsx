@@ -1,5 +1,4 @@
-import WarningIcon from '@mui/icons-material/Warning';
-import { Box, Button, Card, CardContent, CardHeader, CircularProgress, Stack, SvgIcon, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, CardHeader, CircularProgress, Stack, Typography } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
@@ -8,21 +7,21 @@ import { useCallback, useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 import Vault from 'ethereum/Vault';
-import { INT_FORMAT } from 'ethereum/helpers/math';
+import { INT_FORMAT, UnitFormats } from 'ethereum/helpers/math';
 import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
-import IlkStatusCard, { getIlkStatusProps } from 'ethereum/react/cards/IlkStatusCard';
+import IlkStatusCard from 'ethereum/react/cards/IlkStatusCard';
 import useChainLog from 'ethereum/react/useChainLog';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
-import { useErrorDialog } from 'store/ErrorDialogProvider';
 
 import BurnFormController from '../../forms/BurnFormController';
 import MintFormController from '../../forms/MintFormController';
 
 import type { TabValue } from '../../forms/FormLayout';
-import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
+import type ERC20Helper from 'ethereum/contracts/ERC20Helper';
 import type { CDP } from 'ethereum/contracts/GetCDPsHelper';
+import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
 import type { BurnFormProps } from 'pages/forms/BurnForm';
@@ -34,9 +33,6 @@ const NotFound: FC = () => {
 
   return (
     <Stack direction="column" alignItems="center" padding={2}>
-      <Box width={128} height={128}>
-        <SvgIcon component={WarningIcon} inheritViewBox style={{ fontSize: 128 }} color="error" />
-      </Box>
       <Typography variant="h6" component="div" padding={2}>
         {t('notFound')}
       </Typography>
@@ -54,9 +50,14 @@ type ControllerProps = {
   urnStatus: UrnStatus;
   liquidationRatio: FixedNumber;
   tokenBalance: FixedNumber;
+  tokenAllowance: FixedNumber;
   daiBalance: FixedNumber;
+  daiAllowance: FixedNumber;
   address: string;
-  updateAllBalance: () => void;
+  update: () => void;
+  dai: ERC20Helper;
+  proxyRegistry: ProxyRegistryHelper;
+  proxyAddress: string | undefined;
 };
 
 const Controller: FC<ControllerProps> = ({
@@ -65,14 +66,18 @@ const Controller: FC<ControllerProps> = ({
   urnStatus,
   ilkStatus,
   liquidationRatio,
-  updateAllBalance,
+  update,
   tokenBalance,
   daiBalance,
   address,
+  tokenAllowance,
+  daiAllowance,
+  dai,
+  proxyAddress,
+  proxyRegistry,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'terms' });
-  const { t: errorMessage } = useTranslation('common', { keyPrefix: 'pages.vault.errors' });
-  const { openDialog } = useErrorDialog();
+  const { t: common } = useTranslation('common');
 
   const [selectedTab, setSelectedTab] = useState<TabValue>('mint');
   const onSelectTab: (_: unknown, value: TabValue) => void = useCallback(
@@ -82,34 +87,42 @@ const Controller: FC<ControllerProps> = ({
     [setSelectedTab],
   );
 
-  const mint: MintFormProps['onMint'] = useCallback(
-    (collateralAmount, daiAmount) =>
-      vault
-        .mint(cdp.id, collateralAmount, daiAmount)
-        .then(() => updateAllBalance())
-        .catch((err) => openDialog(errorMessage('errorWhileMinting'), err)),
-    [vault, cdp.id, updateAllBalance, openDialog, errorMessage],
+  const mint: MintFormProps['mint'] = useCallback(
+    (collateralAmount, daiAmount) => vault.mint(cdp.id, collateralAmount, daiAmount),
+    [vault, cdp.id],
   );
 
-  const burn: BurnFormProps['onBurn'] = useCallback(
-    (dai, col) =>
-      vault
-        .burn(cdp.id, col, dai)
-        .then(() => updateAllBalance())
-        .catch((err) => openDialog(errorMessage('errorWhileRepaying'), err)),
-    [vault, cdp.id, updateAllBalance, openDialog, errorMessage],
+  const burn: BurnFormProps['burn'] = useCallback((daiAmount, col) => vault.burn(cdp.id, col, daiAmount), [vault, cdp.id]);
+
+  const burnAll: BurnFormProps['burnAll'] = useCallback(
+    (daiAmount, col) => vault.burnAll(cdp.id, col, daiAmount),
+    [vault, cdp.id],
   );
 
-  const burnAll: BurnFormProps['onBurnAll'] = useCallback(
-    (dai, col) =>
-      vault
-        .burnAll(cdp.id, col, dai)
-        .then(() => updateAllBalance())
-        .catch((err) => openDialog(errorMessage('errorWhileRepaying'), err)),
-    [vault, cdp.id, updateAllBalance, openDialog, errorMessage],
+  const ensureProxy = useCallback(
+    () =>
+      proxyRegistry.ensureDSProxy().then((v) => {
+        update();
+        return v.address;
+      }),
+    [proxyRegistry, update],
   );
 
-  const TabContent: FC = useCallback(() => {
+  const increateTokenAllowance = useCallback(
+    async (who: string, amount: FixedNumber) => {
+      await vault.ilkInfo.gem.ensureAllowance(who, amount, 2).then(() => update());
+    },
+    [update, vault.ilkInfo.gem],
+  );
+
+  const increaseDaiAllowance = useCallback(
+    async (who: string, amount: FixedNumber) => {
+      await dai.ensureAllowance(who, amount, 2).then(() => update());
+    },
+    [dai, update],
+  );
+
+  const content = useMemo(() => {
     switch (selectedTab) {
       case 'mint':
         return (
@@ -124,6 +137,14 @@ const Controller: FC<ControllerProps> = ({
             buttonContent={t('mint')}
             selectedTab={selectedTab}
             onSelectTab={onSelectTab}
+            allowance={tokenAllowance}
+            proxyAddress={proxyAddress}
+            increaseAllowance={increateTokenAllowance}
+            mintMessage={common('forms.mint.processing')}
+            doneMessage={common('forms.mint.done')}
+            ensureProxy={ensureProxy}
+            errorMessage={common('forms.mint.error.errorWhileMinting')}
+            onDialogClose={update}
           />
         );
       case 'burn':
@@ -140,6 +161,11 @@ const Controller: FC<ControllerProps> = ({
             ilkStatus={ilkStatus}
             selectedTab={selectedTab}
             onSelectTab={onSelectTab}
+            allowance={daiAllowance}
+            increaseAllowance={increaseDaiAllowance}
+            ensureProxy={ensureProxy}
+            proxyAddress={proxyAddress}
+            onDialogClose={update}
           />
         );
     }
@@ -154,69 +180,20 @@ const Controller: FC<ControllerProps> = ({
     address,
     t,
     onSelectTab,
+    tokenAllowance,
+    proxyAddress,
+    increateTokenAllowance,
+    common,
+    ensureProxy,
     burn,
     burnAll,
     daiBalance,
+    daiAllowance,
+    increaseDaiAllowance,
+    update,
   ]);
 
-  return <TabContent />;
-};
-
-type ContentProps = {
-  chainLog: ChainLogHelper;
-  cdp: CDP;
-  address: string;
-};
-
-const Content: FC<ContentProps> = ({ chainLog, cdp, address }) => {
-  const { data, mutate, isLoading } = useSWR('getVaultData', async () => {
-    const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, cdp.ilk);
-    const [daiBalance, urnStatus, tokenBalance, vault] = await Promise.all([
-      chainLog.dai().then((dai) => dai.getBalance()),
-      chainLog.vat().then((vat) => vat.getUrnStatus(cdp.ilk, cdp.urn)),
-      ilkInfo.gem.getBalance(),
-      Vault.fromChainlog(chainLog, ilkInfo),
-    ]);
-    return {
-      ilkInfo,
-      ilkStatus,
-      liquidationRatio,
-      stabilityFee,
-      tokenBalance,
-      daiBalance,
-      urnStatus,
-      vault,
-    };
-  });
-
-  const updateAllBalance = mutate;
-
-  if (!data || isLoading) {
-    return (
-      <Box display="flex" justifyContent="center" padding={2}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, urnStatus, tokenBalance, daiBalance, vault } = data;
-
-  return (
-    <Stack padding={2} spacing={2}>
-      <IlkStatusCard ilkInfo={ilkInfo} ilkStatus={ilkStatus} liquidationRatio={liquidationRatio} stabilityFee={stabilityFee} />
-      <Controller
-        cdp={cdp}
-        vault={vault}
-        urnStatus={urnStatus}
-        ilkStatus={ilkStatus}
-        liquidationRatio={liquidationRatio}
-        updateAllBalance={updateAllBalance}
-        tokenBalance={tokenBalance}
-        daiBalance={daiBalance}
-        address={address}
-      />
-    </Stack>
-  );
+  return content;
 };
 
 const VaultDetail: NextPageWithEthereum = ({ provider }) => {
@@ -228,15 +205,51 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
     [router.query.id],
   );
   const chainLog = useChainLog(provider);
-  const { data, isLoading } = useSWR('getCDP', async () => {
-    const cdpManager = await chainLog.dssCDPManager();
-    const proxyRegistry = await chainLog.proxyRegistry();
-    const proxy = await proxyRegistry.getDSProxy();
-    return {
-      cdp: await cdpManager.getCDP(cdpId),
-      proxyAddress: proxy?.address || '',
-    };
-  });
+  const { data, isLoading, mutate, error } = useSWR(
+    'getCDP',
+    async () => {
+      const [cdpManager, proxyRegistry, dai, ilkRegistry, jug] = await Promise.all([
+        chainLog.dssCDPManager(),
+        chainLog.proxyRegistry(),
+        chainLog.dai(),
+        chainLog.ilkRegistry(),
+        chainLog.jug(),
+      ]);
+      const proxy = await proxyRegistry.getDSProxy();
+      const cdp = await cdpManager.getCDP(cdpId);
+      const ilkInfo = await ilkRegistry.info(cdp.ilk);
+      const [daiBalance, daiAllowance, tokenBalance, tokenAllowance, vault, stabilityFee] = await Promise.all([
+        dai.getBalance(),
+        proxy ? dai.getAllowance(proxy.address) : FixedNumber.from('0', UnitFormats.WAD),
+        ilkInfo.gem.getBalance(),
+        proxy ? ilkInfo.gem.getAllowance(proxy.address) : FixedNumber.from('0', ilkInfo.gem.format),
+        Vault.fromChainlog(chainLog, ilkInfo),
+        jug.getStabilityFee(cdp.ilk),
+      ]);
+      return {
+        cdp,
+        proxyRegistry,
+        proxyAddress: proxy?.address,
+        ilkInfo,
+        ilkStatus: cdp.ilkStatus,
+        liquidationRatio: cdp.liquidationRatio,
+        stabilityFee,
+        daiBalance,
+        daiAllowance,
+        urnStatus: cdp.urnStatus,
+        tokenBalance,
+        tokenAllowance,
+        vault,
+        dai,
+      };
+    },
+    { revalidateOnFocus: false },
+  );
+
+  if (error as Error) {
+    return <NotFound />;
+  }
+
   if (!data || isLoading) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>
@@ -245,7 +258,22 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
     );
   }
 
-  const { proxyAddress, cdp } = data;
+  const {
+    proxyAddress,
+    cdp,
+    ilkInfo,
+    ilkStatus,
+    liquidationRatio,
+    stabilityFee,
+    tokenBalance,
+    tokenAllowance,
+    daiAllowance,
+    daiBalance,
+    urnStatus,
+    vault,
+    proxyRegistry,
+    dai,
+  } = data;
 
   if (proxyAddress !== cdp.owner.address) {
     return <NotFound />;
@@ -257,7 +285,30 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
     <Card elevation={0}>
       <CardHeader title={t('title', { ilk: ilk.inString, id: cdpId?.toString() })} subheader={urn} />
       <CardContent>
-        <Content chainLog={chainLog} cdp={cdp} address={provider.address} />
+        <Stack padding={2} spacing={2}>
+          <IlkStatusCard
+            ilkInfo={ilkInfo}
+            ilkStatus={ilkStatus}
+            liquidationRatio={liquidationRatio}
+            stabilityFee={stabilityFee}
+          />
+          <Controller
+            cdp={cdp}
+            address={provider.address}
+            ilkStatus={ilkStatus}
+            liquidationRatio={liquidationRatio}
+            tokenBalance={tokenBalance}
+            tokenAllowance={tokenAllowance}
+            daiAllowance={daiAllowance}
+            daiBalance={daiBalance}
+            urnStatus={urnStatus}
+            vault={vault}
+            proxyRegistry={proxyRegistry}
+            proxyAddress={proxyAddress}
+            dai={dai}
+            update={() => mutate()}
+          />
+        </Stack>
       </CardContent>
     </Card>
   );

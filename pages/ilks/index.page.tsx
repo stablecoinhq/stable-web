@@ -1,4 +1,3 @@
-/* eslint-disable i18next/no-literal-string */
 import { Box, Card, CardContent, CardHeader, CircularProgress, Grid, Typography } from '@mui/material';
 import { useTranslation } from 'next-i18next';
 import useSWR from 'swr';

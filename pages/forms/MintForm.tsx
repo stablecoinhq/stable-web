@@ -1,9 +1,11 @@
-import { Button, Card, Grid, InputAdornment, TextField, CircularProgress, FormHelperText } from '@mui/material';
+import { Button, Card, Grid, InputAdornment, TextField, FormHelperText } from '@mui/material';
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
+import ProgressDialog from 'component/ProgressDialog';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
+import { useErrorDialog } from 'store/ErrorDialogProvider';
 
 import { MintFormValidation, MintError } from './MintFormValidation';
 
@@ -19,9 +21,17 @@ export type MintFormProps = {
   balance: FixedNumber;
   lockedBalance: FixedNumber;
   debt: FixedNumber;
-  onMint: (colAmount: FixedNumber, daiAmount: FixedNumber) => Promise<void>;
+  mint: (colAmount: FixedNumber, daiAmount: FixedNumber) => Promise<void>;
+  onDialogClose: () => void;
   onAmountChange: (s: string) => void;
   onDaiAmountChange: (s: string) => void;
+  allowance: FixedNumber;
+  mintMessage: string;
+  doneMessage: string;
+  errorMessage: string;
+  proxyAddress: string | undefined;
+  increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
+  ensureProxy: () => Promise<string>;
   amountText: string;
   daiAmountText: string;
 };
@@ -29,18 +39,31 @@ export type MintFormProps = {
 const MintForm: FC<MintFormProps> = ({
   ilkInfo,
   ilkStatus,
-  onMint,
+  mint,
   buttonContent,
   balance,
   lockedBalance,
   debt,
   onAmountChange,
   onDaiAmountChange,
+  onDialogClose,
   amountText,
   daiAmountText,
+  errorMessage,
+  proxyAddress,
+  allowance,
+  increaseAllowance,
+  ensureProxy,
+  mintMessage: onMintMessage,
+  doneMessage: onDoneMessage,
 }) => {
-  const { t } = useTranslation('common', { keyPrefix: 'forms.mint' });
+  const { t } = useTranslation('common', { keyPrefix: 'forms' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
+  const { openDialog } = useErrorDialog();
+
+  const [dialogText, setDialogText] = useState('');
+  const [totalSteps, setTotalSteps] = useState(1);
+  const [currentStep, setCurrentStep] = useState(1);
 
   const collateralAmount = useMemo(
     () => toFixedNumberOrUndefined(amountText, ilkInfo.gem.format),
@@ -60,16 +83,64 @@ const MintForm: FC<MintFormProps> = ({
     (event) => onDaiAmountChange(event.target.value),
     [onDaiAmountChange],
   );
-  const onButtonClick: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
+  const onButtonClick: MouseEventHandler<HTMLButtonElement> = useCallback(async () => {
     if (!collateralAmount || !daiAmount) {
       return;
     }
 
-    setMinting(true);
-    onMint(collateralAmount, daiAmount).finally(() => {
+    const f = async () => {
+      const allowanceToIncrease = collateralAmount.subUnsafe(allowance);
+      setCurrentStep(1);
+      setTotalSteps(() => {
+        let steps = 2;
+        if (!proxyAddress) {
+          steps += 1;
+        }
+        if (!allowanceToIncrease.isNegative() && !allowanceToIncrease.isZero()) {
+          steps += 1;
+        }
+        return steps;
+      });
+      setMinting(true);
+      let proxy = '';
+      if (!proxyAddress) {
+        setDialogText(t('createProxy')!);
+        proxy = await ensureProxy();
+        setCurrentStep((prev) => prev + 1);
+      } else {
+        proxy = await ensureProxy();
+      }
+
+      if (!allowanceToIncrease.isNegative() && !allowanceToIncrease.isZero()) {
+        setDialogText(t('increaseAllowance', { token: ilkInfo.symbol })!);
+        await increaseAllowance(proxy, collateralAmount);
+        setCurrentStep((prev) => prev + 1);
+      }
+
+      setDialogText(onMintMessage);
+      await mint(collateralAmount, daiAmount);
+      setCurrentStep((prev) => prev + 1);
+      setDialogText(onDoneMessage);
+    };
+    await f().catch((err) => {
       setMinting(false);
+      openDialog(errorMessage, err);
     });
-  }, [collateralAmount, onMint, daiAmount]);
+  }, [
+    collateralAmount,
+    daiAmount,
+    allowance,
+    proxyAddress,
+    onMintMessage,
+    mint,
+    onDoneMessage,
+    t,
+    ensureProxy,
+    ilkInfo.symbol,
+    increaseAllowance,
+    openDialog,
+    errorMessage,
+  ]);
 
   const formErrors: MintError[] = useMemo(() => {
     if (collateralAmount && daiAmount) {
@@ -86,23 +157,38 @@ const MintForm: FC<MintFormProps> = ({
   const showErrorMessage = (e: MintError) => {
     switch (e) {
       case MintError.insufficientBalance:
-        return t('error.insufficientBalance');
+        return t('mint.error.insufficientBalance');
       case MintError.collateralTooLow:
-        return t('error.collateralTooLow');
+        return t('mint.error.collateralTooLow');
       case MintError.debtTooLow:
-        return t('error.debtTooLow');
+        return t('mint.error.debtTooLow');
       case MintError.issuingTooMuchCoins:
-        return t('error.issuingTooMuchCoins');
+        return t('mint.error.issuingTooMuchCoins');
     }
   };
 
+  const handleClose = useCallback(() => {
+    setMinting(false);
+    if (onDialogClose) {
+      onDialogClose();
+    }
+  }, [onDialogClose]);
+
   return (
     <Card component="form" elevation={0}>
+      <ProgressDialog
+        open={minting}
+        title={buttonContent}
+        text={dialogText}
+        totalStep={totalSteps}
+        currentStep={currentStep}
+        onClose={handleClose}
+      />
       <Grid container padding={2} spacing={2}>
         <Grid item xs={6}>
           <TextField
             fullWidth
-            label={t('lockAmount', { gem: ilkInfo.name })}
+            label={t('mint.lockAmount', { gem: ilkInfo.name })}
             error={isInsufficientBalance}
             value={amountText}
             onChange={handleAmountChange}
@@ -114,7 +200,7 @@ const MintForm: FC<MintFormProps> = ({
         <Grid item xs={6}>
           <TextField
             fullWidth
-            label={t('stableTokenAmount', { gem: ilkInfo.name })}
+            label={t('mint.stableTokenAmount', { gem: ilkInfo.name })}
             error={isInsufficientBalance}
             value={daiAmountText}
             onChange={handleDaiAmountChange}
@@ -136,7 +222,7 @@ const MintForm: FC<MintFormProps> = ({
             }
             onClick={onButtonClick}
           >
-            {minting ? <CircularProgress /> : buttonContent}
+            {buttonContent}
           </Button>
         </Grid>
         <Grid item xs={12}>
