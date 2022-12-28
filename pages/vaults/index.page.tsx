@@ -32,14 +32,6 @@ const Page: NextPageWithEthereum = ({ provider }) => {
     );
   }
 
-  if (data.length === 0) {
-    return (
-      <Box display="flex" justifyContent="center" padding={2}>
-        <Typography variant="subtitle1">{t('noVaults')}</Typography>
-      </Box>
-    );
-  }
-
   return (
     <Card elevation={0}>
       <CardHeader
@@ -54,7 +46,9 @@ const Page: NextPageWithEthereum = ({ provider }) => {
         }
       />
       <CardContent>
-        <VaultTable cdps={data} />
+        <Box display="flex" justifyContent="center" padding={2}>
+          {data.length === 0 ? <Typography variant="subtitle1">{t('noVaults')}</Typography> : <VaultTable cdps={data} />}
+        </Box>
       </CardContent>
     </Card>
   );

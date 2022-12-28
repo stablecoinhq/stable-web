@@ -4,6 +4,7 @@ import { appWithTranslation, useTranslation } from 'next-i18next';
 import { useMemo, useState } from 'react';
 import { SWRConfig } from 'swr/_internal';
 
+import { InvalidUrnAddress } from 'ethereum/contracts/CDPManagerHelper';
 import { UnsupportedNetworkError } from 'ethereum/contracts/ChainLogHelper';
 import { InvalidGemAddress } from 'ethereum/contracts/ERC20Helper';
 import useEthereumProvider from 'ethereum/react/useEthereumProvider';
@@ -50,7 +51,7 @@ const Content: FC<{ appProps: AppProps }> = ({ appProps }) => {
       value={{
         onError: (err: Error) => {
           // これらの例外は別途処理する
-          if (err === InvalidGemAddress || err.message.startsWith('underlying network changed')) {
+          if (err === InvalidGemAddress || err.message.startsWith('underlying network changed') || err === InvalidUrnAddress) {
             return;
           }
           if (err === UnsupportedNetworkError && !displayUnsupportedNetwork) {

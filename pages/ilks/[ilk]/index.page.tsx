@@ -111,7 +111,7 @@ type ContentProps = {
 const Content: FC<ContentProps> = ({ provider, ilkType }) => {
   const chainLog = useChainLog(provider);
   const { data, isLoading, error, mutate } = useSWR('getData', async () => {
-    const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, ilkType);
+    const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee } = await getIlkStatusProps(chainLog, ilkType);
     const proxyRegistry = await chainLog.proxyRegistry();
     const proxy = await proxyRegistry.getDSProxy();
     const [balance, vault, allowance] = await Promise.all([
@@ -132,7 +132,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
     };
   });
 
-  if (error) {
+  if (error as Error) {
     return <InvalidIlk />;
   }
 

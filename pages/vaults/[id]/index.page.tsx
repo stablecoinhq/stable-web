@@ -1,5 +1,4 @@
-import WarningIcon from '@mui/icons-material/Warning';
-import { Box, Button, Card, CardContent, CardHeader, CircularProgress, Stack, SvgIcon, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, CardHeader, CircularProgress, Stack, Typography } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
@@ -10,7 +9,7 @@ import useSWR from 'swr';
 import Vault from 'ethereum/Vault';
 import { INT_FORMAT, UnitFormats } from 'ethereum/helpers/math';
 import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
-import IlkStatusCard, { getIlkStatusProps } from 'ethereum/react/cards/IlkStatusCard';
+import IlkStatusCard from 'ethereum/react/cards/IlkStatusCard';
 import useChainLog from 'ethereum/react/useChainLog';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
@@ -34,9 +33,6 @@ const NotFound: FC = () => {
 
   return (
     <Stack direction="column" alignItems="center" padding={2}>
-      <Box width={128} height={128}>
-        <SvgIcon component={WarningIcon} inheritViewBox style={{ fontSize: 128 }} color="error" />
-      </Box>
       <Typography variant="h6" component="div" padding={2}>
         {t('notFound')}
       </Typography>
@@ -209,37 +205,38 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
     [router.query.id],
   );
   const chainLog = useChainLog(provider);
-  const { data, isLoading, mutate } = useSWR(
+  const { data, isLoading, mutate, error } = useSWR(
     'getCDP',
     async () => {
-      const [cdpManager, proxyRegistry, dai, vat] = await Promise.all([
+      const [cdpManager, proxyRegistry, dai, ilkRegistry, jug] = await Promise.all([
         chainLog.dssCDPManager(),
         chainLog.proxyRegistry(),
         chainLog.dai(),
-        chainLog.vat(),
+        chainLog.ilkRegistry(),
+        chainLog.jug(),
       ]);
       const proxy = await proxyRegistry.getDSProxy();
       const cdp = await cdpManager.getCDP(cdpId);
-      const [ilkInfo, ilkStatus, liquidationRatio, stabilityFee] = await getIlkStatusProps(chainLog, cdp.ilk);
-      const [daiBalance, daiAllowance, urnStatus, tokenBalance, tokenAllowance, vault] = await Promise.all([
+      const ilkInfo = await ilkRegistry.info(cdp.ilk);
+      const [daiBalance, daiAllowance, tokenBalance, tokenAllowance, vault, stabilityFee] = await Promise.all([
         dai.getBalance(),
         proxy ? dai.getAllowance(proxy.address) : FixedNumber.from('0', UnitFormats.WAD),
-        vat.getUrnStatus(cdp.ilk, cdp.urn),
         ilkInfo.gem.getBalance(),
         proxy ? ilkInfo.gem.getAllowance(proxy.address) : FixedNumber.from('0', ilkInfo.gem.format),
         Vault.fromChainlog(chainLog, ilkInfo),
+        jug.getStabilityFee(cdp.ilk),
       ]);
       return {
         cdp,
         proxyRegistry,
         proxyAddress: proxy?.address,
         ilkInfo,
-        ilkStatus,
-        liquidationRatio,
+        ilkStatus: cdp.ilkStatus,
+        liquidationRatio: cdp.liquidationRatio,
         stabilityFee,
         daiBalance,
         daiAllowance,
-        urnStatus,
+        urnStatus: cdp.urnStatus,
         tokenBalance,
         tokenAllowance,
         vault,
@@ -248,6 +245,11 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
     },
     { revalidateOnFocus: false },
   );
+
+  if (error as Error) {
+    return <NotFound />;
+  }
+
   if (!data || isLoading) {
     return (
       <Box display="flex" justifyContent="center" padding={2}>

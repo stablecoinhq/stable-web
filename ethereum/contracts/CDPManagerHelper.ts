@@ -1,3 +1,5 @@
+import { ethers } from 'ethers';
+
 import { DSProxy__factory, DssCdpManager__factory } from 'generated/types';
 
 import IlkType from '../IlkType';
@@ -9,6 +11,8 @@ import type SpotHelper from './SpotHelper';
 import type VatHelper from './VatHelper';
 import type { FixedNumber } from 'ethers';
 import type { DssCdpManager } from 'generated/types';
+
+export const InvalidUrnAddress = new Error('Invalid urn address');
 
 export default class CDPManagerHelper {
   private readonly provider: EthereumProvider;
@@ -43,6 +47,9 @@ export default class CDPManagerHelper {
 
   async getCDP(cdpId: FixedNumber): Promise<CDP> {
     const [urn, ilk, owner] = await Promise.all([this.getUrn(cdpId), this.getIlkType(cdpId), this.getOwner(cdpId)]);
+    if (urn === ethers.constants.AddressZero) {
+      throw InvalidUrnAddress;
+    }
     const [urnStatus, ilkStatus, liquidationRatio] = await Promise.all([
       this.vat.getUrnStatus(ilk, urn),
       this.vat.getIlkStatus(ilk),
