@@ -92,6 +92,7 @@
       "noIlks": "No ilks found",
       "openLabel": "Create new $t(terms.vault)",
       "openDesc": "Open new $t(terms.vault)",
+      "unavailable": "Unavailable",
       "openVault": "Creating new $t(terms.vault)",
       "vaultCreated": "$t(terms.vault) created",
       "currency": "Currency",
