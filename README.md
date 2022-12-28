@@ -1,6 +1,6 @@
 # stable-web
 
-Web application
+Web application to open vaults of a stable coin.
 
 ## Development
 
