@@ -91,14 +91,14 @@ const Controller: FC<ControllerProps> = ({
     [setSelectedTab],
   );
 
-  const mint: MintFormProps['onMint'] = useCallback(
+  const mint: MintFormProps['mint'] = useCallback(
     (collateralAmount, daiAmount) => vault.mint(cdp.id, collateralAmount, daiAmount),
     [vault, cdp.id],
   );
 
-  const burn: BurnFormProps['onBurn'] = useCallback((daiAmount, col) => vault.burn(cdp.id, col, daiAmount), [vault, cdp.id]);
+  const burn: BurnFormProps['burn'] = useCallback((daiAmount, col) => vault.burn(cdp.id, col, daiAmount), [vault, cdp.id]);
 
-  const burnAll: BurnFormProps['onBurnAll'] = useCallback(
+  const burnAll: BurnFormProps['burnAll'] = useCallback(
     (daiAmount, col) => vault.burnAll(cdp.id, col, daiAmount),
     [vault, cdp.id],
   );
@@ -144,10 +144,10 @@ const Controller: FC<ControllerProps> = ({
             allowance={tokenAllowance}
             proxyAddress={proxyAddress}
             increaseAllowance={increateTokenAllowance}
-            onMintMessage={common('forms.mint.processing')}
-            onDoneMessage={common('forms.mint.done')}
+            mintMessage={common('forms.mint.processing')}
+            doneMessage={common('forms.mint.done')}
             ensureProxy={ensureProxy}
-            onErrorMessage={common('forms.mint.error.errorWhileMinting')}
+            errorMessage={common('forms.mint.error.errorWhileMinting')}
             onDialogClose={update}
           />
         );

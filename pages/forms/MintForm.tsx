@@ -21,14 +21,14 @@ export type MintFormProps = {
   balance: FixedNumber;
   lockedBalance: FixedNumber;
   debt: FixedNumber;
-  onMint: (colAmount: FixedNumber, daiAmount: FixedNumber) => Promise<void>;
-  onDialogClose?: () => void;
+  mint: (colAmount: FixedNumber, daiAmount: FixedNumber) => Promise<void>;
+  onDialogClose: () => void;
   onAmountChange: (s: string) => void;
   onDaiAmountChange: (s: string) => void;
   allowance: FixedNumber;
-  onMintMessage: string;
-  onDoneMessage: string;
-  onErrorMessage: string;
+  mintMessage: string;
+  doneMessage: string;
+  errorMessage: string;
   proxyAddress: string | undefined;
   increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
   ensureProxy: () => Promise<string>;
@@ -39,23 +39,23 @@ export type MintFormProps = {
 const MintForm: FC<MintFormProps> = ({
   ilkInfo,
   ilkStatus,
-  onMint,
+  mint,
   buttonContent,
   balance,
   lockedBalance,
   debt,
   onAmountChange,
   onDaiAmountChange,
-  onDialogClose: onCloseDialog,
+  onDialogClose,
   amountText,
   daiAmountText,
-  onErrorMessage,
+  errorMessage,
   proxyAddress,
   allowance,
   increaseAllowance,
   ensureProxy,
-  onMintMessage,
-  onDoneMessage,
+  mintMessage: onMintMessage,
+  doneMessage: onDoneMessage,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
@@ -118,13 +118,13 @@ const MintForm: FC<MintFormProps> = ({
       }
 
       setDialogText(onMintMessage);
-      await onMint(collateralAmount, daiAmount);
+      await mint(collateralAmount, daiAmount);
       setCurrentStep((prev) => prev + 1);
       setDialogText(onDoneMessage);
     };
     await f().catch((err) => {
       setMinting(false);
-      openDialog(onErrorMessage, err);
+      openDialog(errorMessage, err);
     });
   }, [
     collateralAmount,
@@ -132,14 +132,14 @@ const MintForm: FC<MintFormProps> = ({
     allowance,
     proxyAddress,
     onMintMessage,
-    onMint,
+    mint,
     onDoneMessage,
     t,
     ensureProxy,
     ilkInfo.symbol,
     increaseAllowance,
     openDialog,
-    onErrorMessage,
+    errorMessage,
   ]);
 
   const formErrors: MintError[] = useMemo(() => {
@@ -169,10 +169,10 @@ const MintForm: FC<MintFormProps> = ({
 
   const handleClose = useCallback(() => {
     setMinting(false);
-    if (onCloseDialog) {
-      onCloseDialog();
+    if (onDialogClose) {
+      onDialogClose();
     }
-  }, [onCloseDialog]);
+  }, [onDialogClose]);
 
   return (
     <Card component="form" elevation={0}>

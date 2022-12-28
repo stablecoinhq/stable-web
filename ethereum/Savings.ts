@@ -94,7 +94,7 @@ export default class Savings {
       const amount = toFixedNumber(pie, UnitFormats.WAD)
         .toFormat(unitFormat)
         .mulUnsafe(currentChi)
-        .round(18)
+        .round(UnitFormats.WAD.decimals)
         .toFormat(UnitFormats.WAD);
       return {
         address: this.proxy.address,

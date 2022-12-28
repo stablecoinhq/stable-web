@@ -25,18 +25,32 @@ import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react
 export type WithdrawFormProps = {
   depositAmount: FixedNumber;
   buttonContent: ReactNode;
-  onWithdraw: (amount: FixedNumber) => Promise<void>;
-  onWithdrawAll: () => Promise<void>;
+  withdraw: (amount: FixedNumber) => Promise<void>;
+  withdrawAll: () => Promise<void>;
   onDialogClose: () => void;
+  proxyAddress: string | undefined;
+  ensureProxy: () => Promise<string>;
 };
 
 type WithdrawState = 'withdraw' | 'withdrawAll' | 'neutral';
 
-const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onWithdraw, onWithdrawAll, onDialogClose }) => {
+const WithdrawForm: FC<WithdrawFormProps> = ({
+  depositAmount,
+  buttonContent,
+  withdraw,
+  withdrawAll,
+  onDialogClose,
+  proxyAddress,
+  ensureProxy,
+}) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn.withdraw.form' });
+  const { t: forms } = useTranslation('common', { keyPrefix: 'forms' });
+
   const { t: error } = useTranslation('common', { keyPrefix: 'pages.earn.withdraw.form.errors' });
   const { openDialog } = useErrorDialog();
   const [dialogText, setDialogText] = useState('');
+  const [totalSteps, setTotalSteps] = useState(2);
+
   const [currentStep, setCurrentStep] = useState(1);
   const [amountText, setAmountText] = useState('');
   const [withdrawState, setWithdrawState] = useState<WithdrawState>('neutral');
@@ -70,16 +84,30 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
     const f = async () => {
       setWithdrawing(true);
       setCurrentStep(1);
+      setTotalSteps(() => {
+        let steps = 2;
+        if (!proxyAddress) {
+          steps += 1;
+        }
+        return steps;
+      });
+
+      if (!proxyAddress) {
+        setDialogText(forms('createProxy')!);
+        await ensureProxy();
+        setCurrentStep((prev) => prev + 1);
+      }
+
       setDialogText(t('processing')!);
       switch (withdrawState) {
         case 'withdrawAll':
-          await onWithdrawAll();
+          await withdrawAll();
           break;
         case 'withdraw':
           if (!amount) {
             break;
           }
-          await onWithdraw(amount);
+          await withdraw(amount);
           break;
         case 'neutral':
           break;
@@ -91,7 +119,7 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
       setWithdrawing(false);
       openDialog(error('errorWhileWithdraw'), err);
     });
-  }, [t, withdrawState, onWithdrawAll, amount, onWithdraw, openDialog, error]);
+  }, [proxyAddress, t, withdrawState, forms, ensureProxy, withdrawAll, amount, withdraw, openDialog, error]);
 
   const formErrors: WithdrawError[] = useMemo(() => {
     if (amount) {
@@ -115,7 +143,7 @@ const WithdrawForm: FC<WithdrawFormProps> = ({ depositAmount, buttonContent, onW
         open={withdrawing}
         title={buttonContent}
         text={dialogText}
-        totalStep={2}
+        totalStep={totalSteps}
         currentStep={currentStep}
         onClose={() => {
           setWithdrawing(false);

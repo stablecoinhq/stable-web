@@ -21,6 +21,7 @@ export type ProgressDialogProps = {
   currentStep: number;
   onClose: () => void;
 };
+
 const ProgressDialog: FC<ProgressDialogProps> = ({ title, text, totalStep, currentStep, onClose, open }) => {
   const { t } = useTranslation('common');
   const currentProgress = useMemo(() => (currentStep / totalStep) * 100, [currentStep, totalStep]);
@@ -30,7 +31,7 @@ const ProgressDialog: FC<ProgressDialogProps> = ({ title, text, totalStep, curre
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <DialogContentText sx={{ paddingBottom: 3 }}>
-          {text}&nbsp;{isInProgress ? <CircularProgress size="1rem" /> : ''}
+          {text}&nbsp;{isInProgress && <CircularProgress size="1rem" />}
         </DialogContentText>
         <LinearProgress variant="determinate" value={currentProgress} />
       </DialogContent>

@@ -15,7 +15,7 @@ import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react
 export type DepositFormProps = {
   balance: FixedNumber;
   buttonContent: ReactNode;
-  onDeposit: (amount: FixedNumber) => Promise<void>;
+  deposit: (amount: FixedNumber) => Promise<void>;
   proxyAddress: string | undefined;
   increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
   ensureProxy: () => Promise<string>;
@@ -24,7 +24,7 @@ export type DepositFormProps = {
 };
 
 const DepositForm: FC<DepositFormProps> = ({
-  onDeposit,
+  deposit,
   buttonContent,
   balance,
   proxyAddress,
@@ -87,7 +87,7 @@ const DepositForm: FC<DepositFormProps> = ({
       }
 
       setDialogText(t('processing')!);
-      await onDeposit(amount);
+      await deposit(amount);
       setCurrentStep((prev) => prev + 1);
       setDialogText(t('done')!);
     };
@@ -95,7 +95,7 @@ const DepositForm: FC<DepositFormProps> = ({
       setDepositing(false);
       openDialog(error('errorWhileDeposit'), err);
     });
-  }, [amount, allowance, proxyAddress, t, onDeposit, forms, ensureProxy, units, increaseAllowance, openDialog, error]);
+  }, [amount, allowance, proxyAddress, t, deposit, forms, ensureProxy, units, increaseAllowance, openDialog, error]);
 
   const formErrors: DepositError[] = useMemo(() => {
     if (amount) {

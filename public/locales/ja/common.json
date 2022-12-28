@@ -41,7 +41,7 @@
   },
   "forms": {
     "createProxy": "Proxyを作成します",
-    "increaseAllowance": "Proxyに{{token}}へのアクセス権限を付与します",
+    "increaseAllowance": "Proxyに対して{{token}}へのアクセス権限を付与します",
     "done": "完了しました",
     "burn": {
       "redeemAmount": "返済する$t(units.stableToken)の数量",
@@ -131,7 +131,7 @@
           "label": "預け入れる$t(units.stableToken)の数量",
           "submit": "預け入れる",
           "processing": "$t(units.stableToken)を$t(terms.savings)に預け入れます",
-          "done": "預け入れが完了しました",
+          "done": "$t(terms.savings)への預け入れが完了しました",
           "errors": {
             "errorWhileDeposit": "$t(units.stableToken)を預け入れる際に問題が発生しました。$t(terms.retry)",
             "insufficientBalance": "残高不足です",
@@ -143,7 +143,7 @@
         "form": {
           "label": "引き出す$t(units.stableToken)の数量",
           "processing": "$t(terms.savings)から$t(units.stableToken)を引き出します",
-          "done": "引き出しが完了しました",
+          "done": "$t(terms.savings)からの引き出しが完了しました",
           "withdrawAll": "預金から全額引き出す",
           "submit": "引き出す",
           "errors": {

@@ -32,8 +32,8 @@ export type BurnFormProps = {
   ilkStatus: IlkStatus;
   ilkInfo: IlkInfo;
   buttonContent: ReactNode;
-  onBurn: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
-  onBurnAll: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
+  burn: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
+  burnAll: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
   onAmountChange: (s: string) => void;
   onColChange: (s: string) => void;
   daiText: string;
@@ -49,8 +49,8 @@ type BurnFormState = 'burn' | 'burnAll' | 'neutral';
 
 const BurnForm: FC<BurnFormProps> = ({
   ilkInfo,
-  onBurn,
-  onBurnAll,
+  burn,
+  burnAll,
   buttonContent,
   daiBalance,
   lockedBalance,
@@ -150,11 +150,11 @@ const BurnForm: FC<BurnFormProps> = ({
       setDialogText(t('burn.processing')!);
       switch (burnFormState) {
         case 'burnAll': {
-          await onBurnAll(Vault.getDebt(debt, ilkStatus.debtMultiplier), lockedBalance);
+          await burnAll(Vault.getDebt(debt, ilkStatus.debtMultiplier), lockedBalance);
           break;
         }
         case 'burn': {
-          await onBurn(daiAmount, colAmount);
+          await burn(daiAmount, colAmount);
           break;
         }
         case 'neutral':
@@ -177,8 +177,8 @@ const BurnForm: FC<BurnFormProps> = ({
     ilkStatus.debtMultiplier,
     increaseAllowance,
     lockedBalance,
-    onBurn,
-    onBurnAll,
+    burn,
+    burnAll,
     openDialog,
     proxyAddress,
     t,

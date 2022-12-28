@@ -27,9 +27,9 @@ type MintFormControllerProps = {
   ensureProxy: () => Promise<string>;
   address: string;
   buttonContent: string;
-  onMintMessage: string;
-  onErrorMessage: string;
-  onDoneMessage: string;
+  mintMessage: string;
+  errorMessage: string;
+  doneMessage: string;
   selectedTab?: TabValue;
   onSelectTab?: (_: unknown, value: TabValue) => void;
   onDialogClose: () => void;
@@ -45,16 +45,16 @@ const MintFormController: FC<MintFormControllerProps> = ({
   proxyAddress,
   increaseAllowance,
   ensureProxy,
-  onMintMessage,
+  mintMessage,
   urnStatus,
   selectedTab,
   onSelectTab,
   onDialogClose,
-  onErrorMessage,
+  errorMessage,
   mint,
   address,
   buttonContent,
-  onDoneMessage,
+  doneMessage,
 }) => {
   const [amountText, setAmountText] = useState('');
   const [daiAmountText, setDaiAmountText] = useState('');
@@ -123,7 +123,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
         ilkInfo={ilkInfo}
         ilkStatus={ilkStatus}
         buttonContent={buttonContent}
-        onMint={mint}
+        mint={mint}
         balance={balance}
         lockedBalance={urnStatus.lockedBalance}
         debt={urnStatus.debt}
@@ -140,9 +140,9 @@ const MintFormController: FC<MintFormControllerProps> = ({
           setAmountText('');
           setDaiAmountText('');
         }}
-        onMintMessage={onMintMessage}
-        onErrorMessage={onErrorMessage}
-        onDoneMessage={onDoneMessage}
+        mintMessage={mintMessage}
+        errorMessage={errorMessage}
+        doneMessage={doneMessage}
       />
     ),
     [
@@ -161,9 +161,9 @@ const MintFormController: FC<MintFormControllerProps> = ({
       proxyAddress,
       increaseAllowance,
       ensureProxy,
-      onMintMessage,
-      onErrorMessage,
-      onDoneMessage,
+      mintMessage,
+      errorMessage,
+      doneMessage,
       onDialogClose,
     ],
   );

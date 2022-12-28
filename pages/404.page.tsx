@@ -1,4 +1,3 @@
-/* eslint-disable i18next/no-literal-string */
 import Error from 'next/error';
 import { useTranslation } from 'react-i18next';
 

@@ -93,11 +93,11 @@ const OpenVault: FC<OpenVaultProps> = ({
       proxyAddress={proxyAddress}
       increaseAllowance={increaseAllowance}
       ensureProxy={ensureProxy}
-      onMintMessage={t('openVault')}
+      mintMessage={t('openVault')}
       address={address}
       buttonContent={t('openLabel')}
-      onDoneMessage={t('vaultCreated')}
-      onErrorMessage={t('errors.errorWhileOpeningVault')}
+      doneMessage={t('vaultCreated')}
+      errorMessage={t('errors.errorWhileOpeningVault')}
       onDialogClose={() => router.push('/vaults')}
     />
   );

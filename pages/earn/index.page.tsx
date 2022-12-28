@@ -53,11 +53,11 @@ const Controller: FC<ControllerProps> = ({
     setSelectedTab(value);
   }, []);
 
-  const deposit: DepositFormProps['onDeposit'] = useCallback((amount) => savingRate.deposit(amount), [savingRate]);
+  const deposit: DepositFormProps['deposit'] = useCallback((amount) => savingRate.deposit(amount), [savingRate]);
 
-  const withdraw: WithdrawFormProps['onWithdraw'] = useCallback((amount) => savingRate.withdraw(amount), [savingRate]);
+  const withdraw: WithdrawFormProps['withdraw'] = useCallback((amount) => savingRate.withdraw(amount), [savingRate]);
 
-  const withdrawAll: WithdrawFormProps['onWithdrawAll'] = useCallback(() => savingRate.withdrawAll(), [savingRate]);
+  const withdrawAll: WithdrawFormProps['withdrawAll'] = useCallback(() => savingRate.withdrawAll(), [savingRate]);
 
   const increaseAllowance = useCallback(
     async (who: string, n: FixedNumber) => {
@@ -81,7 +81,7 @@ const Controller: FC<ControllerProps> = ({
         return (
           <DepositForm
             buttonContent={t('deposit.form.submit')}
-            onDeposit={deposit}
+            deposit={deposit}
             balance={balance}
             increaseAllowance={increaseAllowance}
             proxyAddress={proxyAddress}
@@ -94,10 +94,12 @@ const Controller: FC<ControllerProps> = ({
         return (
           <WithdrawForm
             buttonContent={t('withdraw.form.submit')}
-            onWithdraw={withdraw}
-            onWithdrawAll={withdrawAll}
+            withdraw={withdraw}
+            withdrawAll={withdrawAll}
             depositAmount={depositAmount || FixedNumber.from(0, UnitFormats.WAD)}
             onDialogClose={update}
+            proxyAddress={proxyAddress}
+            ensureProxy={ensureProxy}
           />
         );
     }
