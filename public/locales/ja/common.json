@@ -82,6 +82,12 @@
     }
   },
   "pages": {
+    "home": {
+      "protocolState": "プロトコルの状態",
+      "daiTotalSupply": "Daiの総発行量",
+      "totalSavingsInPot": "$t(terms.savings)の預入総残高",
+      "activeVaults": "稼働中の$t(terms.vault)"
+    },
     "errors": {
       "backToList": "一覧に戻る",
       "changeNetwork": "ネットワークを変更",

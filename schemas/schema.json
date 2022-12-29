@@ -277,8 +277,26 @@
     },
     "pages": {
       "type": "object",
-      "required": ["errors", "ilk", "vault", "earn"],
+      "required": ["errors", "ilk", "vault", "earn", "home"],
       "properties": {
+        "home": {
+          "type": "object",
+          "required": ["protocolState", "daiTotalSupply", "totalSavingsInPot", "activeVaults"],
+          "properties": {
+            "protocolState": {
+              "type": "string"
+            },
+            "daiTotalSupply": {
+              "type": "string"
+            },
+            "totalSavingsInPot": {
+              "type": "string"
+            },
+            "activeVaults": {
+              "type": "string"
+            }
+          }
+        },
         "errors": {
           "type": "object",
           "required": ["backToList", "changeNetwork", "notConnected", "requireConnection", "unsupportedNetwork"],

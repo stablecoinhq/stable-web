@@ -80,6 +80,12 @@
     }
   },
   "pages": {
+    "home": {
+      "protocolState": "Protocol State",
+      "daiTotalSupply": "Dai total supply",
+      "totalSavingsInPot": "Total savings in $t(terms.savings)",
+      "activeVaults": "Active vaults"
+    },
     "errors": {
       "backToList": "Back to the list",
       "changeNetwork": "Change network",
