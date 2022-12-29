@@ -94,6 +94,7 @@
       "noIlks": "担保が見つかりませんでした",
       "openLabel": "$t(terms.vault)を新規作成",
       "openVault": "$t(terms.vault)を新規作成します",
+      "unavailable": "利用不可",
       "vaultCreated": "$t(terms.vault)が作成されました",
       "openDesc": "新規作成",
       "currency": "通貨",

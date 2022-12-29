@@ -54,9 +54,15 @@ const IlkItem: FC<IlkItemProps> = ({ ilk, ilkInfo, ilkStatus, liquidationRatio, 
 
   const liquidationRatioPercent = useMemo(() => liquidationRatio.mulUnsafe(CENT.toFormat(UnitFormats.RAY)), [liquidationRatio]);
   const curPrice = useMemo(() => ilkStatus.price.mulUnsafe(liquidationRatio), [ilkStatus.price, liquidationRatio]);
-
   const annualFee = useMemo(() => getAnnualFee(stabilityFee), [stabilityFee]);
   const totalIssued = useMemo(() => getTotalIssued(ilkStatus), [ilkStatus]);
+  const isAboveCeiling = useMemo(() => {
+    // debtCeiling < totalIssued + debtFloor
+    const { debtFloor, debtCeiling } = ilkStatus;
+    const f = UnitFormats.RAD;
+    const delta = debtCeiling.toFormat(f).subUnsafe(debtFloor.toFormat(f)).subUnsafe(totalIssued.toFormat(f));
+    return delta.isNegative() || delta.isZero();
+  }, [ilkStatus, totalIssued]);
   return (
     <Grid item xs={12} md={6} lg={4}>
       <Card>
@@ -82,8 +88,13 @@ const IlkItem: FC<IlkItemProps> = ({ ilk, ilkInfo, ilkStatus, liquidationRatio, 
         </CardContent>
         <CardActions>
           <Link href={`/ilks/${ilk.inString}`} passHref>
-            <Button endIcon={<ArrowForwardIcon />} style={{ justifyContent: 'start' }} fullWidth>
-              {t('openDesc')}
+            <Button
+              endIcon={!isAboveCeiling && <ArrowForwardIcon />}
+              style={{ justifyContent: 'start' }}
+              fullWidth
+              disabled={isAboveCeiling}
+            >
+              {isAboveCeiling ? t('unavailable') : t('openDesc')}
             </Button>
           </Link>
         </CardActions>
