@@ -27,7 +27,7 @@ import type { FC } from 'react';
 
 type RowProps = {
   field: string;
-  value: FixedNumber;
+  value: string;
   unit: string;
 };
 

@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
+import { displayCommas } from 'ethereum/helpers/stringNumber';
+
 import type { FixedNumber } from 'ethers';
 import type { FC, ReactNode } from 'react';
 
@@ -29,17 +31,16 @@ export type NumericDisplayContextType = {
   /**
    * 任意のFixedNumberの表示形式を変更する
    */
-  format: (n: FixedNumber) => FixedNumber;
+  format: (n: FixedNumber) => string;
 };
 
 const NumericDisplayContext = createContext<NumericDisplayContextType>({
   displayMode: 'simple',
   toggleDisplay: (_b) => {},
-  format: (n) => n,
+  format: (n) => n.toString(),
 });
 
 export const useNumericDisplayContext = () => useContext(NumericDisplayContext);
-
 /**
  * 与えられた数値の四捨五入を行う。値の有効小数点がdecimalsよりも小さい場合、そちらを優先する。
  */
@@ -49,7 +50,7 @@ export const round = (num: FixedNumber, decimals: number) => {
     comps.push('0');
   }
   if (comps[1]!.length <= decimals) {
-    return num;
+    return displayCommas(num);
   }
   const nonZeroAt = comps[1]!.search(/[^0]/);
   // 整数部が0、かつ有効小数点が指定された桁数より小さい場合には、有効小数点を変更する
@@ -58,7 +59,7 @@ export const round = (num: FixedNumber, decimals: number) => {
     (nonZeroAt > decimals && comps[0]! === '0') || num.round(decimals).isZero()
       ? Math.min(nonZeroAt + ROUND_AT_DETAIL, num.format.decimals)
       : decimals;
-  return num.round(roundAt);
+  return displayCommas(num.round(roundAt));
 };
 
 export const NumericDisplayProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -79,7 +80,10 @@ export const NumericDisplayProvider: FC<{ children: ReactNode }> = ({ children }
     setDisplayMode(u || 'simple');
   }, []);
 
-  const format = useCallback((n: FixedNumber) => (displayMode === 'simple' ? round(n, ROUND_AT) : n), [displayMode]);
+  const format = useCallback(
+    (n: FixedNumber) => (displayMode === 'simple' ? round(n, ROUND_AT) : displayCommas(n)),
+    [displayMode],
+  );
   const values: NumericDisplayContextType = useMemo(
     () => ({ displayMode, toggleDisplay, format }),
     [toggleDisplay, format, displayMode],

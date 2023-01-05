@@ -41,7 +41,7 @@ type ColumnTranaslations = {
 };
 
 const MIN_WIDTH = 170;
-const makeColumns = (translations: ColumnTranaslations): GridColDef[] => {
+const makeColumns = (translations: ColumnTranaslations, format: (n: FixedNumber) => string): GridColDef[] => {
   const { collateralType, id, collateralizationRatio, collateralLocked, debt, manageVault, liquidationPrice } = translations;
   return [
     {
@@ -61,7 +61,8 @@ const makeColumns = (translations: ColumnTranaslations): GridColDef[] => {
       flex: 1,
       minWidth: MIN_WIDTH,
       renderHeader: tableHeaderCell,
-      valueFormatter: (params: GridValueFormatterParams<[FixedNumber, string]>) => `${params.value[0]} ${params.value[1]}`,
+      valueFormatter: (params: GridValueFormatterParams<[FixedNumber, string]>) =>
+        `${format(params.value[0])} ${params.value[1]}`,
       sortComparator: sortFixedNumberWithArray,
     },
     {
@@ -72,7 +73,7 @@ const makeColumns = (translations: ColumnTranaslations): GridColDef[] => {
       flex: 1,
       minWidth: MIN_WIDTH,
       renderHeader: tableHeaderCell,
-      valueFormatter: ({ value }) => `${value} %`,
+      valueFormatter: ({ value }) => `${format(value)} %`,
       sortComparator: sortFixedNumber,
     },
     {
@@ -81,7 +82,8 @@ const makeColumns = (translations: ColumnTranaslations): GridColDef[] => {
       headerName: collateralLocked,
       align: 'right',
       minWidth: MIN_WIDTH,
-      valueFormatter: (params: GridValueFormatterParams<[FixedNumber, string]>) => `${params.value[0]} ${params.value[1]}`,
+      valueFormatter: (params: GridValueFormatterParams<[FixedNumber, string]>) =>
+        `${format(params.value[0])} ${params.value[1]}`,
       flex: 1,
       renderHeader: tableHeaderCell,
       sortComparator: sortFixedNumberWithArray,
@@ -94,7 +96,7 @@ const makeColumns = (translations: ColumnTranaslations): GridColDef[] => {
       flex: 1,
       minWidth: MIN_WIDTH,
       renderHeader: tableHeaderCell,
-      valueFormatter: ({ value }) => `${value} DAI`,
+      valueFormatter: ({ value }) => `${format(value)} DAI`,
       sortComparator: sortFixedNumber,
     },
     {
@@ -126,21 +128,22 @@ const VaultTable: FC<{ cdps: CDP[] }> = ({ cdps }) => {
         return {
           id: parseInt(id.toString(), 10),
           collateralType: ilk.inString,
-          collateralizationRatio: format(
-            Vault.getCollateralizationRatio(urnStatus.lockedBalance, urnStatus.debt, liquidationRatio, ilkStatus),
+          collateralizationRatio: Vault.getCollateralizationRatio(
+            urnStatus.lockedBalance,
+            urnStatus.debt,
+            liquidationRatio,
+            ilkStatus,
           ),
           liquidationPrice: [
-            format(
-              Vault.getLiquidationPrice(urnStatus.lockedBalance, urnStatus.debt, ilkStatus.debtMultiplier, liquidationRatio),
-            ),
+            Vault.getLiquidationPrice(urnStatus.lockedBalance, urnStatus.debt, ilkStatus.debtMultiplier, liquidationRatio),
             units('jpy'),
           ],
-          collateralLocked: [format(urnStatus.lockedBalance), ilk.currencySymbol] as [FixedNumber, string],
-          debt: format(Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier)),
+          collateralLocked: [urnStatus.lockedBalance, ilk.currencySymbol] as [FixedNumber, string],
+          debt: Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier),
           manage: id,
         };
       }),
-    [cdps, format, units],
+    [cdps, units],
   );
   const columns = useMemo(() => {
     const translations: ColumnTranaslations = {
@@ -152,8 +155,8 @@ const VaultTable: FC<{ cdps: CDP[] }> = ({ cdps }) => {
       debt: t('debt'),
       manageVault: t('manageVault'),
     };
-    return makeColumns(translations);
-  }, [t, terms]);
+    return makeColumns(translations, format);
+  }, [format, t, terms]);
   return (
     <DataGrid
       columns={columns}
