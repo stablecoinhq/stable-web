@@ -12,11 +12,13 @@ import {
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
+import HelperText from 'component/HelperText';
 import ProgressDialog from 'component/ProgressDialog';
 import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import { useErrorDialog } from 'store/ErrorDialogProvider';
+import { useNumericDisplayContext } from 'store/NumericDisplayProvider';
 
 import { BurnFormValidation, BurnError } from './BurnFormValidation';
 
@@ -78,6 +80,7 @@ const BurnForm: FC<BurnFormProps> = ({
   const [dialogText, setDialogText] = useState('');
   const [totalSteps, setTotalSteps] = useState(1);
   const [currentStep, setCurrentStep] = useState(1);
+  const { format } = useNumericDisplayContext();
 
   const handleDaiChange: ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
@@ -235,7 +238,7 @@ const BurnForm: FC<BurnFormProps> = ({
         }}
       />
       <Grid container padding={2} spacing={2}>
-        <Grid item xs={6}>
+        <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             label={t('burn.redeemAmount')}
@@ -243,12 +246,13 @@ const BurnForm: FC<BurnFormProps> = ({
             value={daiText}
             error={isInvalidRepayAmount || isOverRepaying}
             onChange={handleDaiChange}
+            helperText={<HelperText>{`${t('balance')}: ${format(daiBalance)} ${units('stableToken')}`}</HelperText>}
             InputProps={{
-              endAdornment: <InputAdornment position="end">DAI</InputAdornment>,
+              endAdornment: <InputAdornment position="end">{units('stableToken')}</InputAdornment>,
             }}
           />
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             disabled={burnFormState === 'burnAll' || burning}

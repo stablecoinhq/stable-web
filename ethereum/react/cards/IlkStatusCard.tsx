@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import { useTranslation } from 'next-i18next';
 import { useMemo } from 'react';
 
@@ -46,34 +46,24 @@ const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidation
   const liquidationRatioPercent = useMemo(() => liquidationRatio.mulUnsafe(CENT.toFormat(UnitFormats.RAY)), [liquidationRatio]);
 
   return (
-    <Card>
-      <CardHeader title={t('title', { ilk: ilkInfo.type.inString })} subheader={ilkInfo.name} />
-      <CardContent>
-        <Grid container padding={2} spacing={2}>
-          <BNText label={t('totalIssue')} value={totalIssue} tooltipText={t('totalIssueDesc')} unit={units('stableToken')} />
-          <BNText
-            label={t('currentPrice', { collateral: ilkInfo.symbol })}
-            value={curPrice}
-            tooltipText={t('currentPriceDesc', { collateral: ilkInfo.name })}
-            unit={units('jpy')}
-          />
-          <BNText label={t('liqRatio')} value={liquidationRatioPercent} tooltipText={t('liqRatioDesc')} unit="%" noCommas />
-          <BNText label={t('annualFee')} value={annualFee} tooltipText={t('annualFeeDesc')} unit="%" noCommas />
-          <BNText
-            label={t('maxLiquidity')}
-            value={ilkStatus.debtCeiling}
-            tooltipText={t('maxLiquidityDesc', { collateral: ilkInfo.name })}
-            unit={units('stableToken')}
-          />
-          <BNText
-            label={t('debtFloor')}
-            value={ilkStatus.debtFloor}
-            tooltipText={t('debtFloorDesc')}
-            unit={units('stableToken')}
-          />
-        </Grid>
-      </CardContent>
-    </Card>
+    <Grid container padding={2} spacing={2}>
+      <BNText label={t('totalIssue')} value={totalIssue} tooltipText={t('totalIssueDesc')} unit={units('stableToken')} />
+      <BNText
+        label={t('currentPrice', { collateral: ilkInfo.symbol })}
+        value={curPrice}
+        tooltipText={t('currentPriceDesc', { collateral: ilkInfo.name })}
+        unit={units('jpy')}
+      />
+      <BNText label={t('liqRatio')} value={liquidationRatioPercent} tooltipText={t('liqRatioDesc')} unit="%" noCommas />
+      <BNText label={t('annualFee')} value={annualFee} tooltipText={t('annualFeeDesc')} unit="%" noCommas />
+      <BNText
+        label={t('maxLiquidity')}
+        value={ilkStatus.debtCeiling}
+        tooltipText={t('maxLiquidityDesc', { collateral: ilkInfo.name })}
+        unit={units('stableToken')}
+      />
+      <BNText label={t('debtFloor')} value={ilkStatus.debtFloor} tooltipText={t('debtFloorDesc')} unit={units('stableToken')} />
+    </Grid>
   );
 };
 

@@ -2,10 +2,12 @@ import { Button, Card, Grid, InputAdornment, TextField, FormHelperText } from '@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import HelperText from 'component/HelperText';
 import ProgressDialog from 'component/ProgressDialog';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import { useErrorDialog } from 'store/ErrorDialogProvider';
+import { useNumericDisplayContext } from 'store/NumericDisplayProvider';
 
 import DepositFormValidation, { DepositError } from './DepositFormValidation';
 
@@ -44,6 +46,7 @@ const DepositForm: FC<DepositFormProps> = ({
   const [amountText, setAmountText] = useState('');
 
   const { openDialog } = useErrorDialog();
+  const { format } = useNumericDisplayContext();
 
   const formats = UnitFormats.WAD;
   const amount = useMemo(() => toFixedNumberOrUndefined(amountText, formats), [amountText, formats]);
@@ -134,6 +137,7 @@ const DepositForm: FC<DepositFormProps> = ({
             value={amountText}
             error={formErrors.length !== 0}
             onChange={onAmountChange}
+            helperText={<HelperText>{`${forms('balance')}: ${format(balance)} ${units('stableToken')}`}</HelperText>}
             InputProps={{
               endAdornment: <InputAdornment position="end">DAI</InputAdornment>,
             }}

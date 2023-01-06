@@ -133,7 +133,6 @@ const Controller: FC<ControllerProps> = ({
             mint={mint}
             liquidationRatio={liquidationRatio}
             balance={tokenBalance}
-            address={address}
             buttonContent={t('mint')}
             selectedTab={selectedTab}
             onSelectTab={onSelectTab}
@@ -282,10 +281,9 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
   const { ilk, urn } = cdp;
 
   return (
-    <Card elevation={0}>
+    <Card elevation={5}>
       <CardHeader title={t('title', { ilk: ilk.inString, id: cdpId?.toString() })} subheader={urn} />
       <CardContent>
-        <Stack padding={2} spacing={2}>
           <IlkStatusCard
             ilkInfo={ilkInfo}
             ilkStatus={ilkStatus}
@@ -308,7 +306,6 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
             dai={dai}
             update={() => mutate()}
           />
-        </Stack>
       </CardContent>
     </Card>
   );
