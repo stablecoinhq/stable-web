@@ -61,7 +61,7 @@ const Controller: FC<ControllerProps> = ({
 
   const increaseAllowance = useCallback(
     async (who: string, n: FixedNumber) => {
-      await dai.ensureAllowance(who, n, 2).then(() => update());
+      await dai.ensureAllowance(who, n).then(() => update());
     },
     [dai, update],
   );

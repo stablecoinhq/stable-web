@@ -110,14 +110,14 @@ const Controller: FC<ControllerProps> = ({
 
   const increateTokenAllowance = useCallback(
     async (who: string, amount: FixedNumber) => {
-      await vault.ilkInfo.gem.ensureAllowance(who, amount, 2).then(() => update());
+      await vault.ilkInfo.gem.ensureAllowance(who, amount).then(() => update());
     },
     [update, vault.ilkInfo.gem],
   );
 
   const increaseDaiAllowance = useCallback(
     async (who: string, amount: FixedNumber) => {
-      await dai.ensureAllowance(who, amount, 2).then(() => update());
+      await dai.ensureAllowance(who, amount).then(() => update());
     },
     [dai, update],
   );

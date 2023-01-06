@@ -55,7 +55,7 @@ export default class Savings {
       return;
     }
     const { proxy, actions } = await this.getProxyAndActions();
-    await this.dai.ensureAllowance(proxy.address, daiAmount, 3);
+    await this.dai.ensureAllowance(proxy.address, daiAmount);
     const tx = await actions.deposit(this.daiJoin, this.pot, daiAmount);
     await tx.wait();
   }

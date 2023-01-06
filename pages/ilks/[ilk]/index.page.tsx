@@ -68,7 +68,7 @@ const OpenVault: FC<OpenVaultProps> = ({
 
   const increaseAllowance = useCallback(
     async (who: string, amount: FixedNumber) => {
-      await ilkInfo.gem.ensureAllowance(who, amount, 2).then(() => update());
+      await ilkInfo.gem.ensureAllowance(who, amount).then(() => update());
     },
     [ilkInfo.gem, update],
   );
