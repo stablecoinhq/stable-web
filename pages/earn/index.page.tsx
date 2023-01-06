@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, CircularProgress, Stack, Tab, Tabs } from '@mui/material';
+import { Box, Card, CardContent, CircularProgress, Tab, Tabs } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +16,6 @@ import WithdrawForm from './forms/WithdrawForm';
 
 import type { DepositFormProps } from './forms/DepositForm';
 import type { WithdrawFormProps } from './forms/WithdrawForm';
-import type EthereumProvider from 'ethereum/EthereumProvider';
 import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type ERC20Helper from 'ethereum/contracts/ERC20Helper';
 import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';
@@ -130,14 +129,12 @@ const Controller: FC<ControllerProps> = ({
 };
 
 type ContentProps = {
-  provider: EthereumProvider;
   chainLog: ChainLogHelper;
 };
 
-const Content: FC<ContentProps> = ({ chainLog, provider }) => {
+const Content: FC<ContentProps> = ({ chainLog }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
-  const { t: wallet } = useTranslation('common', { keyPrefix: 'cards.wallet' });
 
   const { data, mutate, isLoading } = useSWR(
     'getSavingData',
@@ -176,7 +173,7 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
 
   const { saving, annualRate, deposit, balance, proxyAddress, proxyRegistry, allowance, dai } = data;
   return (
-    <Stack padding={2} spacing={2}>
+    <>
       <SavingRateCard annualRate={annualRate} />
       {deposit && (
         <BalanceStatusCard
@@ -188,14 +185,6 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
           unit={units('stableToken')}
         />
       )}
-      <BalanceStatusCard
-        title={wallet('title')}
-        address={provider.address}
-        balance={balance}
-        label={wallet('balance', { gem: units('stableToken') })}
-        tooltipText={wallet('description')!}
-        unit={units('stableToken')}
-      />
       <Controller
         savingRate={saving}
         update={() => mutate()}
@@ -206,7 +195,7 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
         allowance={allowance}
         dai={dai}
       />
-    </Stack>
+    </>
   );
 };
 
@@ -214,9 +203,9 @@ const Earn: NextPageWithEthereum = ({ provider }) => {
   const chainLog = useChainLog(provider);
 
   return (
-    <Card elevation={0}>
+    <Card elevation={5}>
       <CardContent>
-        <Content chainLog={chainLog} provider={provider} />
+        <Content chainLog={chainLog} />
       </CardContent>
     </Card>
   );

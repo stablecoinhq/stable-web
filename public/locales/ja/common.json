@@ -41,6 +41,7 @@
   },
   "forms": {
     "createProxy": "Proxyを作成します",
+    "balance": "ウォレットの保有残高",
     "increaseAllowance": "Proxyに対して{{token}}へのアクセス権限を付与します",
     "done": "完了しました",
     "burn": {

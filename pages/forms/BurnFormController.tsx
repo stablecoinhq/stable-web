@@ -25,7 +25,6 @@ type BurnFormControllerProps = {
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
   buttonContent: string;
-  address: string;
   proxyAddress: string | undefined;
   increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
   ensureProxy: () => Promise<string>;
@@ -44,7 +43,6 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
   balance,
   buttonContent,
   urnStatus,
-  address,
   selectedTab,
   onSelectTab,
   burn,
@@ -175,8 +173,6 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
       ilkStatus={ilkStatus}
       current={current}
       liquidationRatio={liquidationRatio}
-      balance={balance}
-      address={address}
       urnStatus={urnStatus}
       selectedTab={selectedTab}
       onSelectTab={onSelectTab}

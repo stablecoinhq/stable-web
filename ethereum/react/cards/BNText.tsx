@@ -1,5 +1,6 @@
 import { Grid, InputAdornment, TextField, Tooltip } from '@mui/material';
 
+import HelperText from 'component/HelperText';
 import { useNumericDisplayContext } from 'store/NumericDisplayProvider';
 
 import type { FixedNumber } from 'ethers';
@@ -19,7 +20,7 @@ const BNText: FC<BNTextProps> = ({ label, value, tooltipText, unit, helperText, 
   const { format } = useNumericDisplayContext();
 
   const content = (
-    <Grid item xs={6}>
+    <Grid item xs={12} md={6}>
       <TextField
         error={error}
         variant="standard"
@@ -28,7 +29,7 @@ const BNText: FC<BNTextProps> = ({ label, value, tooltipText, unit, helperText, 
         value={format(value, noCommas)}
         inputProps={{ disabled: true }}
         InputProps={{ endAdornment: <InputAdornment position="end">{unit}</InputAdornment> }}
-        helperText={<span style={{ fontSize: 15 }}>{helperText}</span>}
+        helperText={<HelperText>{helperText}</HelperText>}
       />
     </Grid>
   );

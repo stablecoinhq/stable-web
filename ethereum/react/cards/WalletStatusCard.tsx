@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, Grid } from '@mui/material';
+import { CardHeader, Grid } from '@mui/material';
 import { useTranslation } from 'next-i18next';
 
 import BNText from './BNText';
@@ -17,14 +17,12 @@ const WalletStatusCard: FC<WalletStatusCardProps> = ({ label, balance, address, 
   const { t } = useTranslation('common', { keyPrefix: 'cards.wallet' });
 
   return (
-    <Card>
+    <>
       <CardHeader title={t('title')} subheader={address} />
-      <CardContent>
-        <Grid container padding={2} spacing={2}>
-          <BNText label={label} value={balance} unit={unit} />
-        </Grid>
-      </CardContent>
-    </Card>
+      <Grid container padding={2} spacing={2}>
+        <BNText label={label} value={balance} unit={unit} />
+      </Grid>
+    </>
   );
 };
 

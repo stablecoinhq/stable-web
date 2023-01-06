@@ -1,8 +1,9 @@
-import { Card, CardContent, CardHeader, Grid } from '@mui/material';
+import { CardHeader, Grid } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useMemo } from 'react';
 
+import HelperText from 'component/HelperText';
 import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { useNumericDisplayContext } from 'store/NumericDisplayProvider';
@@ -55,51 +56,45 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
     [ilkStatus.debtMultiplier, liquidationRatio, lockedBalance, urnDebt],
   );
   const renderHelperText = (num: FixedNumber | undefined, unit: string, noComma?: boolean) =>
-    num ? (
-      <span style={{ fontSize: 13 }}>{`${format(num, noComma)} ${unit}`}</span>
-    ) : (
-      <span style={{ fontSize: 13 }}>&nbsp;</span>
-    );
+    num ? <HelperText>{`${format(num, noComma)} ${unit}`}</HelperText> : <HelperText>&nbsp;</HelperText>;
   return (
-    <Card>
+    <>
       <CardHeader title={t('title')} subheader={urn} />
-      <CardContent>
-        <Grid container padding={2} spacing={2}>
-          <BNText
-            label={t('colRatio')}
-            value={collateralizationRatio}
-            unit="%"
-            helperText={renderHelperText(current?.collateralizationRatio.value, '%', true)}
-            error={current?.collateralizationRatio.isValid}
-            noCommas
-          />
-          <BNText
-            label={t('lockedCollateral')}
-            value={lockedBalance}
-            tooltipText={t('lockedCollateralDesc')}
-            unit={ilkInfo.symbol}
-            helperText={renderHelperText(current?.collateralAmount.value, ilkInfo.symbol)}
-            error={current?.collateralAmount.isValid}
-          />
-          <BNText
-            label={t('debt')}
-            value={debt}
-            tooltipText={t('debtDesc')}
-            unit={units('stableToken')}
-            helperText={renderHelperText(current?.debt.value, units('stableToken'))}
-            error={current?.debt.isValid}
-          />
-          <BNText
-            label={t('liquidationPrice')}
-            tooltipText={t('liquidationPriceDesc', { collateral: ilkInfo.name })}
-            value={liquidationPrice}
-            helperText={renderHelperText(current?.liquidationPrice.value, units('jpy'))}
-            unit={units('jpy')}
-            error={current?.liquidationPrice.isValid}
-          />
-        </Grid>
-      </CardContent>
-    </Card>
+      <Grid container padding={2} spacing={2}>
+        <BNText
+          label={t('colRatio')}
+          value={collateralizationRatio}
+          unit="%"
+          helperText={renderHelperText(current?.collateralizationRatio.value, '%', true)}
+          error={current?.collateralizationRatio.isValid}
+          noCommas
+        />
+        <BNText
+          label={t('lockedCollateral')}
+          value={lockedBalance}
+          tooltipText={t('lockedCollateralDesc')}
+          unit={ilkInfo.symbol}
+          helperText={renderHelperText(current?.collateralAmount.value, ilkInfo.symbol)}
+          error={current?.collateralAmount.isValid}
+        />
+        <BNText
+          label={t('debt')}
+          value={debt}
+          tooltipText={t('debtDesc')}
+          unit={units('stableToken')}
+          helperText={renderHelperText(current?.debt.value, units('stableToken'))}
+          error={current?.debt.isValid}
+        />
+        <BNText
+          label={t('liquidationPrice')}
+          tooltipText={t('liquidationPriceDesc', { collateral: ilkInfo.name })}
+          value={liquidationPrice}
+          helperText={renderHelperText(current?.liquidationPrice.value, units('jpy'))}
+          unit={units('jpy')}
+          error={current?.liquidationPrice.isValid}
+        />
+      </Grid>
+    </>
   );
 };
 

@@ -53,7 +53,6 @@ type ControllerProps = {
   tokenAllowance: FixedNumber;
   daiBalance: FixedNumber;
   daiAllowance: FixedNumber;
-  address: string;
   update: () => void;
   dai: ERC20Helper;
   proxyRegistry: ProxyRegistryHelper;
@@ -69,7 +68,6 @@ const Controller: FC<ControllerProps> = ({
   update,
   tokenBalance,
   daiBalance,
-  address,
   tokenAllowance,
   daiAllowance,
   dai,
@@ -133,7 +131,6 @@ const Controller: FC<ControllerProps> = ({
             mint={mint}
             liquidationRatio={liquidationRatio}
             balance={tokenBalance}
-            address={address}
             buttonContent={t('mint')}
             selectedTab={selectedTab}
             onSelectTab={onSelectTab}
@@ -157,7 +154,6 @@ const Controller: FC<ControllerProps> = ({
             urnStatus={urnStatus}
             balance={daiBalance}
             buttonContent={t('burn')}
-            address={address}
             ilkStatus={ilkStatus}
             selectedTab={selectedTab}
             onSelectTab={onSelectTab}
@@ -177,7 +173,6 @@ const Controller: FC<ControllerProps> = ({
     mint,
     liquidationRatio,
     tokenBalance,
-    address,
     t,
     onSelectTab,
     tokenAllowance,
@@ -282,33 +277,30 @@ const VaultDetail: NextPageWithEthereum = ({ provider }) => {
   const { ilk, urn } = cdp;
 
   return (
-    <Card elevation={0}>
+    <Card elevation={5}>
       <CardHeader title={t('title', { ilk: ilk.inString, id: cdpId?.toString() })} subheader={urn} />
       <CardContent>
-        <Stack padding={2} spacing={2}>
-          <IlkStatusCard
-            ilkInfo={ilkInfo}
-            ilkStatus={ilkStatus}
-            liquidationRatio={liquidationRatio}
-            stabilityFee={stabilityFee}
-          />
-          <Controller
-            cdp={cdp}
-            address={provider.address}
-            ilkStatus={ilkStatus}
-            liquidationRatio={liquidationRatio}
-            tokenBalance={tokenBalance}
-            tokenAllowance={tokenAllowance}
-            daiAllowance={daiAllowance}
-            daiBalance={daiBalance}
-            urnStatus={urnStatus}
-            vault={vault}
-            proxyRegistry={proxyRegistry}
-            proxyAddress={proxyAddress}
-            dai={dai}
-            update={() => mutate()}
-          />
-        </Stack>
+        <IlkStatusCard
+          ilkInfo={ilkInfo}
+          ilkStatus={ilkStatus}
+          liquidationRatio={liquidationRatio}
+          stabilityFee={stabilityFee}
+        />
+        <Controller
+          cdp={cdp}
+          ilkStatus={ilkStatus}
+          liquidationRatio={liquidationRatio}
+          tokenBalance={tokenBalance}
+          tokenAllowance={tokenAllowance}
+          daiAllowance={daiAllowance}
+          daiBalance={daiBalance}
+          urnStatus={urnStatus}
+          vault={vault}
+          proxyRegistry={proxyRegistry}
+          proxyAddress={proxyAddress}
+          dai={dai}
+          update={() => mutate()}
+        />
       </CardContent>
     </Card>
   );

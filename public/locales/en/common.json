@@ -61,6 +61,7 @@
     "mint": {
       "stableTokenAmount": "Amount of $t(units.stableToken) to mint",
       "lockAmount": "Amount of {{gem}} to lock",
+      "balance": "Available Balance",
       "processing": "Minting $t(units.stableToken)",
       "done": "$t(units.stableToken) successfully minted",
       "error": {

@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, CardHeader, CircularProgress, Stack } from '@mui/material';
+import { Box, Card, CardContent, CardHeader, CircularProgress } from '@mui/material';
 import { ethers, FixedNumber } from 'ethers';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
@@ -33,7 +33,6 @@ type OpenVaultProps = {
   allowance: FixedNumber;
   proxyRegistry: ProxyRegistryHelper;
   proxyAddress: string | undefined;
-  address: string;
   update: () => void;
 };
 
@@ -43,7 +42,6 @@ const OpenVault: FC<OpenVaultProps> = ({
   ilkStatus,
   liquidationRatio,
   balance,
-  address,
   allowance,
   proxyAddress,
   proxyRegistry,
@@ -94,7 +92,6 @@ const OpenVault: FC<OpenVaultProps> = ({
       increaseAllowance={increaseAllowance}
       ensureProxy={ensureProxy}
       mintMessage={t('openVault')}
-      address={address}
       buttonContent={t('openLabel')}
       doneMessage={t('vaultCreated')}
       errorMessage={t('errors.errorWhileOpeningVault')}
@@ -146,7 +143,7 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
 
   const { ilkInfo, ilkStatus, liquidationRatio, stabilityFee, balance, vault, allowance, proxyAddress, proxyRegistry } = data;
   return (
-    <Stack padding={2} spacing={2}>
+    <>
       <IlkStatusCard ilkInfo={ilkInfo} ilkStatus={ilkStatus} liquidationRatio={liquidationRatio} stabilityFee={stabilityFee} />
       <OpenVault
         ilkInfo={ilkInfo}
@@ -154,13 +151,12 @@ const Content: FC<ContentProps> = ({ provider, ilkType }) => {
         vault={vault}
         liquidationRatio={liquidationRatio}
         balance={balance}
-        address={provider.address}
         allowance={allowance}
         proxyRegistry={proxyRegistry}
         proxyAddress={proxyAddress}
         update={() => mutate()}
       />
-    </Stack>
+    </>
   );
 };
 
@@ -178,7 +174,7 @@ const OpenVaultForIlk: NextPageWithEthereum = ({ provider }) => {
   }
 
   return (
-    <Card elevation={0}>
+    <Card elevation={5}>
       <CardHeader title={t('openLabel', { ilk: ilkType.inString })} />
       <CardContent>
         <Content provider={provider} ilkType={ilkType} />
