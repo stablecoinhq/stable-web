@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, CircularProgress, Tab, Tabs } from '@mui/material';
+import { Box, Card, CardContent, CircularProgress } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,8 +11,8 @@ import BalanceStatusCard from 'pages/earn/BalanceStatusCard';
 import getTranslationProps from 'pages/getTranslationProps';
 
 import SavingRateCard from './SavingRateCard';
-import DepositForm from './forms/DepositForm';
-import WithdrawForm from './forms/WithdrawForm';
+import DepositFormController from './forms/DepositFormController';
+import WithdrawFormController from './forms/WithdrawFormController';
 
 import type { DepositFormProps } from './forms/DepositForm';
 import type { WithdrawFormProps } from './forms/WithdrawForm';
@@ -78,7 +78,7 @@ const Controller: FC<ControllerProps> = ({
     switch (selectedTab) {
       case 'deposit':
         return (
-          <DepositForm
+          <DepositFormController
             buttonContent={t('deposit.form.submit')}
             deposit={deposit}
             balance={balance}
@@ -87,11 +87,14 @@ const Controller: FC<ControllerProps> = ({
             allowance={allowance}
             ensureProxy={ensureProxy}
             onDialogClose={update}
+            depositAmount={depositAmount}
+            selectedTab={selectedTab}
+            onSelectTab={onSelectTab}
           />
         );
       case 'withdraw':
         return (
-          <WithdrawForm
+          <WithdrawFormController
             buttonContent={t('withdraw.form.submit')}
             withdraw={withdraw}
             withdrawAll={withdrawAll}
@@ -99,6 +102,8 @@ const Controller: FC<ControllerProps> = ({
             onDialogClose={update}
             proxyAddress={proxyAddress}
             ensureProxy={ensureProxy}
+            selectedTab={selectedTab}
+            onSelectTab={onSelectTab}
           />
         );
     }
@@ -112,20 +117,13 @@ const Controller: FC<ControllerProps> = ({
     allowance,
     ensureProxy,
     update,
+    depositAmount,
+    onSelectTab,
     withdraw,
     withdrawAll,
-    depositAmount,
   ]);
 
-  return (
-    <>
-      <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
-        <Tab label={t('depositTab')} value="deposit" />
-        <Tab label={t('withdrawTab')} value="withdraw" disabled={!depositAmount || depositAmount?.isZero()} />
-      </Tabs>
-      {content}
-    </>
-  );
+  return content;
 };
 
 type ContentProps = {

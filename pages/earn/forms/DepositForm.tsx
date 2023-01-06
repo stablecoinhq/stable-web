@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import HelperText from 'component/HelperText';
 import ProgressDialog from 'component/ProgressDialog';
 import { UnitFormats } from 'ethereum/helpers/math';
-import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
+import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import { useErrorDialog } from 'store/ErrorDialogProvider';
 import { useNumericDisplayContext } from 'store/NumericDisplayProvider';
 
@@ -23,6 +23,8 @@ export type DepositFormProps = {
   ensureProxy: () => Promise<string>;
   allowance: FixedNumber;
   onDialogClose: () => void;
+  amountText: string;
+  onAmountChange: (s: string) => void;
 };
 
 const DepositForm: FC<DepositFormProps> = ({
@@ -34,6 +36,8 @@ const DepositForm: FC<DepositFormProps> = ({
   ensureProxy,
   allowance,
   onDialogClose,
+  amountText,
+  onAmountChange,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn.deposit.form' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
@@ -43,7 +47,6 @@ const DepositForm: FC<DepositFormProps> = ({
   const [dialogText, setDialogText] = useState('');
   const [totalSteps, setTotalSteps] = useState(1);
   const [currentStep, setCurrentStep] = useState(1);
-  const [amountText, setAmountText] = useState('');
 
   const { openDialog } = useErrorDialog();
   const { format } = useNumericDisplayContext();
@@ -53,9 +56,9 @@ const DepositForm: FC<DepositFormProps> = ({
   // input as percentage, return as ratio
   const [depositing, setDepositing] = useState(false);
 
-  const onAmountChange: ChangeEventHandler<HTMLInputElement> = useCallback(
-    (event) => setAmountText(cutDecimals(pickNumbers(event.target.value), formats.decimals)),
-    [formats],
+  const handleChange: ChangeEventHandler<HTMLInputElement> = useCallback(
+    (event) => onAmountChange(event.target.value),
+    [onAmountChange],
   );
   const onButtonClick: MouseEventHandler<HTMLButtonElement> = useCallback(async () => {
     if (!amount) {
@@ -124,7 +127,6 @@ const DepositForm: FC<DepositFormProps> = ({
         totalStep={totalSteps}
         currentStep={currentStep}
         onClose={() => {
-          setAmountText('');
           setDepositing(false);
           onDialogClose();
         }}
@@ -136,7 +138,7 @@ const DepositForm: FC<DepositFormProps> = ({
             label={t('label')}
             value={amountText}
             error={formErrors.length !== 0}
-            onChange={onAmountChange}
+            onChange={handleChange}
             helperText={<HelperText>{`${forms('balance')}: ${format(balance)} ${units('stableToken')}`}</HelperText>}
             InputProps={{
               endAdornment: <InputAdornment position="end">DAI</InputAdornment>,
