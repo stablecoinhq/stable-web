@@ -38,3 +38,14 @@ export const toFixedNumberOrUndefined = (input: string | undefined, format: Fixe
     return undefined;
   }
 };
+
+// https://stackoverflow.com/questions/149055/how-to-format-numbers-as-currency-strings
+export function displayCommas(n: string | FixedNumber) {
+  if (typeof n === 'string') {
+    if (n === '' || n === undefined) {
+      return n;
+    }
+    return n.replace(/\d(?=(\d{3})+\.)/g, '$&,');
+  }
+  return n.toString().replace(/\d(?=(\d{3})+\.)/g, '$&,');
+}

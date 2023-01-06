@@ -38,11 +38,26 @@ type ColumnTranaslations = {
   collateralLocked: string;
   manageVault: string;
   debt: string;
+  jpy: string;
+  stableTokenSymbol: string;
 };
 
 const MIN_WIDTH = 170;
-const makeColumns = (translations: ColumnTranaslations): GridColDef[] => {
-  const { collateralType, id, collateralizationRatio, collateralLocked, debt, manageVault, liquidationPrice } = translations;
+const makeColumns = (
+  translations: ColumnTranaslations,
+  format: (n: FixedNumber, noCommas?: boolean) => string,
+): GridColDef[] => {
+  const {
+    collateralType,
+    id,
+    collateralizationRatio,
+    collateralLocked,
+    debt,
+    manageVault,
+    liquidationPrice,
+    jpy,
+    stableTokenSymbol,
+  } = translations;
   return [
     {
       field: 'collateralType',
@@ -61,8 +76,8 @@ const makeColumns = (translations: ColumnTranaslations): GridColDef[] => {
       flex: 1,
       minWidth: MIN_WIDTH,
       renderHeader: tableHeaderCell,
-      valueFormatter: (params: GridValueFormatterParams<[FixedNumber, string]>) => `${params.value[0]} ${params.value[1]}`,
-      sortComparator: sortFixedNumberWithArray,
+      valueFormatter: ({ value }) => `${format(value)} ${jpy}`,
+      sortComparator: sortFixedNumber,
     },
     {
       field: 'collateralizationRatio',
@@ -72,7 +87,7 @@ const makeColumns = (translations: ColumnTranaslations): GridColDef[] => {
       flex: 1,
       minWidth: MIN_WIDTH,
       renderHeader: tableHeaderCell,
-      valueFormatter: ({ value }) => `${value} %`,
+      valueFormatter: ({ value }) => `${format(value, true)} %`,
       sortComparator: sortFixedNumber,
     },
     {
@@ -81,7 +96,8 @@ const makeColumns = (translations: ColumnTranaslations): GridColDef[] => {
       headerName: collateralLocked,
       align: 'right',
       minWidth: MIN_WIDTH,
-      valueFormatter: (params: GridValueFormatterParams<[FixedNumber, string]>) => `${params.value[0]} ${params.value[1]}`,
+      valueFormatter: (params: GridValueFormatterParams<[FixedNumber, string]>) =>
+        `${format(params.value[0])} ${params.value[1]}`,
       flex: 1,
       renderHeader: tableHeaderCell,
       sortComparator: sortFixedNumberWithArray,
@@ -94,7 +110,7 @@ const makeColumns = (translations: ColumnTranaslations): GridColDef[] => {
       flex: 1,
       minWidth: MIN_WIDTH,
       renderHeader: tableHeaderCell,
-      valueFormatter: ({ value }) => `${value} DAI`,
+      valueFormatter: ({ value }) => `${format(value)} ${stableTokenSymbol}`,
       sortComparator: sortFixedNumber,
     },
     {
@@ -126,21 +142,24 @@ const VaultTable: FC<{ cdps: CDP[] }> = ({ cdps }) => {
         return {
           id: parseInt(id.toString(), 10),
           collateralType: ilk.inString,
-          collateralizationRatio: format(
-            Vault.getCollateralizationRatio(urnStatus.lockedBalance, urnStatus.debt, liquidationRatio, ilkStatus),
+          collateralizationRatio: Vault.getCollateralizationRatio(
+            urnStatus.lockedBalance,
+            urnStatus.debt,
+            liquidationRatio,
+            ilkStatus,
           ),
-          liquidationPrice: [
-            format(
-              Vault.getLiquidationPrice(urnStatus.lockedBalance, urnStatus.debt, ilkStatus.debtMultiplier, liquidationRatio),
-            ),
-            units('jpy'),
-          ],
-          collateralLocked: [format(urnStatus.lockedBalance), ilk.currencySymbol] as [FixedNumber, string],
-          debt: format(Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier)),
+          liquidationPrice: Vault.getLiquidationPrice(
+            urnStatus.lockedBalance,
+            urnStatus.debt,
+            ilkStatus.debtMultiplier,
+            liquidationRatio,
+          ),
+          collateralLocked: [urnStatus.lockedBalance, ilk.currencySymbol] as [FixedNumber, string],
+          debt: Vault.getDebt(urnStatus.debt, ilkStatus.debtMultiplier),
           manage: id,
         };
       }),
-    [cdps, format, units],
+    [cdps],
   );
   const columns = useMemo(() => {
     const translations: ColumnTranaslations = {
@@ -151,9 +170,11 @@ const VaultTable: FC<{ cdps: CDP[] }> = ({ cdps }) => {
       collateralLocked: t('lockedCollateral'),
       debt: t('debt'),
       manageVault: t('manageVault'),
+      jpy: units('jpy'),
+      stableTokenSymbol: units('stableToken'),
     };
-    return makeColumns(translations);
-  }, [t, terms]);
+    return makeColumns(translations, format);
+  }, [format, t, terms, units]);
   return (
     <DataGrid
       columns={columns}

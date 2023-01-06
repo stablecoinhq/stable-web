@@ -41,12 +41,12 @@ export default class ERC20Helper {
     return toFixedNumber(value, this.format);
   }
 
-  private async approve(spenderAddress: string, amount: FixedNumber, wait?: number) {
+  private async approve(spenderAddress: string, amount: FixedNumber) {
     const tx = await this.contract.approve(spenderAddress, toBigNumber(amount, this.format));
-    return tx.wait(wait);
+    return tx.wait(3);
   }
 
-  async ensureAllowance(spenderAddress: string, amount: FixedNumber, wait?: number) {
+  async ensureAllowance(spenderAddress: string, amount: FixedNumber) {
     const current = await this.getAllowance(spenderAddress);
     const diff = amount.subUnsafe(current);
 
@@ -55,6 +55,6 @@ export default class ERC20Helper {
       return;
     }
 
-    await this.approve(spenderAddress, amount, wait);
+    await this.approve(spenderAddress, amount);
   }
 }

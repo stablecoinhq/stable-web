@@ -57,8 +57,8 @@ const IlkStatusCard: FC<IlkStatusCardProps> = ({ ilkInfo, ilkStatus, liquidation
             tooltipText={t('currentPriceDesc', { collateral: ilkInfo.name })}
             unit={units('jpy')}
           />
-          <BNText label={t('liqRatio')} value={liquidationRatioPercent} tooltipText={t('liqRatioDesc')} unit="%" />
-          <BNText label={t('annualFee')} value={annualFee} tooltipText={t('annualFeeDesc')} unit="%" />
+          <BNText label={t('liqRatio')} value={liquidationRatioPercent} tooltipText={t('liqRatioDesc')} unit="%" noCommas />
+          <BNText label={t('annualFee')} value={annualFee} tooltipText={t('annualFeeDesc')} unit="%" noCommas />
           <BNText
             label={t('maxLiquidity')}
             value={ilkStatus.debtCeiling}

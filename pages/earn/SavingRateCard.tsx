@@ -17,7 +17,7 @@ const SavingRateCard: FC<SavingRateCardProps> = ({ annualRate }) => {
       <CardHeader title={t('title')} />
       <CardContent>
         <Grid container padding={2} spacing={2}>
-          <BNText label={t('annualSavingRate')} value={annualRate} tooltipText={t('annualSavingRateDesc')} unit="%" />
+          <BNText label={t('annualSavingRate')} value={annualRate} tooltipText={t('annualSavingRateDesc')} unit="%" noCommas />
         </Grid>
       </CardContent>
     </Card>

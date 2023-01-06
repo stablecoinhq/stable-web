@@ -54,9 +54,9 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
     () => Vault.getLiquidationPrice(lockedBalance, urnDebt, ilkStatus.debtMultiplier, liquidationRatio),
     [ilkStatus.debtMultiplier, liquidationRatio, lockedBalance, urnDebt],
   );
-  const renderHelperText = (num: FixedNumber | undefined, unit: string) =>
+  const renderHelperText = (num: FixedNumber | undefined, unit: string, noComma?: boolean) =>
     num ? (
-      <span style={{ fontSize: 13 }}>{`${format(num).toString()} ${unit}`}</span>
+      <span style={{ fontSize: 13 }}>{`${format(num, noComma)} ${unit}`}</span>
     ) : (
       <span style={{ fontSize: 13 }}>&nbsp;</span>
     );
@@ -69,8 +69,9 @@ const VaultStatusCard: FC<VaultStatusCardProps> = ({ urnStatus, ilkStatus, liqui
             label={t('colRatio')}
             value={collateralizationRatio}
             unit="%"
-            helperText={renderHelperText(current?.collateralizationRatio.value, '%')}
+            helperText={renderHelperText(current?.collateralizationRatio.value, '%', true)}
             error={current?.collateralizationRatio.isValid}
+            noCommas
           />
           <BNText
             label={t('lockedCollateral')}

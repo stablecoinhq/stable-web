@@ -63,7 +63,7 @@ export default class Vault {
 
   async mint(cdpId: FixedNumber, colAmount: FixedNumber, daiAmount: FixedNumber) {
     const { actions, proxy } = await this.getProxyAndActions();
-    await this.ilkInfo.gem.ensureAllowance(proxy.address, colAmount, 3);
+    await this.ilkInfo.gem.ensureAllowance(proxy.address, colAmount);
     const tx = await actions.lockGemAndDraw(this.cdpManager, this.jug, this.daiJoin, this.ilkInfo, cdpId, colAmount, daiAmount);
     await tx.wait();
   }
