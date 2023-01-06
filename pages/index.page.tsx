@@ -81,12 +81,8 @@ const Stats: FC<StatProps> = ({ systemStates }) => {
         <CardHeader title={home('protocolState')} sx={{ paddingBottom: 1 }} />
         <CardContent sx={{ padding: 0 }}>
           <Grid container padding={2}>
-            <Stat value={format(daiTotalSupply).toString()} description={home('daiTotalSupply')} unit={units('stableToken')!} />
-            <Stat
-              value={format(totalSavingsInPot).toString()}
-              description={home('totalSavingsInPot')}
-              unit={units('stableToken')!}
-            />
+            <Stat value={format(daiTotalSupply)} description={home('daiTotalSupply')} unit={units('stableToken')!} />
+            <Stat value={format(totalSavingsInPot)} description={home('totalSavingsInPot')} unit={units('stableToken')!} />
             <Stat value={(vaultCount + unmanagedVaultCount).toString()} description={home('activeVaults')} />
           </Grid>
         </CardContent>

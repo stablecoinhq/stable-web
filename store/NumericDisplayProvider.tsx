@@ -31,26 +31,26 @@ export type NumericDisplayContextType = {
   /**
    * 任意のFixedNumberの表示形式を変更する
    */
-  format: (n: FixedNumber) => string;
+  format: (n: FixedNumber, noCommas?: boolean) => string;
 };
 
 const NumericDisplayContext = createContext<NumericDisplayContextType>({
   displayMode: 'simple',
   toggleDisplay: (_b) => {},
-  format: (n) => n.toString(),
+  format: (n, _b) => n.toString(),
 });
 
 export const useNumericDisplayContext = () => useContext(NumericDisplayContext);
 /**
  * 与えられた数値の四捨五入を行う。値の有効小数点がdecimalsよりも小さい場合、そちらを優先する。
  */
-export const round = (num: FixedNumber, decimals: number) => {
+export const round = (num: FixedNumber, decimals: number, noCommas?: boolean) => {
   const comps = num.toString().split('.');
   if (comps.length === 1) {
     comps.push('0');
   }
   if (comps[1]!.length <= decimals) {
-    return displayCommas(num);
+    return noCommas ? num.toString() : displayCommas(num);
   }
   const nonZeroAt = comps[1]!.search(/[^0]/);
   // 整数部が0、かつ有効小数点が指定された桁数より小さい場合には、有効小数点を変更する
@@ -59,7 +59,8 @@ export const round = (num: FixedNumber, decimals: number) => {
     (nonZeroAt > decimals && comps[0]! === '0') || num.round(decimals).isZero()
       ? Math.min(nonZeroAt + ROUND_AT_DETAIL, num.format.decimals)
       : decimals;
-  return displayCommas(num.round(roundAt));
+  const rounded = num.round(roundAt);
+  return noCommas ? rounded.toString() : displayCommas(rounded);
 };
 
 export const NumericDisplayProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -81,7 +82,15 @@ export const NumericDisplayProvider: FC<{ children: ReactNode }> = ({ children }
   }, []);
 
   const format = useCallback(
-    (n: FixedNumber) => (displayMode === 'simple' ? round(n, ROUND_AT) : displayCommas(n)),
+    (n: FixedNumber, noCommas?: boolean) => {
+      if (displayMode === 'simple') {
+        return round(n, ROUND_AT, noCommas);
+      }
+      if (noCommas) {
+        return n.toString();
+      }
+      return displayCommas(n);
+    },
     [displayMode],
   );
   const values: NumericDisplayContextType = useMemo(

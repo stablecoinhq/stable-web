@@ -77,8 +77,8 @@ const IlkItem: FC<IlkItemProps> = ({ ilk, ilkInfo, ilkStatus, liquidationRatio, 
             <Table>
               <TableBody>
                 <Row field={t('currentPrice', { collateral: ilkInfo.symbol })} value={format(curPrice)} unit={units('jpy')} />
-                <Row field={terms('liqRatio')} value={format(liquidationRatioPercent)} unit="%" />
-                <Row field={terms('annualFee')} value={format(annualFee)} unit="%" />
+                <Row field={terms('liqRatio')} value={format(liquidationRatioPercent, true)} unit="%" />
+                <Row field={terms('annualFee')} value={format(annualFee, true)} unit="%" />
                 <Row field={terms('totalIssued')} value={format(totalIssued)} unit={units('stableToken')} />
                 <Row field={terms('maxLiquidity')} value={format(ilkStatus.debtCeiling)} unit={units('stableToken')} />
                 <Row field={terms('debtFloor')} value={format(ilkStatus.debtFloor)} unit={units('stableToken')} />
