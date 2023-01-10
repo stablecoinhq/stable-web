@@ -25,7 +25,6 @@ type BurnFormControllerProps = {
   liquidationRatio: FixedNumber;
   balance: FixedNumber;
   buttonContent: string;
-  address: string;
   proxyAddress: string | undefined;
   increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
   ensureProxy: () => Promise<string>;
@@ -44,7 +43,6 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
   balance,
   buttonContent,
   urnStatus,
-  address,
   selectedTab,
   onSelectTab,
   burn,
@@ -143,13 +141,13 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
       return {
         debt: {
           value: currentDebt,
-          isValid:
+          isInvalid:
             BurnFormValidation.isBelowDebtFloor(currentDebt, ilkStatus.debtFloor) ||
             BurnFormValidation.isOverRepaying(urnStatus.debt, daiAmount, ilkStatus.debtMultiplier),
         },
         collateralizationRatio: {
           value: collateralizationRatio,
-          isValid:
+          isInvalid:
             BurnFormValidation.isCollateralizationRatioTooLow(
               urnStatus.lockedBalance,
               collateralAmount,
@@ -159,11 +157,11 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         },
         collateralAmount: {
           value: currentCollateralAmount,
-          isValid: BurnFormValidation.isInvalidCollateralFreeAmount(urnStatus.lockedBalance, collateralAmount),
+          isInvalid: BurnFormValidation.isInvalidCollateralFreeAmount(urnStatus.lockedBalance, collateralAmount),
         },
         liquidationPrice: {
           value: liquidationPrice,
-          isValid: liquidationPrice.isNegative(),
+          isInvalid: liquidationPrice.isNegative(),
         },
       };
     }
@@ -175,8 +173,6 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
       ilkStatus={ilkStatus}
       current={current}
       liquidationRatio={liquidationRatio}
-      balance={balance}
-      address={address}
       urnStatus={urnStatus}
       selectedTab={selectedTab}
       onSelectTab={onSelectTab}

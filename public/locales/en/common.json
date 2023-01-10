@@ -34,7 +34,7 @@
       "description": "Amount of token that wallet currently holds"
     },
     "savings": {
-      "title": "Saving Rate",
+      "title": "Savings",
       "annualSavingRate": "Annual saving rate",
       "annualSavingRateDesc": "Annual saving rate of the DSR"
     }
@@ -61,6 +61,7 @@
     "mint": {
       "stableTokenAmount": "Amount of $t(units.stableToken) to mint",
       "lockAmount": "Amount of {{gem}} to lock",
+      "balance": "Available Balance",
       "processing": "Minting $t(units.stableToken)",
       "done": "$t(units.stableToken) successfully minted",
       "error": {

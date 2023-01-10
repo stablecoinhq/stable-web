@@ -2,10 +2,12 @@ import { Button, Card, Grid, InputAdornment, TextField, FormHelperText } from '@
 import { useTranslation } from 'next-i18next';
 import { useCallback, useMemo, useState } from 'react';
 
+import HelperText from 'component/HelperText';
 import ProgressDialog from 'component/ProgressDialog';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import { useErrorDialog } from 'store/ErrorDialogProvider';
+import { useNumericDisplayContext } from 'store/NumericDisplayProvider';
 
 import { MintFormValidation, MintError } from './MintFormValidation';
 
@@ -59,11 +61,13 @@ const MintForm: FC<MintFormProps> = ({
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'forms' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
+
   const { openDialog } = useErrorDialog();
 
   const [dialogText, setDialogText] = useState('');
   const [totalSteps, setTotalSteps] = useState(1);
   const [currentStep, setCurrentStep] = useState(1);
+  const { format } = useNumericDisplayContext();
 
   const collateralAmount = useMemo(
     () => toFixedNumberOrUndefined(amountText, ilkInfo.gem.format),
@@ -185,19 +189,20 @@ const MintForm: FC<MintFormProps> = ({
         onClose={handleClose}
       />
       <Grid container padding={2} spacing={2}>
-        <Grid item xs={6}>
+        <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             label={t('mint.lockAmount', { gem: ilkInfo.name })}
             error={isInsufficientBalance}
             value={amountText}
             onChange={handleAmountChange}
+            helperText={<HelperText>{`${t('balance')}: ${format(balance)} ${ilkInfo.symbol}`}</HelperText>}
             InputProps={{
               endAdornment: <InputAdornment position="end">{ilkInfo.symbol}</InputAdornment>,
             }}
           />
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={12} md={6}>
           <TextField
             fullWidth
             label={t('mint.stableTokenAmount', { gem: ilkInfo.name })}
@@ -225,7 +230,7 @@ const MintForm: FC<MintFormProps> = ({
             {buttonContent}
           </Button>
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           {formErrors.map((e) => (
             <FormHelperText key={e} error>
               {showErrorMessage(e)}

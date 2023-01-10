@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, CircularProgress, Stack, Tab, Tabs } from '@mui/material';
+import { Box, Card, CardContent, CircularProgress } from '@mui/material';
 import { FixedNumber } from 'ethers';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,16 +7,14 @@ import useSWR from 'swr';
 import Savings from 'ethereum/Savings';
 import { UnitFormats } from 'ethereum/helpers/math';
 import useChainLog from 'ethereum/react/useChainLog';
-import BalanceStatusCard from 'pages/earn/BalanceStatusCard';
 import getTranslationProps from 'pages/getTranslationProps';
 
 import SavingRateCard from './SavingRateCard';
-import DepositForm from './forms/DepositForm';
-import WithdrawForm from './forms/WithdrawForm';
+import DepositFormController from './forms/DepositFormController';
+import WithdrawFormController from './forms/WithdrawFormController';
 
 import type { DepositFormProps } from './forms/DepositForm';
 import type { WithdrawFormProps } from './forms/WithdrawForm';
-import type EthereumProvider from 'ethereum/EthereumProvider';
 import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type ERC20Helper from 'ethereum/contracts/ERC20Helper';
 import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';
@@ -79,7 +77,7 @@ const Controller: FC<ControllerProps> = ({
     switch (selectedTab) {
       case 'deposit':
         return (
-          <DepositForm
+          <DepositFormController
             buttonContent={t('deposit.form.submit')}
             deposit={deposit}
             balance={balance}
@@ -88,11 +86,14 @@ const Controller: FC<ControllerProps> = ({
             allowance={allowance}
             ensureProxy={ensureProxy}
             onDialogClose={update}
+            depositAmount={depositAmount}
+            selectedTab={selectedTab}
+            onSelectTab={onSelectTab}
           />
         );
       case 'withdraw':
         return (
-          <WithdrawForm
+          <WithdrawFormController
             buttonContent={t('withdraw.form.submit')}
             withdraw={withdraw}
             withdrawAll={withdrawAll}
@@ -100,6 +101,8 @@ const Controller: FC<ControllerProps> = ({
             onDialogClose={update}
             proxyAddress={proxyAddress}
             ensureProxy={ensureProxy}
+            selectedTab={selectedTab}
+            onSelectTab={onSelectTab}
           />
         );
     }
@@ -113,32 +116,20 @@ const Controller: FC<ControllerProps> = ({
     allowance,
     ensureProxy,
     update,
+    depositAmount,
+    onSelectTab,
     withdraw,
     withdrawAll,
-    depositAmount,
   ]);
 
-  return (
-    <>
-      <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>
-        <Tab label={t('depositTab')} value="deposit" />
-        <Tab label={t('withdrawTab')} value="withdraw" disabled={!depositAmount || depositAmount?.isZero()} />
-      </Tabs>
-      {content}
-    </>
-  );
+  return content;
 };
 
 type ContentProps = {
-  provider: EthereumProvider;
   chainLog: ChainLogHelper;
 };
 
-const Content: FC<ContentProps> = ({ chainLog, provider }) => {
-  const { t } = useTranslation('common', { keyPrefix: 'pages.earn' });
-  const { t: units } = useTranslation('common', { keyPrefix: 'units' });
-  const { t: wallet } = useTranslation('common', { keyPrefix: 'cards.wallet' });
-
+const Content: FC<ContentProps> = ({ chainLog }) => {
   const { data, mutate, isLoading } = useSWR(
     'getSavingData',
     async () => {
@@ -176,26 +167,8 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
 
   const { saving, annualRate, deposit, balance, proxyAddress, proxyRegistry, allowance, dai } = data;
   return (
-    <Stack padding={2} spacing={2}>
+    <>
       <SavingRateCard annualRate={annualRate} />
-      {deposit && (
-        <BalanceStatusCard
-          title={t('deposit.title')}
-          address={deposit.address}
-          balance={deposit.amount}
-          label={t('deposit.label')}
-          tooltipText={t('deposit.description')!}
-          unit={units('stableToken')}
-        />
-      )}
-      <BalanceStatusCard
-        title={wallet('title')}
-        address={provider.address}
-        balance={balance}
-        label={wallet('balance', { gem: units('stableToken') })}
-        tooltipText={wallet('description')!}
-        unit={units('stableToken')}
-      />
       <Controller
         savingRate={saving}
         update={() => mutate()}
@@ -206,7 +179,7 @@ const Content: FC<ContentProps> = ({ chainLog, provider }) => {
         allowance={allowance}
         dai={dai}
       />
-    </Stack>
+    </>
   );
 };
 
@@ -214,9 +187,9 @@ const Earn: NextPageWithEthereum = ({ provider }) => {
   const chainLog = useChainLog(provider);
 
   return (
-    <Card elevation={0}>
+    <Card elevation={5}>
       <CardContent>
-        <Content chainLog={chainLog} provider={provider} />
+        <Content chainLog={chainLog} />
       </CardContent>
     </Card>
   );

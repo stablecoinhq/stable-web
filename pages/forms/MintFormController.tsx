@@ -25,7 +25,6 @@ type MintFormControllerProps = {
   proxyAddress: string | undefined;
   increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
   ensureProxy: () => Promise<string>;
-  address: string;
   buttonContent: string;
   mintMessage: string;
   errorMessage: string;
@@ -52,7 +51,6 @@ const MintFormController: FC<MintFormControllerProps> = ({
   onDialogClose,
   errorMessage,
   mint,
-  address,
   buttonContent,
   doneMessage,
 }) => {
@@ -94,7 +92,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
       return {
         collateralizationRatio: {
           value: collateralizationRatio,
-          isValid: MintFormValidation.isBelowLiquidationRatio(
+          isInvalid: MintFormValidation.isBelowLiquidationRatio(
             daiAmount,
             urnStatus.debt,
             urnStatus.lockedBalance,
@@ -102,16 +100,16 @@ const MintFormController: FC<MintFormControllerProps> = ({
             ilkStatus,
           ),
         },
-        collateralAmount: { value: currentCollateralAmount, isValid: false },
+        collateralAmount: { value: currentCollateralAmount, isInvalid: false },
         debt: {
           value: currentUrnDebt,
-          isValid:
+          isInvalid:
             MintFormValidation.isAboveDebtCeiling(daiAmount, ilkStatus) ||
             MintFormValidation.isBelowDebtFloor(daiAmount, urnStatus.debt, ilkStatus),
         },
         liquidationPrice: {
           value: liquidationPrice,
-          isValid: liquidationPrice.isNegative(),
+          isInvalid: liquidationPrice.isNegative(),
         },
       };
     }
@@ -173,8 +171,6 @@ const MintFormController: FC<MintFormControllerProps> = ({
       ilkStatus={ilkStatus}
       current={current}
       liquidationRatio={liquidationRatio}
-      balance={balance}
-      address={address}
       urnStatus={urnStatus}
       selectedTab={selectedTab}
       onSelectTab={onSelectTab}

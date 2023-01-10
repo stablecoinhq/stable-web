@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 
 import ProgressDialog from 'component/ProgressDialog';
 import { UnitFormats } from 'ethereum/helpers/math';
-import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
+import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import { useErrorDialog } from 'store/ErrorDialogProvider';
 
 import WithdrawFormValidation, { WithdrawError } from './WithdrawFormValidation';
@@ -30,6 +30,8 @@ export type WithdrawFormProps = {
   onDialogClose: () => void;
   proxyAddress: string | undefined;
   ensureProxy: () => Promise<string>;
+  amountText: string;
+  onAmountChange: (s: string) => void;
 };
 
 type WithdrawState = 'withdraw' | 'withdrawAll' | 'neutral';
@@ -42,6 +44,8 @@ const WithdrawForm: FC<WithdrawFormProps> = ({
   onDialogClose,
   proxyAddress,
   ensureProxy,
+  amountText,
+  onAmountChange,
 }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn.withdraw.form' });
   const { t: forms } = useTranslation('common', { keyPrefix: 'forms' });
@@ -52,31 +56,30 @@ const WithdrawForm: FC<WithdrawFormProps> = ({
   const [totalSteps, setTotalSteps] = useState(2);
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [amountText, setAmountText] = useState('');
   const [withdrawState, setWithdrawState] = useState<WithdrawState>('neutral');
   const [withdrawing, setWithdrawing] = useState(false);
   const formats = UnitFormats.WAD;
   const amount = useMemo(() => toFixedNumberOrUndefined(amountText, formats), [amountText, formats]);
 
-  const onAmountChange: ChangeEventHandler<HTMLInputElement> = useCallback(
+  const handleChange: ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
-      setAmountText(cutDecimals(pickNumbers(event.target.value), formats.decimals));
+      onAmountChange(event.target.value);
       if (event.target.value === '') {
         setWithdrawState('neutral');
       } else {
         setWithdrawState('withdraw');
       }
     },
-    [formats],
+    [onAmountChange],
   );
 
   const onWithdrawAllChange: ChangeEventHandler<HTMLInputElement> = () => {
     if (withdrawState !== 'withdrawAll') {
       setWithdrawState('withdrawAll');
-      setAmountText(depositAmount.toString());
+      onAmountChange(depositAmount.toString());
     } else {
       setWithdrawState('neutral');
-      setAmountText('');
+      onAmountChange('');
     }
   };
 
@@ -147,7 +150,6 @@ const WithdrawForm: FC<WithdrawFormProps> = ({
         currentStep={currentStep}
         onClose={() => {
           setWithdrawing(false);
-          setAmountText('');
           setWithdrawState('neutral');
           onDialogClose();
         }}
@@ -160,7 +162,7 @@ const WithdrawForm: FC<WithdrawFormProps> = ({
             error={formErrors.length !== 0}
             value={amountText}
             disabled={withdrawState === 'withdrawAll' || withdrawing}
-            onChange={onAmountChange}
+            onChange={handleChange}
             InputProps={{
               endAdornment: <InputAdornment position="end">DAI</InputAdornment>,
             }}

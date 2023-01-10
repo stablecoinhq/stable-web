@@ -34,13 +34,14 @@
       "description": "ウォレットが現在保有している$t(units.stableToken)の残高"
     },
     "savings": {
-      "title": "金利",
+      "title": "貯蓄",
       "annualSavingRate": "預金金利率",
       "annualSavingRateDesc": "DSRにおける年間預金金利率"
     }
   },
   "forms": {
     "createProxy": "Proxyを作成します",
+    "balance": "ウォレットの保有残高",
     "increaseAllowance": "Proxyに対して{{token}}へのアクセス権限を付与します",
     "done": "完了しました",
     "burn": {
@@ -133,7 +134,7 @@
       "deposit": {
         "title": "預金状態",
         "label": "預金残高",
-        "description": "$t(terms.savings)にて現在預けられている$t(unit.stableToken)の残高",
+        "description": "現在$t(terms.savings)にて預け入れられている$t(unit.stableToken)の残高",
         "form": {
           "label": "預け入れる$t(units.stableToken)の数量",
           "submit": "預け入れる",

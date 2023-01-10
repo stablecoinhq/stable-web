@@ -1,4 +1,3 @@
-/* eslint-disable i18next/no-literal-string */
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import {
   Box,
@@ -35,7 +34,7 @@ type ActionProps = {
 
 const Action: FC<ActionProps> = ({ cardTitle, cardBody, buttonTitle, href }) => (
   <Grid item xs={12} md={6}>
-    <Card>
+    <Card elevation={5}>
       <CardContent>
         <Typography variant="h5">{cardTitle}</Typography>
         <Typography variant="body2" color="text.secondary">
@@ -77,16 +76,12 @@ const Stats: FC<StatProps> = ({ systemStates }) => {
   const { daiTotalSupply, vaultCount, totalSavingsInPot, unmanagedVaultCount } = systemStates;
   return (
     <Grid item xs={12}>
-      <Card>
-        <CardHeader title={home('protocolState')} sx={{ paddingBottom: 1 }} />
-        <CardContent sx={{ padding: 0 }}>
-          <Grid container padding={2}>
-            <Stat value={format(daiTotalSupply)} description={home('daiTotalSupply')} unit={units('stableToken')!} />
-            <Stat value={format(totalSavingsInPot)} description={home('totalSavingsInPot')} unit={units('stableToken')!} />
-            <Stat value={(vaultCount + unmanagedVaultCount).toString()} description={home('activeVaults')} />
-          </Grid>
-        </CardContent>
-      </Card>
+      <CardHeader title={home('protocolState')} sx={{ paddingBottom: 1 }} />
+      <Grid container padding={2}>
+        <Stat value={format(daiTotalSupply)} description={home('daiTotalSupply')} unit={units('stableToken')!} />
+        <Stat value={format(totalSavingsInPot)} description={home('totalSavingsInPot')} unit={units('stableToken')!} />
+        <Stat value={(vaultCount + unmanagedVaultCount).toString()} description={home('activeVaults')} />
+      </Grid>
     </Grid>
   );
 };
