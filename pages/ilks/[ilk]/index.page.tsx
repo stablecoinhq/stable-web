@@ -10,7 +10,7 @@ import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
 import IlkStatusCard, { getIlkStatusProps } from 'ethereum/react/cards/IlkStatusCard';
 import useChainLog from 'ethereum/react/useChainLog';
-import MintFormController from 'pages/forms/MintFormController';
+import FormController from 'pages/forms/mint/FormController';
 import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
@@ -80,7 +80,7 @@ const OpenVault: FC<OpenVaultProps> = ({
   );
 
   return (
-    <MintFormController
+    <FormController
       ilkInfo={ilkInfo}
       ilkStatus={ilkStatus}
       urnStatus={urnStatus}

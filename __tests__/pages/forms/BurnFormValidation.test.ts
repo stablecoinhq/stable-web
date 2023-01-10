@@ -1,7 +1,7 @@
 import { FixedNumber } from 'ethers';
 
 import { UnitFormats } from 'ethereum/helpers/math';
-import { BurnFormValidation } from 'pages/forms/BurnFormValidation';
+import { Validation } from 'pages/forms/burn/Validation';
 
 describe('BurnFormValidation', () => {
   describe('isInsufficientBalance', () => {
@@ -11,19 +11,19 @@ describe('BurnFormValidation', () => {
     const anotherHigh = FixedNumber.fromString('1.23456', UnitFormats.WAD);
 
     it('returns true when balance < repay', () => {
-      expect(BurnFormValidation.isInsufficientBalance(zero, low)).toBeTruthy();
-      expect(BurnFormValidation.isInsufficientBalance(low, high)).toBeTruthy();
+      expect(Validation.isInsufficientBalance(zero, low)).toBeTruthy();
+      expect(Validation.isInsufficientBalance(low, high)).toBeTruthy();
     });
 
     it('returns false when balance = repay', () => {
-      expect(BurnFormValidation.isInsufficientBalance(zero, zero)).toBeFalsy();
-      expect(BurnFormValidation.isInsufficientBalance(low, low)).toBeFalsy();
-      expect(BurnFormValidation.isInsufficientBalance(high, anotherHigh)).toBeFalsy();
+      expect(Validation.isInsufficientBalance(zero, zero)).toBeFalsy();
+      expect(Validation.isInsufficientBalance(low, low)).toBeFalsy();
+      expect(Validation.isInsufficientBalance(high, anotherHigh)).toBeFalsy();
     });
 
     it('returns false when balance > repay', () => {
-      expect(BurnFormValidation.isInsufficientBalance(low, zero)).toBeFalsy();
-      expect(BurnFormValidation.isInsufficientBalance(high, low)).toBeFalsy();
+      expect(Validation.isInsufficientBalance(low, zero)).toBeFalsy();
+      expect(Validation.isInsufficientBalance(high, low)).toBeFalsy();
     });
   });
 
@@ -38,19 +38,19 @@ describe('BurnFormValidation', () => {
       const debtMultiplier = FixedNumber.fromString('2', UnitFormats.RAY);
 
       it('returns true when debt < repay', () => {
-        expect(BurnFormValidation.isOverRepaying(zero, low, debtMultiplier)).toBeTruthy();
-        expect(BurnFormValidation.isOverRepaying(low, high, debtMultiplier)).toBeTruthy();
+        expect(Validation.isOverRepaying(zero, low, debtMultiplier)).toBeTruthy();
+        expect(Validation.isOverRepaying(low, high, debtMultiplier)).toBeTruthy();
       });
 
       it('returns false when debt = repay', () => {
-        expect(BurnFormValidation.isOverRepaying(zero, zero, debtMultiplier)).toBeFalsy();
-        expect(BurnFormValidation.isOverRepaying(mid, twiceMid, debtMultiplier)).toBeFalsy();
+        expect(Validation.isOverRepaying(zero, zero, debtMultiplier)).toBeFalsy();
+        expect(Validation.isOverRepaying(mid, twiceMid, debtMultiplier)).toBeFalsy();
       });
 
       it('returns false when debt > repay', () => {
-        expect(BurnFormValidation.isOverRepaying(mid, zero, debtMultiplier)).toBeFalsy();
-        expect(BurnFormValidation.isOverRepaying(low, mid, debtMultiplier)).toBeFalsy();
-        expect(BurnFormValidation.isOverRepaying(high, low, debtMultiplier)).toBeFalsy();
+        expect(Validation.isOverRepaying(mid, zero, debtMultiplier)).toBeFalsy();
+        expect(Validation.isOverRepaying(low, mid, debtMultiplier)).toBeFalsy();
+        expect(Validation.isOverRepaying(high, low, debtMultiplier)).toBeFalsy();
       });
     });
 
@@ -58,12 +58,12 @@ describe('BurnFormValidation', () => {
       const debtMultiplier = FixedNumber.fromString('0', UnitFormats.RAY);
 
       it('returns true when debt < repay', () => {
-        expect(BurnFormValidation.isOverRepaying(zero, low, debtMultiplier)).toBeTruthy();
-        expect(BurnFormValidation.isOverRepaying(high, low, debtMultiplier)).toBeTruthy();
+        expect(Validation.isOverRepaying(zero, low, debtMultiplier)).toBeTruthy();
+        expect(Validation.isOverRepaying(high, low, debtMultiplier)).toBeTruthy();
       });
 
       it('returns false when debt = repay', () => {
-        expect(BurnFormValidation.isOverRepaying(high, zero, debtMultiplier)).toBeFalsy();
+        expect(Validation.isOverRepaying(high, zero, debtMultiplier)).toBeFalsy();
       });
     });
   });
@@ -75,19 +75,19 @@ describe('BurnFormValidation', () => {
     const anotherHigh = FixedNumber.fromString('1.23456', UnitFormats.WAD);
 
     it('returns true when locked < to free', () => {
-      expect(BurnFormValidation.isInvalidCollateralFreeAmount(zero, low)).toBeTruthy();
-      expect(BurnFormValidation.isInvalidCollateralFreeAmount(low, high)).toBeTruthy();
+      expect(Validation.isInvalidCollateralFreeAmount(zero, low)).toBeTruthy();
+      expect(Validation.isInvalidCollateralFreeAmount(low, high)).toBeTruthy();
     });
 
     it('returns false when locked = to free', () => {
-      expect(BurnFormValidation.isInvalidCollateralFreeAmount(zero, zero)).toBeFalsy();
-      expect(BurnFormValidation.isInvalidCollateralFreeAmount(low, low)).toBeFalsy();
-      expect(BurnFormValidation.isInvalidCollateralFreeAmount(high, anotherHigh)).toBeFalsy();
+      expect(Validation.isInvalidCollateralFreeAmount(zero, zero)).toBeFalsy();
+      expect(Validation.isInvalidCollateralFreeAmount(low, low)).toBeFalsy();
+      expect(Validation.isInvalidCollateralFreeAmount(high, anotherHigh)).toBeFalsy();
     });
 
     it('returns false when locked > to free', () => {
-      expect(BurnFormValidation.isInvalidCollateralFreeAmount(low, zero)).toBeFalsy();
-      expect(BurnFormValidation.isInvalidCollateralFreeAmount(high, low)).toBeFalsy();
+      expect(Validation.isInvalidCollateralFreeAmount(low, zero)).toBeFalsy();
+      expect(Validation.isInvalidCollateralFreeAmount(high, low)).toBeFalsy();
     });
   });
 
@@ -102,20 +102,20 @@ describe('BurnFormValidation', () => {
     const twoRAY = FixedNumber.fromString('2', UnitFormats.RAY);
 
     it('returns true when current > new debt', () => {
-      expect(BurnFormValidation.isCollateralizationRatioTooLow(value1, value3, zero, twoRAY)).toBeTruthy();
-      expect(BurnFormValidation.isCollateralizationRatioTooLow(value2, value1, value3, oneRAY)).toBeTruthy();
-      expect(BurnFormValidation.isCollateralizationRatioTooLow(value4, value2, value1, zeroRAY)).toBeTruthy();
+      expect(Validation.isCollateralizationRatioTooLow(value1, value3, zero, twoRAY)).toBeTruthy();
+      expect(Validation.isCollateralizationRatioTooLow(value2, value1, value3, oneRAY)).toBeTruthy();
+      expect(Validation.isCollateralizationRatioTooLow(value4, value2, value1, zeroRAY)).toBeTruthy();
     });
 
     it('returns false when current = new debt', () => {
-      expect(BurnFormValidation.isCollateralizationRatioTooLow(value4, value1, zero, zeroRAY)).toBeFalsy();
-      expect(BurnFormValidation.isCollateralizationRatioTooLow(value4, value3, value2, oneRAY)).toBeFalsy();
+      expect(Validation.isCollateralizationRatioTooLow(value4, value1, zero, zeroRAY)).toBeFalsy();
+      expect(Validation.isCollateralizationRatioTooLow(value4, value3, value2, oneRAY)).toBeFalsy();
     });
 
     it('returns false when current < new debt', () => {
-      expect(BurnFormValidation.isCollateralizationRatioTooLow(value4, value1, value2, twoRAY)).toBeFalsy();
-      expect(BurnFormValidation.isCollateralizationRatioTooLow(value3, zero, value1, oneRAY)).toBeFalsy();
-      expect(BurnFormValidation.isCollateralizationRatioTooLow(value2, value1, zero, oneRAY)).toBeFalsy();
+      expect(Validation.isCollateralizationRatioTooLow(value4, value1, value2, twoRAY)).toBeFalsy();
+      expect(Validation.isCollateralizationRatioTooLow(value3, zero, value1, oneRAY)).toBeFalsy();
+      expect(Validation.isCollateralizationRatioTooLow(value2, value1, zero, oneRAY)).toBeFalsy();
     });
   });
 
@@ -129,22 +129,22 @@ describe('BurnFormValidation', () => {
     const highRAD = FixedNumber.fromString('1.23456', UnitFormats.RAD);
 
     it('returns true when 0 < current < floor', () => {
-      expect(BurnFormValidation.isBelowDebtFloor(lowWAD, highRAD)).toBeTruthy();
+      expect(Validation.isBelowDebtFloor(lowWAD, highRAD)).toBeTruthy();
     });
 
     it('returns false when current = 0', () => {
-      expect(BurnFormValidation.isBelowDebtFloor(zeroWAD, zeroRAD)).toBeFalsy();
-      expect(BurnFormValidation.isBelowDebtFloor(zeroWAD, lowRAD)).toBeFalsy();
+      expect(Validation.isBelowDebtFloor(zeroWAD, zeroRAD)).toBeFalsy();
+      expect(Validation.isBelowDebtFloor(zeroWAD, lowRAD)).toBeFalsy();
     });
 
     it('returns false when current < 0', () => {
-      expect(BurnFormValidation.isBelowDebtFloor(minusWAD, zeroRAD)).toBeFalsy();
-      expect(BurnFormValidation.isBelowDebtFloor(minusWAD, highRAD)).toBeFalsy();
+      expect(Validation.isBelowDebtFloor(minusWAD, zeroRAD)).toBeFalsy();
+      expect(Validation.isBelowDebtFloor(minusWAD, highRAD)).toBeFalsy();
     });
 
     it('returns false when current = debt', () => {
-      expect(BurnFormValidation.isBelowDebtFloor(lowWAD, lowRAD)).toBeFalsy();
-      expect(BurnFormValidation.isBelowDebtFloor(highWAD, highRAD)).toBeFalsy();
+      expect(Validation.isBelowDebtFloor(lowWAD, lowRAD)).toBeFalsy();
+      expect(Validation.isBelowDebtFloor(highWAD, highRAD)).toBeFalsy();
     });
   });
 });

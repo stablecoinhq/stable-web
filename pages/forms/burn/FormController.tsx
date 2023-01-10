@@ -4,10 +4,10 @@ import { useCallback, useMemo, useState } from 'react';
 import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
-import BurnForm from 'pages/forms/BurnForm';
-import { BurnFormValidation } from 'pages/forms/BurnFormValidation';
+import Form from 'pages/forms/burn/Form';
+import { Validation } from 'pages/forms/burn/Validation';
 
-import FormLayout from './FormLayout';
+import FormLayout from '../FormLayout';
 
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
@@ -18,7 +18,7 @@ type TabValue = 'mint' | 'burn';
 
 const formats = UnitFormats.RAD;
 
-type BurnFormControllerProps = {
+type FormControllerProps = {
   ilkInfo: IlkInfo;
   ilkStatus: IlkStatus;
   urnStatus: UrnStatus;
@@ -36,7 +36,7 @@ type BurnFormControllerProps = {
   burnAll: (daiAmount: FixedNumber, colAmount: FixedNumber) => Promise<void>;
 };
 
-const BurnFormController: FC<BurnFormControllerProps> = ({
+const FormController: FC<FormControllerProps> = ({
   ilkInfo,
   ilkStatus,
   liquidationRatio,
@@ -67,7 +67,7 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
 
   const burnForm = useMemo(
     () => (
-      <BurnForm
+      <Form
         ilkInfo={ilkInfo}
         ilkStatus={ilkStatus}
         buttonContent={buttonContent}
@@ -142,13 +142,13 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         debt: {
           value: currentDebt,
           isInvalid:
-            BurnFormValidation.isBelowDebtFloor(currentDebt, ilkStatus.debtFloor) ||
-            BurnFormValidation.isOverRepaying(urnStatus.debt, daiAmount, ilkStatus.debtMultiplier),
+            Validation.isBelowDebtFloor(currentDebt, ilkStatus.debtFloor) ||
+            Validation.isOverRepaying(urnStatus.debt, daiAmount, ilkStatus.debtMultiplier),
         },
         collateralizationRatio: {
           value: collateralizationRatio,
           isInvalid:
-            BurnFormValidation.isCollateralizationRatioTooLow(
+            Validation.isCollateralizationRatioTooLow(
               urnStatus.lockedBalance,
               collateralAmount,
               currentDebt,
@@ -157,7 +157,7 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         },
         collateralAmount: {
           value: currentCollateralAmount,
-          isInvalid: BurnFormValidation.isInvalidCollateralFreeAmount(urnStatus.lockedBalance, collateralAmount),
+          isInvalid: Validation.isInvalidCollateralFreeAmount(urnStatus.lockedBalance, collateralAmount),
         },
         liquidationPrice: {
           value: liquidationPrice,
@@ -180,4 +180,4 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
     />
   );
 };
-export default BurnFormController;
+export default FormController;

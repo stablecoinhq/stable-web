@@ -3,36 +3,33 @@ import { useCallback, useMemo, useState } from 'react';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 
-import DepositForm from './DepositForm';
-import FormLayout from './FormLayout';
+import FormLayout from '../FormLayout';
 
-import type { CurrentBalanceStatus } from '../BalanceStatusCard';
-import type { TabValue } from './FormLayout';
+import Form from './Form';
+
+import type { CurrentBalanceStatus } from '../../BalanceStatusCard';
+import type { TabValue } from '../FormLayout';
 import type { FixedNumber } from 'ethers';
 import type { FC, ReactNode } from 'react';
 
-export type DepositFormControllerProps = {
-  balance: FixedNumber;
+export type FormControllerProps = {
+  depositAmount: FixedNumber;
   buttonContent: ReactNode;
-  deposit: (amount: FixedNumber) => Promise<void>;
-  proxyAddress: string | undefined;
-  increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
-  ensureProxy: () => Promise<string>;
-  allowance: FixedNumber;
+  withdraw: (amount: FixedNumber) => Promise<void>;
+  withdrawAll: () => Promise<void>;
   onDialogClose: () => void;
-  depositAmount: FixedNumber | undefined;
+  proxyAddress: string | undefined;
+  ensureProxy: () => Promise<string>;
   selectedTab: TabValue;
   onSelectTab: (_: unknown, value: TabValue) => void;
 };
 
-const DepositFormController: FC<DepositFormControllerProps> = ({
-  deposit,
+const FormController: FC<FormControllerProps> = ({
   buttonContent,
-  balance,
   proxyAddress,
-  increaseAllowance,
   ensureProxy,
-  allowance,
+  withdraw,
+  withdrawAll,
   onDialogClose,
   depositAmount,
   selectedTab,
@@ -52,23 +49,22 @@ const DepositFormController: FC<DepositFormControllerProps> = ({
     if (amount) {
       return {
         depositAmount: {
-          value: amount.addUnsafe(balance),
-          isInvalid: false,
+          value: depositAmount.subUnsafe(amount),
+          isInvalid: depositAmount.subUnsafe(amount).isNegative(),
         },
       };
     }
-  }, [amountText, balance, formats]);
+  }, [amountText, depositAmount, formats]);
 
   const form = (
-    <DepositForm
-      deposit={deposit}
-      balance={balance}
+    <Form
+      depositAmount={depositAmount}
       buttonContent={buttonContent}
-      proxyAddress={proxyAddress}
-      increaseAllowance={increaseAllowance}
-      ensureProxy={ensureProxy}
-      allowance={allowance}
+      withdraw={withdraw}
+      withdrawAll={withdrawAll}
       onDialogClose={closeDialog}
+      proxyAddress={proxyAddress}
+      ensureProxy={ensureProxy}
       amountText={amountText}
       onAmountChange={onAmountChange}
     />
@@ -85,4 +81,4 @@ const DepositFormController: FC<DepositFormControllerProps> = ({
   );
 };
 
-export default DepositFormController;
+export default FormController;

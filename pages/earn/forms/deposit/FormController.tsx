@@ -3,32 +3,37 @@ import { useCallback, useMemo, useState } from 'react';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 
-import FormLayout from './FormLayout';
-import WithdrawForm from './WithdrawForm';
+import FormLayout from '../FormLayout';
 
-import type { CurrentBalanceStatus } from '../BalanceStatusCard';
-import type { TabValue } from './FormLayout';
+import Form from './Form';
+
+import type { CurrentBalanceStatus } from '../../BalanceStatusCard';
+import type { TabValue } from '../FormLayout';
 import type { FixedNumber } from 'ethers';
 import type { FC, ReactNode } from 'react';
 
-export type WithdrawFormControllerProps = {
-  depositAmount: FixedNumber;
+export type FormControllerProps = {
+  balance: FixedNumber;
   buttonContent: ReactNode;
-  withdraw: (amount: FixedNumber) => Promise<void>;
-  withdrawAll: () => Promise<void>;
-  onDialogClose: () => void;
+  deposit: (amount: FixedNumber) => Promise<void>;
   proxyAddress: string | undefined;
+  increaseAllowance: (address: string, spendingAmount: FixedNumber) => Promise<void>;
   ensureProxy: () => Promise<string>;
+  allowance: FixedNumber;
+  onDialogClose: () => void;
+  depositAmount: FixedNumber | undefined;
   selectedTab: TabValue;
   onSelectTab: (_: unknown, value: TabValue) => void;
 };
 
-const WithdrawFormController: FC<WithdrawFormControllerProps> = ({
+const FormController: FC<FormControllerProps> = ({
+  deposit,
   buttonContent,
+  balance,
   proxyAddress,
+  increaseAllowance,
   ensureProxy,
-  withdraw,
-  withdrawAll,
+  allowance,
   onDialogClose,
   depositAmount,
   selectedTab,
@@ -48,22 +53,23 @@ const WithdrawFormController: FC<WithdrawFormControllerProps> = ({
     if (amount) {
       return {
         depositAmount: {
-          value: depositAmount.subUnsafe(amount),
-          isInvalid: depositAmount.subUnsafe(amount).isNegative(),
+          value: amount.addUnsafe(balance),
+          isInvalid: false,
         },
       };
     }
-  }, [amountText, depositAmount, formats]);
+  }, [amountText, balance, formats]);
 
   const form = (
-    <WithdrawForm
-      depositAmount={depositAmount}
+    <Form
+      deposit={deposit}
+      balance={balance}
       buttonContent={buttonContent}
-      withdraw={withdraw}
-      withdrawAll={withdrawAll}
-      onDialogClose={closeDialog}
       proxyAddress={proxyAddress}
+      increaseAllowance={increaseAllowance}
       ensureProxy={ensureProxy}
+      allowance={allowance}
+      onDialogClose={closeDialog}
       amountText={amountText}
       onAmountChange={onAmountChange}
     />
@@ -80,4 +86,4 @@ const WithdrawFormController: FC<WithdrawFormControllerProps> = ({
   );
 };
 
-export default WithdrawFormController;
+export default FormController;

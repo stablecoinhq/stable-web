@@ -17,12 +17,12 @@ import { UnitFormats } from 'ethereum/helpers/math';
 import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import { useErrorDialog } from 'store/ErrorDialogProvider';
 
-import WithdrawFormValidation, { WithdrawError } from './WithdrawFormValidation';
+import Validation, { WithdrawError } from './Validation';
 
 import type { FixedNumber } from 'ethers';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
-export type WithdrawFormProps = {
+export type FormProps = {
   depositAmount: FixedNumber;
   buttonContent: ReactNode;
   withdraw: (amount: FixedNumber) => Promise<void>;
@@ -34,9 +34,9 @@ export type WithdrawFormProps = {
   onAmountChange: (s: string) => void;
 };
 
-type WithdrawState = 'withdraw' | 'withdrawAll' | 'neutral';
+type FormState = 'withdraw' | 'withdrawAll' | 'neutral';
 
-const WithdrawForm: FC<WithdrawFormProps> = ({
+const Form: FC<FormProps> = ({
   depositAmount,
   buttonContent,
   withdraw,
@@ -56,7 +56,7 @@ const WithdrawForm: FC<WithdrawFormProps> = ({
   const [totalSteps, setTotalSteps] = useState(2);
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [withdrawState, setWithdrawState] = useState<WithdrawState>('neutral');
+  const [withdrawState, setWithdrawState] = useState<FormState>('neutral');
   const [withdrawing, setWithdrawing] = useState(false);
   const formats = UnitFormats.WAD;
   const amount = useMemo(() => toFixedNumberOrUndefined(amountText, formats), [amountText, formats]);
@@ -126,7 +126,7 @@ const WithdrawForm: FC<WithdrawFormProps> = ({
 
   const formErrors: WithdrawError[] = useMemo(() => {
     if (amount) {
-      return WithdrawFormValidation.canDeposit(depositAmount, amount);
+      return Validation.canDeposit(depositAmount, amount);
     }
     return [];
   }, [amount, depositAmount]);
@@ -197,4 +197,4 @@ const WithdrawForm: FC<WithdrawFormProps> = ({
   );
 };
 
-export default WithdrawForm;
+export default Form;

@@ -9,12 +9,12 @@ import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import { useErrorDialog } from 'store/ErrorDialogProvider';
 import { useNumericDisplayContext } from 'store/NumericDisplayProvider';
 
-import DepositFormValidation, { DepositError } from './DepositFormValidation';
+import Validation, { DepositError } from './Validation';
 
 import type { FixedNumber } from 'ethers';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
-export type DepositFormProps = {
+export type FormProps = {
   balance: FixedNumber;
   buttonContent: ReactNode;
   deposit: (amount: FixedNumber) => Promise<void>;
@@ -27,7 +27,7 @@ export type DepositFormProps = {
   onAmountChange: (s: string) => void;
 };
 
-const DepositForm: FC<DepositFormProps> = ({
+const Form: FC<FormProps> = ({
   deposit,
   buttonContent,
   balance,
@@ -105,7 +105,7 @@ const DepositForm: FC<DepositFormProps> = ({
 
   const formErrors: DepositError[] = useMemo(() => {
     if (amount) {
-      return DepositFormValidation.canDeposit(balance, amount);
+      return Validation.canDeposit(balance, amount);
     }
     return [];
   }, [amount, balance]);
@@ -168,4 +168,4 @@ const DepositForm: FC<DepositFormProps> = ({
   );
 };
 
-export default DepositForm;
+export default Form;

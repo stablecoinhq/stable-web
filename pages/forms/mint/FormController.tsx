@@ -3,19 +3,19 @@ import { useCallback, useMemo, useState } from 'react';
 import Vault from 'ethereum/Vault';
 import { UnitFormats } from 'ethereum/helpers/math';
 import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
-import MintForm from 'pages/forms/MintForm';
-import { MintFormValidation } from 'pages/forms/MintFormValidation';
+import Form from 'pages/forms/mint/Form';
+import { MintFormValidation } from 'pages/forms/mint/Validation';
 
-import FormLayout from './FormLayout';
+import FormLayout from '../FormLayout';
 
-import type { TabValue } from './FormLayout';
+import type { TabValue } from '../FormLayout';
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { CurrentVaultStatus } from 'ethereum/react/cards/VaultStatusCard';
 import type { FixedNumber } from 'ethers';
 import type { FC, ReactNode } from 'react';
 
-type MintFormControllerProps = {
+type FormControllerProps = {
   ilkInfo: IlkInfo;
   ilkStatus: IlkStatus;
   urnStatus: UrnStatus;
@@ -35,7 +35,7 @@ type MintFormControllerProps = {
   mint: (colAmount: FixedNumber, daiAmount: FixedNumber) => Promise<void>;
 };
 
-const MintFormController: FC<MintFormControllerProps> = ({
+const FormController: FC<FormControllerProps> = ({
   ilkInfo,
   ilkStatus,
   liquidationRatio,
@@ -117,7 +117,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
 
   const mintForm: ReactNode = useMemo(
     () => (
-      <MintForm
+      <Form
         ilkInfo={ilkInfo}
         ilkStatus={ilkStatus}
         buttonContent={buttonContent}
@@ -178,4 +178,4 @@ const MintFormController: FC<MintFormControllerProps> = ({
     />
   );
 };
-export default MintFormController;
+export default FormController;
