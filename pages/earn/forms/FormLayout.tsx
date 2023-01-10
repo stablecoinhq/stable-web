@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import BalanceStatusCard from '../BalanceStatusCard';
 
+import type { CurrentBalanceStatus } from '../BalanceStatusCard';
 import type { FixedNumber } from 'ethers';
 import type { FC, ReactNode } from 'react';
 
@@ -14,9 +15,10 @@ type FormLayoutProps = {
   selectedTab: TabValue;
   onSelectTab: (_: unknown, value: TabValue) => void;
   form: ReactNode;
+  current?: CurrentBalanceStatus;
 };
 
-const FormLayout: FC<FormLayoutProps> = ({ proxyAddress, depositAmount, selectedTab, onSelectTab, form }) => {
+const FormLayout: FC<FormLayoutProps> = ({ proxyAddress, depositAmount, selectedTab, onSelectTab, form, current }) => {
   const { t } = useTranslation('common', { keyPrefix: 'pages.earn' });
   const { t: units } = useTranslation('common', { keyPrefix: 'units' });
 
@@ -30,6 +32,7 @@ const FormLayout: FC<FormLayoutProps> = ({ proxyAddress, depositAmount, selected
           label={t('deposit.label')}
           tooltipText={t('deposit.description')!}
           unit={units('stableToken')}
+          current={current}
         />
       )}
       <Tabs variant="fullWidth" value={selectedTab} onChange={onSelectTab}>

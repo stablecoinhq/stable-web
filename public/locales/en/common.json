@@ -34,7 +34,7 @@
       "description": "Amount of token that wallet currently holds"
     },
     "savings": {
-      "title": "Saving Rate",
+      "title": "Savings",
       "annualSavingRate": "Annual saving rate",
       "annualSavingRateDesc": "Annual saving rate of the DSR"
     }

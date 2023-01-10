@@ -92,7 +92,7 @@ const MintFormController: FC<MintFormControllerProps> = ({
       return {
         collateralizationRatio: {
           value: collateralizationRatio,
-          isValid: MintFormValidation.isBelowLiquidationRatio(
+          isInvalid: MintFormValidation.isBelowLiquidationRatio(
             daiAmount,
             urnStatus.debt,
             urnStatus.lockedBalance,
@@ -100,16 +100,16 @@ const MintFormController: FC<MintFormControllerProps> = ({
             ilkStatus,
           ),
         },
-        collateralAmount: { value: currentCollateralAmount, isValid: false },
+        collateralAmount: { value: currentCollateralAmount, isInvalid: false },
         debt: {
           value: currentUrnDebt,
-          isValid:
+          isInvalid:
             MintFormValidation.isAboveDebtCeiling(daiAmount, ilkStatus) ||
             MintFormValidation.isBelowDebtFloor(daiAmount, urnStatus.debt, ilkStatus),
         },
         liquidationPrice: {
           value: liquidationPrice,
-          isValid: liquidationPrice.isNegative(),
+          isInvalid: liquidationPrice.isNegative(),
         },
       };
     }

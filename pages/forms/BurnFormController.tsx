@@ -141,13 +141,13 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
       return {
         debt: {
           value: currentDebt,
-          isValid:
+          isInvalid:
             BurnFormValidation.isBelowDebtFloor(currentDebt, ilkStatus.debtFloor) ||
             BurnFormValidation.isOverRepaying(urnStatus.debt, daiAmount, ilkStatus.debtMultiplier),
         },
         collateralizationRatio: {
           value: collateralizationRatio,
-          isValid:
+          isInvalid:
             BurnFormValidation.isCollateralizationRatioTooLow(
               urnStatus.lockedBalance,
               collateralAmount,
@@ -157,11 +157,11 @@ const BurnFormController: FC<BurnFormControllerProps> = ({
         },
         collateralAmount: {
           value: currentCollateralAmount,
-          isValid: BurnFormValidation.isInvalidCollateralFreeAmount(urnStatus.lockedBalance, collateralAmount),
+          isInvalid: BurnFormValidation.isInvalidCollateralFreeAmount(urnStatus.lockedBalance, collateralAmount),
         },
         liquidationPrice: {
           value: liquidationPrice,
-          isValid: liquidationPrice.isNegative(),
+          isInvalid: liquidationPrice.isNegative(),
         },
       };
     }

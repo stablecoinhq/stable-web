@@ -1,12 +1,12 @@
-/* eslint-disable i18next/no-literal-string */
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { UnitFormats } from 'ethereum/helpers/math';
-import { cutDecimals, pickNumbers } from 'ethereum/helpers/stringNumber';
+import { cutDecimals, pickNumbers, toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 
 import FormLayout from './FormLayout';
 import WithdrawForm from './WithdrawForm';
 
+import type { CurrentBalanceStatus } from '../BalanceStatusCard';
 import type { TabValue } from './FormLayout';
 import type { FixedNumber } from 'ethers';
 import type { FC, ReactNode } from 'react';
@@ -43,6 +43,18 @@ const WithdrawFormController: FC<WithdrawFormControllerProps> = ({
     setAmountText('');
   }, [onDialogClose]);
 
+  const current: CurrentBalanceStatus | undefined = useMemo(() => {
+    const amount = toFixedNumberOrUndefined(amountText, formats);
+    if (amount) {
+      return {
+        depositAmount: {
+          value: depositAmount.subUnsafe(amount),
+          isInvalid: depositAmount.subUnsafe(amount).isNegative(),
+        },
+      };
+    }
+  }, [amountText, depositAmount, formats]);
+
   const form = (
     <WithdrawForm
       depositAmount={depositAmount}
@@ -63,6 +75,7 @@ const WithdrawFormController: FC<WithdrawFormControllerProps> = ({
       selectedTab={selectedTab}
       onSelectTab={onSelectTab}
       form={form}
+      current={current}
     />
   );
 };

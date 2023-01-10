@@ -7,7 +7,6 @@ import useSWR from 'swr';
 import Savings from 'ethereum/Savings';
 import { UnitFormats } from 'ethereum/helpers/math';
 import useChainLog from 'ethereum/react/useChainLog';
-import BalanceStatusCard from 'pages/earn/BalanceStatusCard';
 import getTranslationProps from 'pages/getTranslationProps';
 
 import SavingRateCard from './SavingRateCard';
@@ -131,9 +130,6 @@ type ContentProps = {
 };
 
 const Content: FC<ContentProps> = ({ chainLog }) => {
-  const { t } = useTranslation('common', { keyPrefix: 'pages.earn' });
-  const { t: units } = useTranslation('common', { keyPrefix: 'units' });
-
   const { data, mutate, isLoading } = useSWR(
     'getSavingData',
     async () => {
@@ -173,16 +169,6 @@ const Content: FC<ContentProps> = ({ chainLog }) => {
   return (
     <>
       <SavingRateCard annualRate={annualRate} />
-      {deposit && (
-        <BalanceStatusCard
-          title={t('deposit.title')}
-          address={deposit.address}
-          balance={deposit.amount}
-          label={t('deposit.label')}
-          tooltipText={t('deposit.description')!}
-          unit={units('stableToken')}
-        />
-      )}
       <Controller
         savingRate={saving}
         update={() => mutate()}
