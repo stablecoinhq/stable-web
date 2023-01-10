@@ -20,14 +20,14 @@ import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import { useErrorDialog } from 'store/ErrorDialogProvider';
 import { useNumericDisplayContext } from 'store/NumericDisplayProvider';
 
-import { BurnFormValidation, BurnError } from './BurnFormValidation';
+import { Validation, BurnError } from './Validation';
 
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
 import type { FixedNumber } from 'ethers';
 import type { FC, ChangeEventHandler, MouseEventHandler, ReactNode } from 'react';
 
-export type BurnFormProps = {
+export type FormProps = {
   daiBalance: FixedNumber;
   lockedBalance: FixedNumber;
   debt: FixedNumber;
@@ -47,9 +47,9 @@ export type BurnFormProps = {
   allowance: FixedNumber;
 };
 
-type BurnFormState = 'burn' | 'burnAll' | 'neutral';
+type FormState = 'burn' | 'burnAll' | 'neutral';
 
-const BurnForm: FC<BurnFormProps> = ({
+const Form: FC<FormProps> = ({
   ilkInfo,
   burn,
   burnAll,
@@ -76,7 +76,7 @@ const BurnForm: FC<BurnFormProps> = ({
   const daiAmount = useMemo(() => toFixedNumberOrUndefined(daiText, UnitFormats.WAD), [daiText]);
   const colAmount = useMemo(() => toFixedNumberOrUndefined(colText, ilkInfo.gem.format), [colText, ilkInfo.gem.format]);
   const [burning, setBurning] = useState(false);
-  const [burnFormState, setBurnFormState] = useState<BurnFormState>('neutral');
+  const [burnFormState, setBurnFormState] = useState<FormState>('neutral');
   const [dialogText, setDialogText] = useState('');
   const [totalSteps, setTotalSteps] = useState(1);
   const [currentStep, setCurrentStep] = useState(1);
@@ -189,22 +189,22 @@ const BurnForm: FC<BurnFormProps> = ({
   ]);
 
   const isInvalidRepayAmount = useMemo(
-    () => daiAmount && BurnFormValidation.isInsufficientBalance(daiBalance, daiAmount),
+    () => daiAmount && Validation.isInsufficientBalance(daiBalance, daiAmount),
     [daiAmount, daiBalance],
   );
   const isOverRepaying = useMemo(
-    () => daiAmount && colAmount && BurnFormValidation.isOverRepaying(debt, daiAmount, ilkStatus.debtMultiplier),
+    () => daiAmount && colAmount && Validation.isOverRepaying(debt, daiAmount, ilkStatus.debtMultiplier),
     [colAmount, daiAmount, debt, ilkStatus.debtMultiplier],
   );
 
   const isInvalidCollateralFreeAmount = useMemo(
-    () => colAmount && daiAmount && BurnFormValidation.isInvalidCollateralFreeAmount(lockedBalance, colAmount),
+    () => colAmount && daiAmount && Validation.isInvalidCollateralFreeAmount(lockedBalance, colAmount),
     [colAmount, daiAmount, lockedBalance],
   );
 
   const formErrors: BurnError[] = useMemo(() => {
     if (colAmount && daiAmount) {
-      return BurnFormValidation.canBurn(daiBalance, lockedBalance, debt, colAmount, daiAmount, ilkStatus);
+      return Validation.canBurn(daiBalance, lockedBalance, debt, colAmount, daiAmount, ilkStatus);
     }
     return [];
   }, [colAmount, daiAmount, lockedBalance, ilkStatus, debt, daiBalance]);
@@ -301,4 +301,4 @@ const BurnForm: FC<BurnFormProps> = ({
   );
 };
 
-export default BurnForm;
+export default Form;

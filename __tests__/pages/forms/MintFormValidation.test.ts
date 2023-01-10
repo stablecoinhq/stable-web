@@ -1,7 +1,7 @@
 import { FixedNumber } from 'ethers';
 
 import { INT_FORMAT, UnitFormats } from 'ethereum/helpers/math';
-import { MintFormValidation } from 'pages/forms/MintFormValidation';
+import { MintFormValidation } from 'pages/forms/mint/Validation';
 
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
 

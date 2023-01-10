@@ -9,15 +9,15 @@ export enum WithdrawError {
   invalidAmount,
 }
 
-export default class WithdrawFormValidation {
+export default class Validation {
   static canDeposit(daiBalance: FixedNumber, withdrawAmount: FixedNumber) {
     const errors: WithdrawError[] = [];
 
-    if (WithdrawFormValidation.isInsufficientBalance(daiBalance, withdrawAmount)) {
+    if (Validation.isInsufficientBalance(daiBalance, withdrawAmount)) {
       errors.push(WithdrawError.insufficientBalance);
     }
 
-    if (WithdrawFormValidation.isInvalidWithdrawAmount(withdrawAmount)) {
+    if (Validation.isInvalidWithdrawAmount(withdrawAmount)) {
       errors.push(WithdrawError.invalidAmount);
     }
 

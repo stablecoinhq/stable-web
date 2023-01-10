@@ -15,8 +15,8 @@ import getEmptyPaths from 'pages/getEmptyPaths';
 import getTranslationProps from 'pages/getTranslationProps';
 import { getStringQuery } from 'pages/query';
 
-import BurnFormController from '../../forms/BurnFormController';
-import MintFormController from '../../forms/MintFormController';
+import BurnFormController from '../../forms/burn/FormController';
+import MintFormController from '../../forms/mint/FormController';
 
 import type { TabValue } from '../../forms/FormLayout';
 import type ERC20Helper from 'ethereum/contracts/ERC20Helper';
@@ -24,8 +24,8 @@ import type { CDP } from 'ethereum/contracts/GetCDPsHelper';
 import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';
 import type { IlkStatus, UrnStatus } from 'ethereum/contracts/VatHelper';
 import type { NextPageWithEthereum } from 'next';
-import type { BurnFormProps } from 'pages/forms/BurnForm';
-import type { MintFormProps } from 'pages/forms/MintForm';
+import type { FormProps as BurnFormProps } from 'pages/forms/burn/Form';
+import type { FormProps as MintFormProps } from 'pages/forms/mint/Form';
 import type { FC } from 'react';
 
 const NotFound: FC = () => {

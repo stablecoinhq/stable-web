@@ -20,7 +20,7 @@ export enum BurnError {
 
 const format = UnitFormats.RAD;
 
-export class BurnFormValidation {
+export class Validation {
   /**
    * Burnが可能か検証を行う。できない場合にはその理由をリストとして返す
    * @param daiBalance ウォレットに保有するDAIの数量
@@ -42,7 +42,7 @@ export class BurnFormValidation {
 
     const errors: BurnError[] = [];
 
-    if (BurnFormValidation.isInsufficientBalance(daiBalance, daiToRepay)) {
+    if (Validation.isInsufficientBalance(daiBalance, daiToRepay)) {
       errors.push(BurnError.insufficientBalance);
     }
 
@@ -51,19 +51,19 @@ export class BurnFormValidation {
       debtMultiplier,
       daiToRepay.mulUnsafe(FixedNumber.fromString('-1', UnitFormats.WAD)),
     );
-    if (BurnFormValidation.isOverRepaying(debt, daiToRepay, debtMultiplier)) {
+    if (Validation.isOverRepaying(debt, daiToRepay, debtMultiplier)) {
       errors.push(BurnError.invalidRepayAmount);
     }
 
-    if (BurnFormValidation.isInvalidCollateralFreeAmount(lockedBalance, collateralToFree)) {
+    if (Validation.isInvalidCollateralFreeAmount(lockedBalance, collateralToFree)) {
       errors.push(BurnError.invalidCollateralFreeAmount);
     }
 
-    if (BurnFormValidation.isCollateralizationRatioTooLow(lockedBalance, collateralToFree, currentDebt, price)) {
+    if (Validation.isCollateralizationRatioTooLow(lockedBalance, collateralToFree, currentDebt, price)) {
       errors.push(BurnError.collateralTooLow);
     }
 
-    if (BurnFormValidation.isBelowDebtFloor(currentDebt, debtFloor)) {
+    if (Validation.isBelowDebtFloor(currentDebt, debtFloor)) {
       errors.push(BurnError.debtTooLow);
     }
 

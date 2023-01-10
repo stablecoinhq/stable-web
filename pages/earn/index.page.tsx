@@ -10,11 +10,11 @@ import useChainLog from 'ethereum/react/useChainLog';
 import getTranslationProps from 'pages/getTranslationProps';
 
 import SavingRateCard from './SavingRateCard';
-import DepositFormController from './forms/DepositFormController';
-import WithdrawFormController from './forms/WithdrawFormController';
+import DepositFormController from './forms/deposit/FormController';
+import WithdrawFormController from './forms/withdraw/FormController';
 
-import type { DepositFormProps } from './forms/DepositForm';
-import type { WithdrawFormProps } from './forms/WithdrawForm';
+import type { FormProps as DepositFormProps } from './forms/deposit/Form';
+import type { FormProps as WithdrawFormProps } from './forms/withdraw/Form';
 import type ChainLogHelper from 'ethereum/contracts/ChainLogHelper';
 import type ERC20Helper from 'ethereum/contracts/ERC20Helper';
 import type ProxyRegistryHelper from 'ethereum/contracts/ProxyRegistryHelper';

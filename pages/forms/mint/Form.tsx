@@ -9,14 +9,14 @@ import { toFixedNumberOrUndefined } from 'ethereum/helpers/stringNumber';
 import { useErrorDialog } from 'store/ErrorDialogProvider';
 import { useNumericDisplayContext } from 'store/NumericDisplayProvider';
 
-import { MintFormValidation, MintError } from './MintFormValidation';
+import { MintFormValidation, MintError } from './Validation';
 
 import type { IlkInfo } from 'ethereum/contracts/IlkRegistryHelper';
 import type { IlkStatus } from 'ethereum/contracts/VatHelper';
 import type { FixedNumber } from 'ethers';
 import type { ChangeEventHandler, FC, MouseEventHandler, ReactNode } from 'react';
 
-export type MintFormProps = {
+export type FormProps = {
   ilkInfo: IlkInfo;
   ilkStatus: IlkStatus;
   buttonContent: ReactNode;
@@ -38,7 +38,7 @@ export type MintFormProps = {
   daiAmountText: string;
 };
 
-const MintForm: FC<MintFormProps> = ({
+const Form: FC<FormProps> = ({
   ilkInfo,
   ilkStatus,
   mint,
@@ -242,4 +242,4 @@ const MintForm: FC<MintFormProps> = ({
   );
 };
 
-export default MintForm;
+export default Form;

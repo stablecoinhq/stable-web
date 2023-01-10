@@ -8,15 +8,15 @@ export enum DepositError {
   insufficientBalance,
   invalidAmount,
 }
-export default class DepositFormValidation {
+export default class Validation {
   static canDeposit(daiBalance: FixedNumber, depositAmount: FixedNumber) {
     const errors: DepositError[] = [];
 
-    if (DepositFormValidation.isInsufficientBalance(daiBalance, depositAmount)) {
+    if (Validation.isInsufficientBalance(daiBalance, depositAmount)) {
       errors.push(DepositError.insufficientBalance);
     }
 
-    if (DepositFormValidation.isInvalidDepositAmount(depositAmount)) {
+    if (Validation.isInvalidDepositAmount(depositAmount)) {
       errors.push(DepositError.invalidAmount);
     }
 
